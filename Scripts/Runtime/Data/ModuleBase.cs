@@ -46,15 +46,15 @@ namespace BlackStartX.GestureManager.Data
 
         public abstract void Update();
         public abstract void LateUpdate();
-        public abstract void OnDrawGizmos();
+        //public abstract void OnDrawGizmos();
         public abstract void InitForAvatar();
-        public abstract void EditorHeader();
-        public abstract void EditorContent(object editor, VisualElement element);
+        //public abstract void EditorHeader();
+        //public abstract void EditorContent(object editor, VisualElement element);
         protected abstract void Unlink();
         protected abstract void OnNewLeft(int left);
         protected abstract void OnNewRight(int right);
         public abstract string GetGestureTextNameByIndex(int gestureIndex);
-        protected abstract Animator OnCustomAnimationPlay(AnimationClip clip);
+        //protected abstract Animator OnCustomAnimationPlay(AnimationClip clip);
         protected abstract List<HumanBodyBones> PoseBones { get; }
 
         public virtual bool IsInvalid() => !Avatar || !AvatarAnimator || !_avatarDescriptor;
@@ -116,21 +116,21 @@ namespace BlackStartX.GestureManager.Data
 
         public IEnumerable<string> GetWarnings() => _warningList;
 
-        public void StopCustomAnimation() => SetCustomAnimation(clip: null, play: true, save: false, PlayingCustomAnimation);
+        //public void StopCustomAnimation() => SetCustomAnimation(clip: null, play: true, save: false, PlayingCustomAnimation);
 
-        public void SetCustomAnimation(AnimationClip clip) => SetCustomAnimation(clip, play: false, save: true, PlayingCustomAnimation);
+        //public void SetCustomAnimation(AnimationClip clip) => SetCustomAnimation(clip, play: false, save: true, PlayingCustomAnimation);
 
-        public void PlayCustomAnimation(AnimationClip clip) => SetCustomAnimation(clip, play: true, save: true, PlayingCustomAnimation);
+        //public void PlayCustomAnimation(AnimationClip clip) => SetCustomAnimation(clip, play: true, save: true, PlayingCustomAnimation);
 
-        private void SetCustomAnimation(AnimationClip clip, bool play, bool save, bool playing)
-        {
-            PlayingCustomAnimation = (PlayingCustomAnimation || play) && clip;
-            if (save) CustomAnim = clip;
-            var customAnimator = PlayingCustomAnimation || playing && !clip ? OnCustomAnimationPlay(clip) : null;
-            if (!customAnimator) return;
-            if (playing) _beforeEmote.ApplyTo(customAnimator.gameObject.transform);
-            else _beforeEmote = new TransformData(customAnimator.gameObject.transform);
-        }
+        //private void SetCustomAnimation(AnimationClip clip, bool play, bool save, bool playing)
+        //{
+        //    PlayingCustomAnimation = (PlayingCustomAnimation || play) && clip;
+        //    if (save) CustomAnim = clip;
+        //    var customAnimator = PlayingCustomAnimation || playing && !clip ? OnCustomAnimationPlay(clip) : null;
+        //    if (!customAnimator) return;
+        //    if (playing) _beforeEmote.ApplyTo(customAnimator.gameObject.transform);
+        //    else _beforeEmote = new TransformData(customAnimator.gameObject.transform);
+        //}
 
         public void Connect(ModuleSettings set)
         {

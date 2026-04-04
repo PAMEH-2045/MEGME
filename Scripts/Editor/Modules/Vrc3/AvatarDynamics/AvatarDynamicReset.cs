@@ -66,7 +66,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.AvatarDynamics
             obj.AddComponent<PhysBoneManager>();
             PhysBoneManager.Inst.IsSDK = true;
             PhysBoneManager.Inst.Init();
-            obj.AddComponent<PhysBoneGrabHelper>();
+            //obj.AddComponent<PhysBoneGrabHelper>();
             foreach (var physBone in Resources.FindObjectsOfTypeAll<VRCPhysBoneBase>()) RecreateComponent(physBone);
         }
 

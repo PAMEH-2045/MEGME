@@ -22,7 +22,7 @@ namespace BlackStartX.GestureManager
 
         private void OnDisable() => UnlinkModule();
 
-        private void OnDrawGizmos() => Module?.OnDrawGizmos();
+        //private void OnDrawGizmos() => Module?.OnDrawGizmos();
 
         private void Update()
         {

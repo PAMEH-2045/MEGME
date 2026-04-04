@@ -2,14 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BlackStartX.GestureManager.Data;
-using BlackStartX.GestureManager.Editor.Data;
-using BlackStartX.GestureManager.Editor.Library;
-using UnityEditor;
-using UnityEditor.Profiling;
-using UnityEditorInternal;
+//using BlackStartX.GestureManager.Data;
+//using BlackStartX.GestureManager.Editor.Data;
+//using BlackStartX.GestureManager.Editor.Library;
+//using UnityEditor;
+//using UnityEditor.Profiling;
+//using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Profiling;
+//using UnityEngine.Profiling;
 using VRC.Dynamics;
 
 namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
@@ -19,53 +19,53 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
         private static Camera ToolCamera => Camera.allCameras.FirstOrDefault(CameraRule);
         private static bool CameraRule(Camera camera) => camera.enabled && camera.gameObject.activeInHierarchy;
 
-        private UpdateSceneCamera _sceneCamera;
-        public UpdateSceneCamera SceneCamera => _sceneCamera ??= new UpdateSceneCamera();
+        //private UpdateSceneCamera _sceneCamera;
+        //public UpdateSceneCamera SceneCamera => _sceneCamera ??= new UpdateSceneCamera();
 
         private ClickableContacts _clickableContacts;
         public ClickableContacts ContactsClickable => _clickableContacts ??= new ClickableContacts();
 
-        private AvatarPose _avatarPose;
-        public AvatarPose PoseAvatar => _avatarPose ??= new AvatarPose();
+        //private AvatarPose _avatarPose;
+        //public AvatarPose PoseAvatar => _avatarPose ??= new AvatarPose();
 
-        private AvatarBackground _avatarBackground;
-        private AvatarBackground BackgroundAvatar => _avatarBackground ??= new AvatarBackground();
+        //private AvatarBackground _avatarBackground;
+        //private AvatarBackground BackgroundAvatar => _avatarBackground ??= new AvatarBackground();
 
-        private TestAnimation _testAnimation;
-        private TestAnimation AnimationTest => _testAnimation ??= new TestAnimation();
+        //private TestAnimation _testAnimation;
+        //private TestAnimation AnimationTest => _testAnimation ??= new TestAnimation();
 
-        private AnimatorPerformance _animatorPerformance;
-        public AnimatorPerformance PerformanceAnimator => _animatorPerformance ??= new AnimatorPerformance();
+        //private AnimatorPerformance _animatorPerformance;
+        //public AnimatorPerformance PerformanceAnimator => _animatorPerformance ??= new AnimatorPerformance();
 
-        private Customization _customization;
-        private Customization CustomizationTool => _customization ??= new Customization();
+        //private Customization _customization;
+        //private Customization CustomizationTool => _customization ??= new Customization();
 
         // This is silly but otherwise Rider will prompt casting hints on screen... I hate those more~
-        private static bool Exist(UnityEngine.Object uObject) => !NExist(uObject);
-        private static bool NExist(UnityEngine.Object uObject) => !uObject;
+        //private static bool Exist(UnityEngine.Object uObject) => !NExist(uObject);
+        //private static bool NExist(UnityEngine.Object uObject) => !uObject;
 
-        internal void Gui(ModuleVrc3 module)
-        {
-            GUILayout.Label("Gesture Manager Tools", GestureManagerStyles.Header);
-            GUILayout.Label("A collection of some small utility functions~", GestureManagerStyles.Centered);
-            GUILayout.Space(10);
-            SceneCamera.Display(module);
-            ContactsClickable.Display(module);
-            PoseAvatar.Display(module);
-            GUILayout.Label("Extra Tools", GestureManagerStyles.Header);
-            BackgroundAvatar.Display(module);
-            AnimationTest.Display(module);
-            PerformanceAnimator.Display(module);
-            GUILayout.Label("Customization", GestureManagerStyles.Header);
-            CustomizationTool.Display(module);
-        }
+        //internal void Gui(ModuleVrc3 module)
+        //{
+        //    GUILayout.Label("Gesture Manager Tools", GestureManagerStyles.Header);
+        //    GUILayout.Label("A collection of some small utility functions~", GestureManagerStyles.Centered);
+        //    GUILayout.Space(10);
+        //    SceneCamera.Display(module);
+        //    ContactsClickable.Display(module);
+        //    PoseAvatar.Display(module);
+        //    GUILayout.Label("Extra Tools", GestureManagerStyles.Header);
+        //    BackgroundAvatar.Display(module);
+        //    AnimationTest.Display(module);
+        //    PerformanceAnimator.Display(module);
+        //    GUILayout.Label("Customization", GestureManagerStyles.Header);
+        //    CustomizationTool.Display(module);
+        //}
 
         internal void OnUpdate(ModuleVrc3 module)
         {
-            SceneCamera.OnUpdate(module);
-            BackgroundAvatar.OnUpdate(module);
+            //SceneCamera.OnUpdate(module);
+            //BackgroundAvatar.OnUpdate(module);
             ContactsClickable.OnUpdate(module);
-            PerformanceAnimator.OnUpdate(module);
+            //PerformanceAnimator.OnUpdate(module);
         }
 
         internal void OnLateUpdate(ModuleVrc3 module)
@@ -73,13 +73,14 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             ContactsClickable.OnLateUpdate(module);
         }
 
-        internal void OnDrawGizmos()
-        {
-            ContactsClickable.OnDrawGizmos();
-        }
+        //internal void OnDrawGizmos()
+        //{
+        //    ContactsClickable.OnDrawGizmos();
+        //}
 
-        public void Unlink(ModuleVrc3 module) => PerformanceAnimator.Disable(module);
+//public void Unlink(ModuleVrc3 module) => PerformanceAnimator.Disable(module);
 
+#if false
         public class UpdateSceneCamera : GmgDynamicFunction
         {
             private static Camera _camera;
@@ -124,65 +125,85 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
                 IsActive.Property = Exist(_camera);
             }
         }
+#endif
 
-        public class ClickableContacts : GmgDynamicFunction
+        //public class ClickableContacts : GmgDynamicFunction
+        public class ClickableContacts
         {
             private class Flat
             {
                 public float Float;
             }
 
-            private readonly BoolProperty _isActive = new("GM3 ClickableContacts");
-            private readonly StringProperty _tag = new("GM3 ClickableContacts Tag");
+            private bool _isActive;
+            //private readonly BoolProperty _isActive = new("GM3 ClickableContacts");
+            private readonly string _tag;
+            //private readonly StringProperty _tag = new("GM3 ClickableContacts Tag");
             private readonly Dictionary<ContactReceiver, Flat> _activeContact = new();
 
-            protected internal override string Name => "Clickable Contacts";
-            protected override string Description => "Click and trigger Avatar Contacts with your mouse!\n\nLike you can do with PhysBones~";
-            protected internal override bool Active => _isActive.Property;
+            //protected internal override string Name => "Clickable Contacts";
+            //protected override string Description => "Click and trigger Avatar Contacts with your mouse!\n\nLike you can do with PhysBones~";
+            //protected internal bool Active => _isActive.Property;
 
-            private static Mesh _sphereMesh;
-            private static Mesh SphereMesh => _sphereMesh ? _sphereMesh : _sphereMesh = FetchSpherePrimitive();
+            //private static Mesh _sphereMesh;
+            //private static Mesh SphereMesh => _sphereMesh ? _sphereMesh : _sphereMesh = FetchSpherePrimitive();
 
-            private static Mesh _capsuleMesh;
-            private static Mesh CapsuleMesh => _capsuleMesh ? _capsuleMesh : _capsuleMesh = FetchCapsulePrimitive();
+            //private static Mesh _capsuleMesh;
+            //private static Mesh CapsuleMesh => _capsuleMesh ? _capsuleMesh : _capsuleMesh = FetchCapsulePrimitive();
 
             private Camera _camera = ToolCamera;
             private Camera Camera => _camera ? _camera : _camera = ToolCamera;
 
-            protected internal override void Toggle(ModuleVrc3 module) => _isActive.Property = !_isActive.Property;
+            //internal void Toggle(ModuleVrc3 module) => _isActive = !_isActive;
+            //protected internal override void Toggle(ModuleVrc3 module) => _isActive.Property = !_isActive.Property;
 
-            protected override void Gui(ModuleVrc3 module)
-            {
-                _isActive.Property = GmgLayoutHelper.ToggleRight("Enabled: ", _isActive.Property);
-                _tag.Property = GmgLayoutHelper.PlaceHolderTextField("Tag: ", _tag.Property, " <leave blank to ignore tags> ");
-            }
+            //protected override void Gui(ModuleVrc3 module)
+            //{
+            //    _isActive.Property = GmgLayoutHelper.ToggleRight("Enabled: ", _isActive.Property);
+            //    _tag.Property = GmgLayoutHelper.PlaceHolderTextField("Tag: ", _tag.Property, " <leave blank to ignore tags> ");
+            //}
 
-            protected override void Update(ModuleVrc3 module) => LateUpdate(module);
+            protected void Update(ModuleVrc3 module) => LateUpdate(module);
+            //protected override void Update(ModuleVrc3 module) => LateUpdate(module);
 
-            protected override void LateUpdate(ModuleVrc3 module)
+            protected void LateUpdate(ModuleVrc3 module)
+            //protected override void LateUpdate(ModuleVrc3 module)
             {
                 if (Input.GetMouseButton(0)) OnClick(module);
                 if (Input.GetMouseButtonUp(0)) Disable();
             }
 
-            protected override void DrawGizmos()
+            internal void OnLateUpdate(ModuleVrc3 module)
             {
-                foreach (var pair in _activeContact) DrawGizmos(pair.Key, pair.Value, pair.Key.radius, pair.Key.height);
+                if (_isActive) LateUpdate(module);
+                //if (Active) LateUpdate(module);
+            }
+            private bool _value;
+            internal void OnUpdate(ModuleVrc3 module)
+            {
+                if (_value != (_value = _isActive)) module.UpdateRunning();
+                //if (_value != (_value = Active)) module.UpdateRunning();
+                if (_value) Update(module);
             }
 
-            private static void DrawGizmos(ContactReceiver key, Flat value, float xRadiusZ, float yHeight)
-            {
-                var isSphere = key.shapeType == ContactBase.ShapeType.Sphere;
-                var mesh = isSphere ? SphereMesh : CapsuleMesh;
-                xRadiusZ *= 2;
-                yHeight = isSphere ? xRadiusZ : yHeight / 2f;
-                var scaleSize = new Vector3(xRadiusZ, yHeight, xRadiusZ);
-                Gizmos.color = new Color(0.0f, 1f, 1f, value.Float * 0.85f);
-                Gizmos.matrix = key.shape.transform0.localToWorldMatrix;
-                if (mesh) Gizmos.DrawMesh(mesh, key.position, key.rotation, scaleSize);
-                else Gizmos.DrawCube(key.shape.center, scaleSize);
-                if (key.receiverType == ContactReceiver.ReceiverType.OnEnter && value.Float > 0) value.Float -= 0.05f;
-            }
+            //protected override void DrawGizmos()
+            //{
+            //    foreach (var pair in _activeContact) DrawGizmos(pair.Key, pair.Value, pair.Key.radius, pair.Key.height);
+            //}
+
+            //private static void DrawGizmos(ContactReceiver key, Flat value, float xRadiusZ, float yHeight)
+            //{
+            //    var isSphere = key.shapeType == ContactBase.ShapeType.Sphere;
+            //    var mesh = isSphere ? SphereMesh : CapsuleMesh;
+            //    xRadiusZ *= 2;
+            //    yHeight = isSphere ? xRadiusZ : yHeight / 2f;
+            //    var scaleSize = new Vector3(xRadiusZ, yHeight, xRadiusZ);
+            //    Gizmos.color = new Color(0.0f, 1f, 1f, value.Float * 0.85f);
+            //    Gizmos.matrix = key.shape.transform0.localToWorldMatrix;
+            //    if (mesh) Gizmos.DrawMesh(mesh, key.position, key.rotation, scaleSize);
+            //    else Gizmos.DrawCube(key.shape.center, scaleSize);
+            //    if (key.receiverType == ContactReceiver.ReceiverType.OnEnter && value.Float > 0) value.Float -= 0.05f;
+            //}
 
             private void OnClick(ModuleVrc3 module)
             {
@@ -217,13 +238,14 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
                 _activeContact.Clear();
             }
 
-            private static Mesh FetchSpherePrimitive() => (Mesh)Resources.First(uObject => uObject.name == "Sphere");
+            //private static Mesh FetchSpherePrimitive() => (Mesh)Resources.First(uObject => uObject.name == "Sphere");
+   
+            //private static Mesh FetchCapsulePrimitive() => (Mesh)Resources.First(uObject => uObject.name == "Capsule");
+ 
+            //private static IEnumerable<UnityEngine.Object> Resources => AssetDatabase.LoadAllAssetsAtPath("Library/unity default resources");
 
-            private static Mesh FetchCapsulePrimitive() => (Mesh)Resources.First(uObject => uObject.name == "Capsule");
-
-            private static IEnumerable<UnityEngine.Object> Resources => AssetDatabase.LoadAllAssetsAtPath("Library/unity default resources");
-
-            private bool IsValid(ContactReceiver receiver) => receiver.isActiveAndEnabled && string.IsNullOrEmpty(_tag.Property) || receiver.collisionTags.Contains(_tag.Property);
+            private bool IsValid(ContactReceiver receiver) => receiver.isActiveAndEnabled && string.IsNullOrEmpty(_tag) || receiver.collisionTags.Contains(_tag);
+            //private bool IsValid(ContactReceiver receiver) => receiver.isActiveAndEnabled && string.IsNullOrEmpty(_tag.Property) || receiver.collisionTags.Contains(_tag.Property);
 
             /*
              * RayCast Calculation~
@@ -288,6 +310,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             private static Vector3 ClosestPointOnLineSegment(Vector3 lineA, Vector3 lineB, Vector3 lhsRhs, float dot1, float dot) => dot <= dot1 ? lineB : lineA + lhsRhs * (dot1 / dot);
         }
 
+#if false
         public class AvatarPose : GmgDynamicFunction
         {
             private bool _poseMode;
@@ -627,6 +650,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
                 set => EditorPrefs.SetString(_key, value);
             }
         }
+#endif
     }
 }
+
 #endif

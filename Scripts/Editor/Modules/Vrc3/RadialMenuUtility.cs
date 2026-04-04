@@ -8,7 +8,7 @@ using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
 using BlackStartX.GestureManager.Library;
 using BlackStartX.GestureManager.Library.VisualElements;
 using JetBrains.Annotations;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.UIElements;
@@ -39,7 +39,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             private const string BorderKeyName = "GM3 Border Color";
             private const string SelectedKeyName = "GM3 Selected Color";
 
-            private static Color PrefColor(string name, Color defaultColor) => ColorUtility.TryParseHtmlString(EditorPrefs.GetString(name), out var color) ? color : defaultColor;
+            //private static Color PrefColor(string name, Color defaultColor) => ColorUtility.TryParseHtmlString(EditorPrefs.GetString(name), out var color) ? color : defaultColor;
 
             internal static readonly Color RadialTextBackground = new(0.11f, 0.11f, 0.11f, 0.49f);
             internal static readonly Color RestartButton = new(1f, 0.72f, 0.41f);
@@ -49,18 +49,21 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             internal static Color CursorBorder => new(CustomBorder.r, CustomBorder.g, CustomBorder.b, CustomBorder.a - 0.5f);
             internal static Color ProgressBorder => CustomSelected * 1.5f;
 
-            public static Color CustomMain = PrefColor(MainKeyName, Default.Main);
-            public static Color CustomBorder = PrefColor(BorderKeyName, Default.Border);
-            public static Color CustomSelected = PrefColor(SelectedKeyName, Default.Selected);
+            //public static Color CustomMain = PrefColor(MainKeyName, Default.Main);
+            public static Color CustomMain = Default.Main;
+            //public static Color CustomBorder = PrefColor(BorderKeyName, Default.Border);
+            public static Color CustomBorder = Default.Border;
+            //public static Color CustomSelected = PrefColor(SelectedKeyName, Default.Selected);
+            public static Color CustomSelected = Default.Selected;
 
             public static void SaveColors(Color main, Color border, Color selected)
             {
-                CustomMain = main;
-                CustomBorder = border;
-                CustomSelected = selected;
-                EditorPrefs.SetString(MainKeyName, $"#{ColorUtility.ToHtmlStringRGBA(main)}");
-                EditorPrefs.SetString(BorderKeyName, $"#{ColorUtility.ToHtmlStringRGBA(border)}");
-                EditorPrefs.SetString(SelectedKeyName, $"#{ColorUtility.ToHtmlStringRGBA(selected)}");
+                //CustomMain = main;
+                //CustomBorder = border;
+                //CustomSelected = selected;
+                //EditorPrefs.SetString(MainKeyName, $"#{ColorUtility.ToHtmlStringRGBA(main)}");
+                //EditorPrefs.SetString(BorderKeyName, $"#{ColorUtility.ToHtmlStringRGBA(border)}");
+                //EditorPrefs.SetString(SelectedKeyName, $"#{ColorUtility.ToHtmlStringRGBA(selected)}");
             }
         }
 

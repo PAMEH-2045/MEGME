@@ -13,7 +13,7 @@ namespace BlackStartX.GestureManager.Editor.Modules
     {
         public static readonly string LocalLowPath =
 #if VRC_SDK_VRCSDK3
-            VRC.SDKBase.Editor.VRC_SdkBuilder.GetLocalLowPath();
+            null; //VRC.SDKBase.Editor.VRC_SdkBuilder.GetLocalLowPath();
 #else
             null;
 #endif

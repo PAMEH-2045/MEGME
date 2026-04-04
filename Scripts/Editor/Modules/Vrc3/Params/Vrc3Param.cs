@@ -39,7 +39,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Params
             InternalSet(value, source);
             if (isSame) return;
             _onChange?.Invoke(this, value);
-            module.OscModule.OnParameterChange(this, value);
+            //module.OscModule.OnParameterChange(this, value);
             foreach (var menu in module.Radials) menu.UpdateValue(Name, value);
         }
 

@@ -71,11 +71,11 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             JsonUtility.FromJsonOverwrite(supporters, SupObject);
         }
 
-        public static void Check()
-        {
-            if (_checkedForSupporter) return;
-            GestureManagerEditor.CheckSupporters(OnSupporters);
-        }
+        //public static void Check()
+        //{
+        //    if (_checkedForSupporter) return;
+        //    GestureManagerEditor.CheckSupporters(OnSupporters);
+        //}
     }
 }
 #endif
