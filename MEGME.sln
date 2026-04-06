@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VRC-Gesture-Manager", "VRC-Gesture-Manager.csproj", "{4D642045-0EED-D278-25F4-6B244919AAFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MEGME", "MEGME.csproj", "{4D642045-0EED-D278-25F4-6B244919AAFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

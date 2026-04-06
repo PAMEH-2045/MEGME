@@ -12,7 +12,7 @@
     <ProjectGuid>{4D642045-0EED-D278-25F4-6B244919AAFA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>BlackStartX.GestureManager</AssemblyName>
+    <AssemblyName>MEGME</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -180,116 +180,120 @@
     <Analyzer Include="G:\UnityEditor\6000.2.6f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\..\VRCstuff\_packages\Harmony-Fat.2.4.2.0\net472\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependences\Harmony-Fat.2.4.2.0\net472\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Mate-Engine-MEPhysBone\Library\ScriptAssemblies\Assembly-CSharp.dll</HintPath>
+      <HintPath>Dependences\Public.Release.X3.3.0.HOTFIX-1\Assembly-CSharp.dll</HintPath>
+	  <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.AssetBundleModule.dll</HintPath>
+	  <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ClothModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.ClothModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.ClothModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\MEPhysBone\Dependences\unity_2022.3.22f1_build\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>Dependences\unity_2022.3.22f1_build\UnityEngine.InputLegacyModule.dll</HintPath>
+	  <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.UIElementsModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.UIElementsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.JSONSerializeModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\Managed\UnityEngine\UnityEngine.UIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRC.SDK3.Dynamics.Contact">
-      <HintPath>G:\__Projects\Unity\VRCstuff\_packages\com.vrchat.base-3.9.0\Runtime\VRCSDK\Plugins\VRC.SDK3.Dynamics.Contact.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRCSDK3A">
-      <HintPath>G:\__Projects\Unity\VRCstuff\_packages\com.vrchat.avatars-3.9.0\Runtime\VRCSDK\Plugins\VRCSDK3A.dll</HintPath>
+      <HintPath>Dependences\com.vrchat.avatars-3.10.2\VRCSDK3A.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRC.SDK3.Dynamics.Constraint">
-      <HintPath>G:\__Projects\Unity\VRCstuff\_packages\com.vrchat.base-3.9.0\Runtime\VRCSDK\Plugins\VRC.SDK3.Dynamics.Constraint.dll</HintPath>
+      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.Constraint.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+	<Reference Include="VRC.SDK3.Dynamics.Contact">
+      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.Contact.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRC.SDK3.Dynamics.PhysBone">
-      <HintPath>G:\__Projects\Unity\VRCstuff\_packages\com.vrchat.base-3.9.0\Runtime\VRCSDK\Plugins\VRC.SDK3.Dynamics.PhysBone.dll</HintPath>
+      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.PhysBone.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRCSDKBase">
-      <HintPath>G:\__Projects\Unity\VRCstuff\_packages\com.vrchat.base-3.9.0\Runtime\VRCSDK\Plugins\VRCSDKBase.dll</HintPath>
+      <HintPath>Dependences\com.vrchat.base-3.10.2\VRCSDKBase.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRC.Dynamics">
-      <HintPath>G:\__Projects\Unity\VRCstuff\_packages\com.vrchat.base-3.9.0\Runtime\VRCSDK\Plugins\VRC.Dynamics.dll</HintPath>
+      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.Dynamics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Core">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\System.Core.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\System.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\System.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\System.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Linq">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Linq.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\System.Linq.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\netstandard.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\netstandard.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\mscorlib.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\mscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.IO">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.IO.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\System.IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Linq">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Linq.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\System.Linq.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Reflection">
-      <HintPath>G:\UnityEditor\6000.2.6f2\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Reflection.dll</HintPath>
+      <HintPath>Dependences\unity_editor_6000.2.6f2\System.Reflection.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
