@@ -12,6 +12,7 @@ using BlendablePlayableLayer = VRC.SDKBase.VRC_PlayableLayerControl.BlendableLay
 using TrackingType = VRC.SDKBase.VRC_AnimatorTrackingControl.TrackingType;
 using ValueType = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.ValueType;
 using System.Reflection;
+using System.Linq;
 
 namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 {
@@ -74,63 +75,64 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal static GUIStyle Url => _url ??= new GUIStyle(GUI.skin.label) { padding = new RectOffset(-6, -6, 1, 0), normal = { textColor = Color.blue } };
         internal static GUIStyle UrlPro => _urlPro ??= new GUIStyle(GUI.skin.label) { padding = new RectOffset(-6, -6, 1, 0), normal = { textColor = Color.cyan } };
 
-        internal static Texture2D Emojis => !_emojis ? _emojis = LoadEmbeddedTexture("Vrc3.BSX_GM_Emojis.png") : _emojis;
-        internal static Texture2D Option => !_option ? _option = LoadEmbeddedTexture("Vrc3.BSX_GM_Option.png") : _option;
-        internal static Texture2D Expressions => !_expressions ? _expressions = LoadEmbeddedTexture("Vrc3.BSX_GM_Expressions.png") : _expressions;
-        internal static Texture2D Tools => !_tools ? _tools = LoadEmbeddedTexture("Vrc3.BSX_GM_Tools.png") : _tools;
-        internal static Texture2D Back => !_back ? _back = LoadEmbeddedTexture("Vrc3.BSX_GM_Back.png") : _back;
-        internal static Texture2D BackHome => !_backHome ? _backHome = LoadEmbeddedTexture("Vrc3.BSX_GM_BackHome.png") : _backHome;
-        internal static Texture2D Default => !_default ? _default = LoadEmbeddedTexture("Vrc3.BSX_GM_Default.png") : _default;
-        internal static Texture2D Gear => !_gear ? _gear = LoadEmbeddedTexture("Vrc3.BSX_GM_Gear.png") : _gear;
-        internal static Texture2D Reset => !_reset ? _reset = LoadEmbeddedTexture("Vrc3.BSX_GM_Reset.png") : _reset;
-        internal static Texture2D TwoAxis => !_twoAxis ? _twoAxis = LoadEmbeddedTexture("Vrc3.BSX_GM_2_Axis.png") : _twoAxis;
-        internal static Texture2D FourAxis => !_fourAxis ? _fourAxis = LoadEmbeddedTexture("Vrc3.BSX_GM_4_Axis.png") : _fourAxis;
-        internal static Texture2D Radial => !_radial ? _radial = LoadEmbeddedTexture("Vrc3.BSX_GM_Radial.png") : _radial;
-        internal static Texture2D Toggle => !_toggle ? _toggle = LoadEmbeddedTexture("Vrc3.BSX_GM_Toggle.png") : _toggle;
-        internal static Texture2D ResetHeight => !_resetHeight ? _resetHeight = LoadEmbeddedTexture("Vrc3.BSX_GM_Reset_Height.png") : _resetHeight;
-        internal static Texture2D AvatarHeight => !_avatarHeight ? _avatarHeight = LoadEmbeddedTexture("Vrc3.BSX_GM_Avatar_Height.png") : _avatarHeight;
-        internal static Texture2D ReleasePoses => !_releasePoses ? _releasePoses = LoadEmbeddedTexture("Vrc3.BSX_GM_Release_Poses.png") : _releasePoses;
-        internal static Texture2D RunningParam => !_runningParam ? _runningParam = LoadEmbeddedTexture("Vrc3.BSX_GM_Running_Param.png") : _runningParam;
-        internal static Texture2D AxisUp => !_axisUp ? _axisUp = LoadEmbeddedTexture("Vrc3.BSX_GM_Axis_Up.png") : _axisUp;
-        internal static Texture2D AxisRight => !_axisRight ? _axisRight = LoadEmbeddedTexture("Vrc3.BSX_GM_Axis_Right.png") : _axisRight;
-        internal static Texture2D AxisDown => !_axisDown ? _axisDown = LoadEmbeddedTexture("Vrc3.BSX_GM_Axis_Down.png") : _axisDown;
-        internal static Texture2D AxisLeft => !_axisLeft ? _axisLeft = LoadEmbeddedTexture("Vrc3.BSX_GM_Axis_Left.png") : _axisLeft;
-        internal static Texture2D SupportLike => !_supportLike ? _supportLike = LoadEmbeddedTexture("Vrc3.BSX_GM_Support_Like.png") : _supportLike;
-        internal static Texture2D SupportGold => !_supportGold ? _supportGold = LoadEmbeddedTexture("Vrc3.BSX_GM_Support_Gold.png") : _supportGold;
-        internal static Texture2D SupportHeart => !_supportHeart ? _supportHeart = LoadEmbeddedTexture("Vrc3.BSX_GM_Support_Heart.png") : _supportHeart;
-        internal static Texture2D ToolCamera => !_toolCamera ? _toolCamera = LoadEmbeddedTexture("Vrc3.BSX_GM_Tool_Camera.png") : _toolCamera;
-        internal static Texture2D ToolClick => !_toolClick ? _toolClick = LoadEmbeddedTexture("Vrc3.BSX_GM_Tool_Click.png") : _toolClick;
-        internal static Texture2D ToolPose => !_toolPose ? _toolPose = LoadEmbeddedTexture("Vrc3.BSX_GM_Tool_Pose.png") : _toolPose;
-        internal static Texture2D Earmuffs => !_earmuffs ? _earmuffs = LoadEmbeddedTexture("Vrc3.BSX_GM_Earmuffs.png") : _earmuffs;
-        internal static Texture2D FallingSpeed => !_fallingSpeed ? _fallingSpeed = LoadEmbeddedTexture("Vrc3.BSX_GM_FallingSpeed.png") : _fallingSpeed;
-        internal static Texture2D FullBody => !_fullBody ? _fullBody = LoadEmbeddedTexture("Vrc3.BSX_GM_FullBody.png") : _fullBody;
-        internal static Texture2D Generic => !_generic ? _generic = LoadEmbeddedTexture("Vrc3.BSX_GM_Generic.png") : _generic;
-        internal static Texture2D GestureLeftWeight => !_gestureLeftWeight ? _gestureLeftWeight = LoadEmbeddedTexture("Vrc3.BSX_GM_GestureLeftWeight.png") : _gestureLeftWeight;
-        internal static Texture2D GestureRightWeight => !_gestureRightWeight ? _gestureRightWeight = LoadEmbeddedTexture("Vrc3.BSX_GM_GestureRightWeight.png") : _gestureRightWeight;
-        internal static Texture2D Grounded => !_grounded ? _grounded = LoadEmbeddedTexture("Vrc3.BSX_GM_Grounded.png") : _grounded;
-        internal static Texture2D HandsOnly => !_handsOnly ? _handsOnly = LoadEmbeddedTexture("Vrc3.BSX_GM_HandsOnly.png") : _handsOnly;
-        internal static Texture2D HeadHands => !_headHands ? _headHands = LoadEmbeddedTexture("Vrc3.BSX_GM_HeadHands.png") : _headHands;
-        internal static Texture2D PoseIK => !_poseIk ? _poseIk = LoadEmbeddedTexture("Vrc3.BSX_GM_Pose_IK.png") : _poseIk;
-        internal static Texture2D MuteSelf => !_muteSelf ? _muteSelf = LoadEmbeddedTexture("Vrc3.BSX_GM_MuteSelf.png") : _muteSelf;
-        internal static Texture2D Seated => !_seated ? _seated = LoadEmbeddedTexture("Vrc3.BSX_GM_Seated.png") : _seated;
-        internal static Texture2D PoseT => !_poseT ? _poseT = LoadEmbeddedTexture("Vrc3.BSX_GM_Pose_T.png") : _poseT;
-        internal static Texture2D Upright => !_upright ? _upright = LoadEmbeddedTexture("Vrc3.BSX_GM_Upright.png") : _upright;
-        internal static Texture2D Velocity => !_velocity ? _velocity = LoadEmbeddedTexture("Vrc3.BSX_GM_Velocity.png") : _velocity;
-        internal static Texture2D Visemes => !_visemes ? _visemes = LoadEmbeddedTexture("Vrc3.BSX_GM_Visemes.png") : _visemes;
-        internal static Texture2D VRMode => !_vRMode ? _vRMode = LoadEmbeddedTexture("Vrc3.BSX_GM_VRMode.png") : _vRMode;
-        internal static Texture2D Afk => !_afk ? _afk = LoadEmbeddedTexture("Vrc3.BSX_GM_AFK.png") : _afk;
-        internal static Texture2D FourPoint => !_fourPoint ? _fourPoint = LoadEmbeddedTexture("Vrc3.BSX_GM_FourPoint.png") : _fourPoint;
-        internal static Texture2D Uninitialized => !_uninitialized ? _uninitialized = LoadEmbeddedTexture("Vrc3.BSX_GM_Uninitialized.png") : _uninitialized;
-        internal static Texture2D IsLocal => !_isLocal ? _isLocal = LoadEmbeddedTexture("Vrc3.BSX_GM_IsLocal.png") : _isLocal;
-        internal static Texture2D Extras => !_extras ? _extras = LoadEmbeddedTexture("Vrc3.BSX_GM_Extras.png") : _extras;
-        internal static Texture2D IsOnFriendsList => !_isOnFriendsList ? _isOnFriendsList = LoadEmbeddedTexture("Vrc3.BSX_GM_IsOnFriendsList.png") : _isOnFriendsList;
+        internal static Texture2D Emojis => !_emojis ? _emojis = LoadEmbeddedTexture("BSX_GM_Emojis") : _emojis;
+        internal static Texture2D Option => !_option ? _option = LoadEmbeddedTexture("BSX_GM_Option") : _option;
+        internal static Texture2D Expressions => !_expressions ? _expressions = LoadEmbeddedTexture("BSX_GM_Expressions") : _expressions;
+        internal static Texture2D Tools => !_tools ? _tools = LoadEmbeddedTexture("BSX_GM_Tools") : _tools;
+        internal static Texture2D Back => !_back ? _back = LoadEmbeddedTexture("BSX_GM_Back") : _back;
+        internal static Texture2D BackHome => !_backHome ? _backHome = LoadEmbeddedTexture("BSX_GM_BackHome") : _backHome;
+        internal static Texture2D Default => !_default ? _default = LoadEmbeddedTexture("BSX_GM_Default") : _default;
+        internal static Texture2D Gear => !_gear ? _gear = LoadEmbeddedTexture("BSX_GM_Gear") : _gear;
+        internal static Texture2D Reset => !_reset ? _reset = LoadEmbeddedTexture("BSX_GM_Reset") : _reset;
+        internal static Texture2D TwoAxis => !_twoAxis ? _twoAxis = LoadEmbeddedTexture("BSX_GM_2_Axis") : _twoAxis;
+        internal static Texture2D FourAxis => !_fourAxis ? _fourAxis = LoadEmbeddedTexture("BSX_GM_4_Axis") : _fourAxis;
+        internal static Texture2D Radial => !_radial ? _radial = LoadEmbeddedTexture("BSX_GM_Radial") : _radial;
+        internal static Texture2D Toggle => !_toggle ? _toggle = LoadEmbeddedTexture("BSX_GM_Toggle") : _toggle;
+        internal static Texture2D ResetHeight => !_resetHeight ? _resetHeight = LoadEmbeddedTexture("BSX_GM_Reset_Height") : _resetHeight;
+        internal static Texture2D AvatarHeight => !_avatarHeight ? _avatarHeight = LoadEmbeddedTexture("BSX_GM_Avatar_Height") : _avatarHeight;
+        internal static Texture2D ReleasePoses => !_releasePoses ? _releasePoses = LoadEmbeddedTexture("BSX_GM_Release_Poses") : _releasePoses;
+        internal static Texture2D RunningParam => !_runningParam ? _runningParam = LoadEmbeddedTexture("BSX_GM_Running_Param") : _runningParam;
+        internal static Texture2D AxisUp => !_axisUp ? _axisUp = LoadEmbeddedTexture("BSX_GM_Axis_Up") : _axisUp;
+        internal static Texture2D AxisRight => !_axisRight ? _axisRight = LoadEmbeddedTexture("BSX_GM_Axis_Right") : _axisRight;
+        internal static Texture2D AxisDown => !_axisDown ? _axisDown = LoadEmbeddedTexture("BSX_GM_Axis_Down") : _axisDown;
+        internal static Texture2D AxisLeft => !_axisLeft ? _axisLeft = LoadEmbeddedTexture("BSX_GM_Axis_Left") : _axisLeft;
+        internal static Texture2D SupportLike => !_supportLike ? _supportLike = LoadEmbeddedTexture("BSX_GM_Support_Like") : _supportLike;
+        internal static Texture2D SupportGold => !_supportGold ? _supportGold = LoadEmbeddedTexture("BSX_GM_Support_Gold") : _supportGold;
+        internal static Texture2D SupportHeart => !_supportHeart ? _supportHeart = LoadEmbeddedTexture("BSX_GM_Support_Heart") : _supportHeart;
+        internal static Texture2D ToolCamera => !_toolCamera ? _toolCamera = LoadEmbeddedTexture("BSX_GM_Tool_Camera") : _toolCamera;
+        internal static Texture2D ToolClick => !_toolClick ? _toolClick = LoadEmbeddedTexture("BSX_GM_Tool_Click") : _toolClick;
+        internal static Texture2D ToolPose => !_toolPose ? _toolPose = LoadEmbeddedTexture("BSX_GM_Tool_Pose") : _toolPose;
+        internal static Texture2D Earmuffs => !_earmuffs ? _earmuffs = LoadEmbeddedTexture("BSX_GM_Earmuffs") : _earmuffs;
+        internal static Texture2D FallingSpeed => !_fallingSpeed ? _fallingSpeed = LoadEmbeddedTexture("BSX_GM_FallingSpeed") : _fallingSpeed;
+        internal static Texture2D FullBody => !_fullBody ? _fullBody = LoadEmbeddedTexture("BSX_GM_FullBody") : _fullBody;
+        internal static Texture2D Generic => !_generic ? _generic = LoadEmbeddedTexture("BSX_GM_Generic") : _generic;
+        internal static Texture2D GestureLeftWeight => !_gestureLeftWeight ? _gestureLeftWeight = LoadEmbeddedTexture("BSX_GM_GestureLeftWeight") : _gestureLeftWeight;
+        internal static Texture2D GestureRightWeight => !_gestureRightWeight ? _gestureRightWeight = LoadEmbeddedTexture("BSX_GM_GestureRightWeight") : _gestureRightWeight;
+        internal static Texture2D Grounded => !_grounded ? _grounded = LoadEmbeddedTexture("BSX_GM_Grounded") : _grounded;
+        internal static Texture2D HandsOnly => !_handsOnly ? _handsOnly = LoadEmbeddedTexture("BSX_GM_HandsOnly") : _handsOnly;
+        internal static Texture2D HeadHands => !_headHands ? _headHands = LoadEmbeddedTexture("BSX_GM_HeadHands") : _headHands;
+        internal static Texture2D PoseIK => !_poseIk ? _poseIk = LoadEmbeddedTexture("BSX_GM_Pose_IK") : _poseIk;
+        internal static Texture2D MuteSelf => !_muteSelf ? _muteSelf = LoadEmbeddedTexture("BSX_GM_MuteSelf") : _muteSelf;
+        internal static Texture2D Seated => !_seated ? _seated = LoadEmbeddedTexture("BSX_GM_Seated") : _seated;
+        internal static Texture2D PoseT => !_poseT ? _poseT = LoadEmbeddedTexture("BSX_GM_Pose_T") : _poseT;
+        internal static Texture2D Upright => !_upright ? _upright = LoadEmbeddedTexture("BSX_GM_Upright") : _upright;
+        internal static Texture2D Velocity => !_velocity ? _velocity = LoadEmbeddedTexture("BSX_GM_Velocity") : _velocity;
+        internal static Texture2D Visemes => !_visemes ? _visemes = LoadEmbeddedTexture("BSX_GM_Visemes") : _visemes;
+        internal static Texture2D VRMode => !_vRMode ? _vRMode = LoadEmbeddedTexture("BSX_GM_VRMode") : _vRMode;
+        internal static Texture2D Afk => !_afk ? _afk = LoadEmbeddedTexture("BSX_GM_AFK") : _afk;
+        internal static Texture2D FourPoint => !_fourPoint ? _fourPoint = LoadEmbeddedTexture("BSX_GM_FourPoint") : _fourPoint;
+        internal static Texture2D Uninitialized => !_uninitialized ? _uninitialized = LoadEmbeddedTexture("BSX_GM_Uninitialized") : _uninitialized;
+        internal static Texture2D IsLocal => !_isLocal ? _isLocal = LoadEmbeddedTexture("BSX_GM_IsLocal") : _isLocal;
+        internal static Texture2D Extras => !_extras ? _extras = LoadEmbeddedTexture("BSX_GM_Extras") : _extras;
+        internal static Texture2D IsOnFriendsList => !_isOnFriendsList ? _isOnFriendsList = LoadEmbeddedTexture("BSX_GM_IsOnFriendsList") : _isOnFriendsList;
 
+
+        private static readonly string[] resNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
         public static Texture2D LoadEmbeddedTexture(string resourceName)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            resourceName = $"{assembly.GetName().Name}.Resources.{resourceName}";
+            resourceName = resNames.First(name => name.Contains(resourceName));
 
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
                 if (stream == null)
                     throw new FileNotFoundException(resourceName);

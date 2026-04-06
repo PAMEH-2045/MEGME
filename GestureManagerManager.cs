@@ -15,7 +15,6 @@ namespace BlackStartX.GestureManager
         [SerializeField] private Button circleSelectorButton;
 
         [SerializeField] private bool bindMEController = true;
-        [SerializeField] private float avatarScanInterval = 0.25f;
 
         bool bigScreenWasActive;
 
@@ -37,7 +36,9 @@ namespace BlackStartX.GestureManager
         void OnEnable()
         {
             CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
-
+        }
+        void Start()
+        {
             CacheClothesItems();
 
             isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
