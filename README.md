@@ -19,25 +19,56 @@ A port of BlackStartx's [Gesture Manager](https://github.com/BlackStartx/VRC-Ges
 
 ## Installation
 
-1. Install [MEPhysBone](https://github.com/PAMEH-2045/MEPhysBone)
+1. Download release archive and unpack
 
-2. Download release archive and unpack
-
-3. Copy and paste MateEngineX_Data folder to game root with overwrite
-
-
+2. Copy and paste MateEngineX_Data folder to game root with overwrite
 
 ## Model Preparing
 
-1. Either install VRCSDK to ME project or bring MESDK to VRCCC project
+##### 1.A Installing VRCSDK to Mate Engine project
 
-2. Add `VRM Blend Shape Proxy` to a model
+1. Download VRCSDK Base and Avatars https://github.com/vrchat/packages/releases/latest
+   
+   > com.vrchat.avatars-X.X.X.zip and com.vrchat.base-X.X.X.zip archives
 
-3. Remove `Pipeline Manager` component that is located on model root next to a `VRC Avatar Descriptor`
+2. Import VRCSDK packages to your ME Unity project
+   
+   > Window > Package Managment > Package Manager, 
+   > 
+   > "+" in upper left corner > Install package from disk
+   > locate `package.json` file in your extracted archive
 
-4. Export 
+3. Delete `Packages/VRChat SDK - Base/Runtime/VRCSDK/Plugins/SDKBase-Legacy.dll`
 
+##### 1.B Installing MESDK to VRChat Creator Companion project
 
+To export model you actually need only `Assets\Editor\MEModelExporter.cs` script
+
+So copy it from ME project and place in `Editor` directory ( If dont have one create somewhere under `Assets` ) of VRCCC avatar project
+
+##### 2. Configure Blendshapes
+
+1. Add `VRM Blend Shape Proxy` to a model
+
+2. Create `Blend Shape Avatar` asset in `Project`
+
+3. Add and configure `BlendShapeClip` for every preset
+
+##### 3.A In case of Modular Avatar
+
+1. RMB to a avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar`
+
+2. Delete all assigned layers in `VRC Avatar Descriptor > Playable Layers` except Base and FX
+   
+   > Currently MEGME do not use layers other then Base and FX, and MA adds animation controllers with "write defaults = 0" to empty fields 
+
+##### 3.B In case of VRCFury
+
+1. Select avatar gameobject, in menubar: `Tools > VRCFury > Build an Editor Test Copy`
+
+2. Should be the same as Modular Avatar ( i never tested )
+
+##### 4. Export
 
 ## How does it work?
 
