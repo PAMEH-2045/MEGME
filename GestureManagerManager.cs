@@ -21,13 +21,14 @@ namespace BlackStartX.GestureManager
         AccessTools.FieldRef<AvatarTools.ClickableContacts, bool> isClickableContactsActive;
         
         bool isButtonСonfigured;
-
+        RuntimeAnimatorController avatarControllerME;
         MenuActions menuActions;
         int actionsClothesIndex;
         MenuEntry actionsClothesEntryOrigin;
         CircleSelector circleSelector;
         int selectorClothesIndex;
         GameObject selectorClothesButtonOrigin;
+
 
         void Awake()
         {
@@ -42,6 +43,8 @@ namespace BlackStartX.GestureManager
             CacheClothesItems();
 
             isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
+
+            avatarControllerME = FindFirstObjectByType<VRMLoader>().animatorController;
         }
         void Update()
         {
@@ -140,14 +143,13 @@ namespace BlackStartX.GestureManager
 
         private void BindMEControllerToDescriptor()
         {
-            var animator = CurrentModel.GetComponent<Animator>();
-            var controller = animator.runtimeAnimatorController;
-
             var descriptor = CurrentModel.GetComponent<VRCAvatarDescriptor>();
-            for (int i = 0; i < descriptor.baseAnimationLayers.Length; i++)
-                if (descriptor.baseAnimationLayers[i].type == VRCAvatarDescriptor.AnimLayerType.Base)
+            var baseLayers = descriptor.baseAnimationLayers;
+
+            for (int i = 0; i < baseLayers.Length; i++)
+                if (baseLayers[i].type == VRCAvatarDescriptor.AnimLayerType.Base)
                 {
-                    descriptor.baseAnimationLayers[i].animatorController = controller;
+                    baseLayers[i].animatorController = avatarControllerME;
                     break;
                 }
         }
