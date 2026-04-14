@@ -99,6 +99,8 @@
     <EmbeddedResource Include="Resources\Vrc3\BSX_GM_VRMode.png" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PipelineManager.cs" />
+    <Compile Include="ReadUniversalBSJob.cs" />
     <Compile Include="CurrentModel.cs" />
     <Compile Include="Stuff.cs" />
     <Compile Include="GestureManagerManager.cs" />
@@ -172,6 +174,7 @@
     <Compile Include="Scripts\Runtime\Library\VisualElements\GmgCircleElement.cs" />
     <Compile Include="Scripts\Runtime\Library\VisualElements\GmgTmpRichTextElement.cs" />
     <Compile Include="Scripts\Runtime\Modules\ModuleSettings.cs" />
+    <Compile Include="UniversalBinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="G:\VS\VSComunity\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
@@ -186,7 +189,7 @@
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>Dependences\Public.Release.X3.3.0.HOTFIX-1\Assembly-CSharp.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.dll</HintPath>
@@ -198,7 +201,7 @@
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.AssetBundleModule.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.CoreModule.dll</HintPath>
@@ -218,7 +221,7 @@
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>Dependences\unity_2022.3.22f1_build\UnityEngine.InputLegacyModule.dll</HintPath>
-	  <Private>False</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule">
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.UIElementsModule.dll</HintPath>
@@ -248,7 +251,7 @@
       <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.Constraint.dll</HintPath>
       <Private>False</Private>
     </Reference>
-	<Reference Include="VRC.SDK3.Dynamics.Contact">
+    <Reference Include="VRC.SDK3.Dynamics.Contact">
       <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.Contact.dll</HintPath>
       <Private>False</Private>
     </Reference>

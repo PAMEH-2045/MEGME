@@ -1,8 +1,4 @@
 ﻿#if VRC_SDK_VRCSDK3
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using BlackStartX.GestureManager.Data;
 using BlackStartX.GestureManager.Editor.Data;
 //using BlackStartX.GestureManager.Editor.Library;
@@ -14,9 +10,14 @@ using BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
+using HarmonyLib;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.Vrc3Debug.Avatar;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.Vrc3Debug.Osc;
 using JetBrains.Annotations;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 //using UnityEditor;
 //using UnityEditor.Animations;
 using UnityEngine;
@@ -131,6 +132,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             if (PoseMode) SetPose(AvatarAnimator);
             //if (DummyMode == null && Avatar != null) Avatar.transform.localScale = _baseScale * _scale; // scale setting controlled by GM
             AvatarTools.OnLateUpdate(this);
+
+            if (Avatar != null) ApplyUniversalBlendShapeValues();
         }
 
         //public override void OnDrawGizmos() => AvatarTools.OnDrawGizmos();
@@ -167,6 +170,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             Receivers.Clear();
 
+            universalBindings.Clear(); //
+
             for (var i = 1; i < intCount; i++)
             {
                 var layer = layerList[i - 1];
@@ -189,9 +194,20 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var weight = new AnimatorControllerWeight(mixer, playable, i);
                 var isNull = playable.GetInput(0).IsNull();
                 _layers[layer.type] = new LayerData { Playable = playable, Weight = weight, Empty = isNull, Parameters = RadialMenuUtility.GetParameters(playable) };
-
-                mixer.ConnectInput(i, playable, OutputValue, weightOn);
-
+                
+                if (layer.type == VRCAvatarDescriptor.AnimLayerType.Base)
+                {
+                    var readJob = new ReadUniversalBSJob(universalBindings);    
+                    var readScriptPlayable = AnimationScriptPlayable.Create(_playableGraph, readJob);
+                    readScriptPlayable.AddInput(playable, 0, 1);
+                    mixer.ConnectInput(i, readScriptPlayable, OutputValue, weightOn);
+                }
+                else
+                {
+                    mixer.ConnectInput(i, playable, OutputValue, weightOn);
+                }
+                    
+                
                 if (isLim) mixer.SetInputWeight(i, weightOff);
                 if (isAdd) mixer.SetLayerAdditive((uint)i, add);
                 if (mask) mixer.SetLayerMaskFromAvatarMask((uint)i, mask);
@@ -203,6 +219,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _baseView = AvatarDescriptor.ViewPosition;
             _baseScale = Avatar.transform.localScale;
             InitParams(Parameters);
+
+            SetupUniversalBindings(); //
 
             GetParam(Vrc3DefaultParams.Upright).InternalSet(1f);
             GetParam(Vrc3DefaultParams.Grounded).InternalSet(1f);
@@ -221,7 +239,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _playableGraph.Play();
             _playableGraph.Evaluate(0f);
             //if (_brokenLayers.Count != 0) TryAddWarning(new Vrc3Warning("Animator Controllers", "Some default Animator Controllers have changed!", true, "Restore Controllers", RestoreDefaultControllers));
-            if (_brokenLayers.Count != 0) Debug.LogWarning("Broken Layers");
+            if (_brokenLayers.Count != 0) Debug.LogWarning("[MEGME] Broken Layers");
 
             Left = GetParam(Vrc3DefaultParams.GestureLeft).IntValue();
             Right = GetParam(Vrc3DefaultParams.GestureRight).IntValue();
@@ -246,6 +264,31 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _animators.Add(AvatarAnimator);
 
             //OscModule.Resume();
+        }
+
+        static readonly string[] keys = AccessTools.StaticFieldRefAccess<UniversalBlendshapes, string[]>("keys"); //
+        readonly List<UniversalBinding> universalBindings = new(); //
+
+        private void SetupUniversalBindings() //
+        {
+            foreach (var key in keys)
+                universalBindings.Add(new UniversalBinding(
+                        AccessTools.FieldRefAccess<UniversalBlendshapes, float>(key),
+                        AvatarAnimator.BindStreamProperty(
+                            Avatar.transform,
+                            typeof(UniversalBlendshapes),
+                            key
+                        ),
+                        0
+                    )
+                );
+
+        }
+        private void ApplyUniversalBlendShapeValues() //
+        {
+            var universalInst = Avatar.GetComponent<UniversalBlendshapes>();
+            foreach (var b in universalBindings)
+                b.universalBlendshapesBinding(universalInst) = b.value;
         }
 
         protected override void Unlink()
