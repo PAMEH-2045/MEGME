@@ -18,7 +18,7 @@ namespace BlackStartX.GestureManager
 
         bool bigScreenWasActive;
 
-        AccessTools.FieldRef<AvatarTools.ClickableContacts, bool> isClickableContactsActive;
+        AccessTools.FieldRef<AvatarTools.ClickableContacts, bool> isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
         
         bool isButtonСonfigured;
         RuntimeAnimatorController avatarControllerME;
@@ -42,17 +42,13 @@ namespace BlackStartX.GestureManager
         {
             CacheClothesItems();
 
-            isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
-
             avatarControllerME = FindFirstObjectByType<VRMLoader>().animatorController;
         }
         void Update()
         {
             CurrentModel.OnUpdate();
 
-            if (Manager == null) return;
-
-            if (Manager.Module == null) return;
+            if (Manager == null || Manager.Module == null) return;
 
             var isBigScreenActive = CurrentModel.AvatarBigScreenHandlerProxy.isBigScreenActive;
             if (bigScreenWasActive != (bigScreenWasActive = isBigScreenActive))

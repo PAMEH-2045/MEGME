@@ -176,6 +176,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             {
                 var layer = layerList[i - 1];
 
+                var isBase = layer.type == VRCAvatarDescriptor.AnimLayerType.Base;
                 var isFx = layer.type == VRCAvatarDescriptor.AnimLayerType.FX;
                 var isAdd = layer.type == VRCAvatarDescriptor.AnimLayerType.Additive;
                 var isPose = layer.type is VRCAvatarDescriptor.AnimLayerType.IKPose or VRCAvatarDescriptor.AnimLayerType.TPose;
@@ -195,19 +196,17 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var isNull = playable.GetInput(0).IsNull();
                 _layers[layer.type] = new LayerData { Playable = playable, Weight = weight, Empty = isNull, Parameters = RadialMenuUtility.GetParameters(playable) };
                 
-                if (layer.type == VRCAvatarDescriptor.AnimLayerType.Base)
+                if (isBase)
                 {
-                    var readJob = new ReadUniversalBSJob(universalBindings);    
-                    var readScriptPlayable = AnimationScriptPlayable.Create(_playableGraph, readJob);
-                    readScriptPlayable.AddInput(playable, 0, 1);
-                    mixer.ConnectInput(i, readScriptPlayable, OutputValue, weightOn);
+                    var readUBSJob = new ReadUniversalBSJob(universalBindings);    
+                    var readUBSScriptPlayable = AnimationScriptPlayable.Create(_playableGraph, readUBSJob);
+                    readUBSScriptPlayable.AddInput(playable, OutputValue, weightOn);
+                    mixer.ConnectInput(i, readUBSScriptPlayable, OutputValue, weightOn);
                 }
                 else
                 {
                     mixer.ConnectInput(i, playable, OutputValue, weightOn);
                 }
-                    
-                
                 if (isLim) mixer.SetInputWeight(i, weightOff);
                 if (isAdd) mixer.SetLayerAdditive((uint)i, add);
                 if (mask) mixer.SetLayerMaskFromAvatarMask((uint)i, mask);
