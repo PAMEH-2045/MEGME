@@ -150,6 +150,7 @@ namespace BlackStartX.GestureManager
                 if (baseLayers[i].type == VRCAvatarDescriptor.AnimLayerType.Base)
                 {
                     baseLayers[i].animatorController = avatarControllerME;
+                    baseLayers[i].isDefault = false;
                     break;
                 }
         }
