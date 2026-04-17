@@ -348,7 +348,10 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             slice.Progress = progress;
 
             _sliceHolder.MyAdd(new VisualElement().With(slice)).transform.rotation = Quaternion.Euler(0, 0, dCurrent);
-            _sliceHolder.MyAdd(RadialMenuUtility.Prefabs.NewBorder(MaxSize)).transform.rotation = Quaternion.Euler(0, 0, dCurrent - 90);
+            var border = RadialMenuUtility.Prefabs.NewBorder(MaxSize - MinSize);
+            border.transform.rotation = Quaternion.Euler(0, 0, dCurrent - 90);
+            border.transform.position = new Vector3(Mathf.Cos((dCurrent - 90) * Mathf.Deg2Rad) * MinSize, Mathf.Sin((dCurrent - 90) * Mathf.Deg2Rad) * MinSize - 1, 0);
+            _sliceHolder.Add(border);
             _textHolder.MyAdd(slice.DataHolder).transform.position = new Vector3(Mathf.Sin(pCurrent) * Size / 3, Mathf.Cos(pCurrent) * Size / 3, 0);
         }
 

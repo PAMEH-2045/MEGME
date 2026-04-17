@@ -26,14 +26,14 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         {
             public static class Default
             {
-                public static readonly Color Main = new(0.14f, 0.18f, 0.2f);
-                public static readonly Color Border = new(0.1f, 0.35f, 0.38f);
+                public static readonly Color Main = new(0.14f, 0.18f, 0.2f, 0.8f);
+                public static readonly Color Border = new(0.1f, 0.35f, 0.38f, 0.8f);
                 public static readonly Color Selected = new(0.07f, 0.55f, 0.58f);
             }
 
-            public static readonly Color CenterSelected = new(0.06f, 0.2f, 0.22f);
-            public static readonly Color RadialInner = new(0.21f, 0.24f, 0.27f);
-            public static readonly Color CenterIdle = new(0.06f, 0.27f, 0.29f);
+            public static readonly Color CenterSelected = new(0.06f, 0.2f, 0.22f, 0.9f);
+            public static readonly Color RadialInner = new(0.21f, 0.24f, 0.27f, 0.3f);
+            public static readonly Color CenterIdle = new(0.06f, 0.27f, 0.29f, 0.7f);
 
             private const string MainKeyName = "GM3 Main Color";
             private const string BorderKeyName = "GM3 Border Color";
