@@ -2,7 +2,7 @@
 
 A port of BlackStartx's [Gesture Manager](https://github.com/BlackStartx/VRC-Gesture-Manager) for [Mate Engine](https://github.com/shinyflvre/Mate-Engine)
 
-| Feature                                | Ported? | Inplementation Details         |
+| Feature                                | Ported? | Implementation Details         |
 |:-------------------------------------- |:-------:| ------------------------------ |
 | Locomotion, Tracking, States and Extra | -       |                                |
 | Edit Mode                              | -       |                                |
@@ -60,17 +60,11 @@ So copy it from ME project and place in `Editor` directory ( If dont have one cr
 
 ### 3.A In case of Modular Avatar
 
-1. RMB to a avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar`
-
-2. Delete all assigned layers in `VRC Avatar Descriptor > Playable Layers` except Base and FX
-   
-   > Currently MEGME do not use layers other then Base and FX, and MA adds animation controllers with "write defaults = 0" to empty fields 
+- RMB to a avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar
 
 ### 3.B In case of VRCFury
 
-1. Select avatar gameobject, in menubar: `Tools > VRCFury > Build an Editor Test Copy`
-
-2. Should be the same as Modular Avatar ( i never tested )
+- Select avatar gameobject, in menubar: `Tools > VRCFury > Build an Editor Test Copy`
 
 ### 4. Export
 
