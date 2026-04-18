@@ -99,9 +99,9 @@
     <EmbeddedResource Include="Resources\Vrc3\BSX_GM_VRMode.png" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PipelineManager.cs" />
     <Compile Include="ReadUniversalBSJob.cs" />
     <Compile Include="CurrentModel.cs" />
+    <Compile Include="Scripts\Editor\Modules\Vrc3\Cache\ExpressionCache.cs" />
     <Compile Include="Stuff.cs" />
     <Compile Include="GestureManagerManager.cs" />
     <Compile Include="RadialMenuController.cs" />
@@ -190,6 +190,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>Dependences\Public.Release.X3.3.0.HOTFIX-1\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Dependences\unity_editor_6000.2.6f2\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.dll</HintPath>

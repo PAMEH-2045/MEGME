@@ -765,24 +765,56 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 if (!Params.ContainsKey(nameString))
                     Params[nameString] = new Vrc3Param(nameString, type);
 
-            if (Settings.loadStored) TryAddWarning(InitStored());
+            InitStored(); //
+            //if (Settings.loadStored) TryAddWarning(InitStored());
 
             FilterParam();
+
+            if (parameters) //
+                foreach (var p in UserFilteredParams)
+                    p.Value.SetOnChange(Save);
         }
 
-        private Vrc3Warning InitStored()
+        void Save(Vrc3Param param, float value)
         {
-            return null; //
-            //if (string.IsNullOrEmpty(Pipeline.blueprintId)) return null;
-            //var localString = GestureManagerSettings.UserPath(Settings.userIndex);
-            //if (localString == null) return null;
-            //var fileString = Path.Combine(localString, Pipeline.blueprintId);
-            //if (!File.Exists(fileString)) return Vrc3Warning.InitLoadUnexisting;
-            //var file = AvatarFile.LoadData(File.ReadAllText(fileString));
-            //if (file == null) return Vrc3Warning.InitLoadJsonError;
-            //foreach (var parameters in file.animationParameters) GetParam(parameters.name)?.InternalSet(parameters.value);
-            //return null;
+            var currentAvatarPath = ExpressionsCacheHandler.saveLoadHandler.data.selectedModelPath;
+
+            var data = ExpressionsCacheHandler.Data;
+
+            if (!data.avatarsParams.TryGetValue(currentAvatarPath, out var parameters))
+            {
+                parameters = new Dictionary<string, float>();
+                data.avatarsParams[currentAvatarPath] = parameters;
+            }
+
+            parameters[param.Name] = value;
+
+            ExpressionsCacheHandler.SaveToDisk();
         }
+
+        void InitStored()
+        {
+            var currentAvatarPath = ExpressionsCacheHandler.saveLoadHandler.data.selectedModelPath;
+            if (!ExpressionsCacheHandler.Data.avatarsParams.TryGetValue(currentAvatarPath, out var parameters))
+            {
+                Debug.Log("[MEGME] Avatar not found in the cache");
+                return;
+            }
+
+            foreach (var pair in parameters) GetParam(pair.Key)?.InternalSet(pair.Value);
+        }
+        //private Vrc3Warning InitStored()
+        //{
+        //if (string.IsNullOrEmpty(Pipeline.blueprintId)) return null;
+        //var localString = GestureManagerSettings.UserPath(Settings.userIndex);
+        //if (localString == null) return null;
+        //var fileString = Path.Combine(localString, Pipeline.blueprintId);
+        //if (!File.Exists(fileString)) return Vrc3Warning.InitLoadUnexisting;
+        //var file = AvatarFile.LoadData(File.ReadAllText(fileString));
+        //if (file == null) return Vrc3Warning.InitLoadJsonError;
+        //foreach (var parameters in file.animationParameters) GetParam(parameters.name)?.InternalSet(parameters.value);
+        //return null;
+        //}
 
         public Vrc3Param GetParam(string paramName)
         {
