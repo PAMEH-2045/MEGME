@@ -10,6 +10,7 @@ using BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
+using CustomDancePlayer;
 using HarmonyLib;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.Vrc3Debug.Avatar;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.Vrc3Debug.Osc;
@@ -135,7 +136,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         }
 
         //public override void OnDrawGizmos() => AvatarTools.OnDrawGizmos();
-        AnimationLayerMixerPlayable mixer;
+
+        readonly AccessTools.FieldRef<AvatarDanceHandler, AnimatorOverrideController> overrideController = AccessTools.FieldRefAccess<AvatarDanceHandler, AnimatorOverrideController>("overrideController");
         public override void InitForAvatar()
         {
             StartVrcHooks();
@@ -157,7 +159,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             _playableGraph = PlayableGraph.Create(GestureManager.Version);
             _playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
-            mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
+            var mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount + 1);
+            //mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
             AnimationPlayableOutput.Create(_playableGraph, OutputName, AvatarAnimator).SetSourcePlayable(mixer);
 
             _layers.Clear();
@@ -191,10 +194,16 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var weight = new AnimatorControllerWeight(mixer, playable, i);
                 var isNull = playable.GetInput(0).IsNull();
                 _layers[layer.type] = new LayerData { Playable = playable, Weight = weight, Empty = isNull, Parameters = RadialMenuUtility.GetParameters(playable) };
-                
 
                 mixer.ConnectInput(i, playable, OutputValue, weightOn);
 
+                if (isBase) //
+                {
+                    var danceHandler = GameObject.FindFirstObjectByType<AvatarDanceHandler>();
+                    overrideController(danceHandler) = new AnimatorOverrideController(controller);
+                    var overrideControllerPlayable = AnimatorControllerPlayable.Create(_playableGraph, overrideController(danceHandler));
+                    mixer.ConnectInput(intCount, overrideControllerPlayable, OutputValue, weightOn);
+                }
                 if (isLim) mixer.SetInputWeight(i, weightOff);
                 if (isAdd) mixer.SetLayerAdditive((uint)i, add);
                 if (mask) mixer.SetLayerMaskFromAvatarMask((uint)i, mask);
