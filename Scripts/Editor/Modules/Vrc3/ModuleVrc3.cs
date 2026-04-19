@@ -137,7 +137,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         }
 
         //public override void OnDrawGizmos() => AvatarTools.OnDrawGizmos();
-        AnimationLayerMixerPlayable mixer;
+        AnimationScriptPlayable readUBSScriptPlayable;
         public override void InitForAvatar()
         {
             StartVrcHooks();
@@ -159,7 +159,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             _playableGraph = PlayableGraph.Create(GestureManager.Version);
             _playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
-            mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
+            var mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
             AnimationPlayableOutput.Create(_playableGraph, OutputName, AvatarAnimator).SetSourcePlayable(mixer);
 
             _layers.Clear();
@@ -199,7 +199,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 if (isBase)
                 {
                     var readUBSJob = new ReadUniversalBSJob(universalBindings);    
-                    var readUBSScriptPlayable = AnimationScriptPlayable.Create(_playableGraph, readUBSJob);
+                    readUBSScriptPlayable = AnimationScriptPlayable.Create(_playableGraph, readUBSJob);
                     readUBSScriptPlayable.AddInput(playable, OutputValue, weightOn);
                     mixer.ConnectInput(i, readUBSScriptPlayable, OutputValue, weightOn);
                 }
