@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace BlackStartX.GestureManager
 {
-    [DefaultExecutionOrder(-10)] // if Module's LateUpdate() would be invoked after UniversalBlendshapes's LateUpdate() visemes wouldn't work
     public class GestureManager : MonoBehaviour
     {
         public const string Version = "Gesture Manager 3.9";
