@@ -40,6 +40,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
             Data.avatarsParams = Data.avatarsParams
                 .Where(pair => ids.Contains(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            SaveToDisk();
         }
         public static void SaveToDisk()
         {
