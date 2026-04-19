@@ -99,7 +99,6 @@
     <EmbeddedResource Include="Resources\Vrc3\BSX_GM_VRMode.png" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReadUniversalBSJob.cs" />
     <Compile Include="CurrentModel.cs" />
     <Compile Include="Scripts\Editor\Modules\Vrc3\Cache\ExpressionCache.cs" />
     <Compile Include="Stuff.cs" />
@@ -174,7 +173,6 @@
     <Compile Include="Scripts\Runtime\Library\VisualElements\GmgCircleElement.cs" />
     <Compile Include="Scripts\Runtime\Library\VisualElements\GmgTmpRichTextElement.cs" />
     <Compile Include="Scripts\Runtime\Modules\ModuleSettings.cs" />
-    <Compile Include="UniversalBinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="G:\VS\VSComunity\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />

@@ -132,8 +132,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             if (PoseMode) SetPose(AvatarAnimator);
             //if (DummyMode == null && Avatar != null) Avatar.transform.localScale = _baseScale * _scale; // scale setting controlled by GM
             AvatarTools.OnLateUpdate(this);
-
-            if (Avatar != null) ApplyUniversalBlendShapeValues();
         }
 
         //public override void OnDrawGizmos() => AvatarTools.OnDrawGizmos();
@@ -170,8 +168,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             Receivers.Clear();
 
-            universalBindings.Clear(); //
-
             for (var i = 1; i < intCount; i++)
             {
                 var layer = layerList[i - 1];
@@ -196,17 +192,9 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var isNull = playable.GetInput(0).IsNull();
                 _layers[layer.type] = new LayerData { Playable = playable, Weight = weight, Empty = isNull, Parameters = RadialMenuUtility.GetParameters(playable) };
                 
-                if (isBase)
-                {
-                    var readUBSJob = new ReadUniversalBSJob(universalBindings);    
-                    var readUBSScriptPlayable = AnimationScriptPlayable.Create(_playableGraph, readUBSJob);
-                    readUBSScriptPlayable.AddInput(playable, OutputValue, weightOn);
-                    mixer.ConnectInput(i, readUBSScriptPlayable, OutputValue, weightOn);
-                }
-                else
-                {
-                    mixer.ConnectInput(i, playable, OutputValue, weightOn);
-                }
+
+                mixer.ConnectInput(i, playable, OutputValue, weightOn);
+
                 if (isLim) mixer.SetInputWeight(i, weightOff);
                 if (isAdd) mixer.SetLayerAdditive((uint)i, add);
                 if (mask) mixer.SetLayerMaskFromAvatarMask((uint)i, mask);
@@ -218,8 +206,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _baseView = AvatarDescriptor.ViewPosition;
             _baseScale = Avatar.transform.localScale;
             InitParams(Parameters);
-
-            SetupUniversalBindings(); //
 
             GetParam(Vrc3DefaultParams.Upright).InternalSet(1f);
             GetParam(Vrc3DefaultParams.Grounded).InternalSet(1f);
@@ -263,31 +249,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _animators.Add(AvatarAnimator);
 
             //OscModule.Resume();
-        }
-
-        static readonly string[] keys = AccessTools.StaticFieldRefAccess<UniversalBlendshapes, string[]>("keys"); //
-        readonly List<UniversalBinding> universalBindings = new(); //
-
-        private void SetupUniversalBindings() //
-        {
-            foreach (var key in keys)
-                universalBindings.Add(new UniversalBinding(
-                        AccessTools.FieldRefAccess<UniversalBlendshapes, float>(key),
-                        AvatarAnimator.BindStreamProperty(
-                            Avatar.transform,
-                            typeof(UniversalBlendshapes),
-                            key
-                        ),
-                        0
-                    )
-                );
-
-        }
-        private void ApplyUniversalBlendShapeValues() //
-        {
-            var universalInst = Avatar.GetComponent<UniversalBlendshapes>();
-            foreach (var b in universalBindings)
-                b.universalBlendshapesBinding(universalInst) = b.value;
         }
 
         protected override void Unlink()
