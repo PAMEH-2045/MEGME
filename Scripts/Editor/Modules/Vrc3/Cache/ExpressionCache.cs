@@ -37,11 +37,15 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
 
             var ids = new HashSet<string>(avatarEntries.Select(e => e.filePath));
 
-            Data.avatarsParams = Data.avatarsParams
+            var updatedData = Data.avatarsParams
                 .Where(pair => ids.Contains(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            SaveToDisk();
+            if (Data.avatarsParams.Count != updatedData.Count)
+            {
+                Data.avatarsParams = updatedData;
+                SaveToDisk();
+            }
         }
         public static void SaveToDisk()
         {
