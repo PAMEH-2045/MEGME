@@ -200,7 +200,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 if (isBase) //
                 {
                     var danceHandler = GameObject.FindFirstObjectByType<AvatarDanceHandler>();
-                    overrideController(danceHandler) = new AnimatorOverrideController(controller);
+                    overrideController(danceHandler) = controller is AnimatorOverrideController alreadyOverride ? alreadyOverride : new AnimatorOverrideController(controller); // AnimatorOverrideController constructor do not copy override table if AnimatorOverrideController is supplied
                     var overrideControllerPlayable = AnimatorControllerPlayable.Create(_playableGraph, overrideController(danceHandler));
                     mixer.ConnectInput(intCount, overrideControllerPlayable, OutputValue, weightOn);
                 }

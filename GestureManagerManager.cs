@@ -8,6 +8,7 @@ using Xamin;
 
 namespace BlackStartX.GestureManager
 {
+    [DefaultExecutionOrder(+10)] // Should run after all possible MEManipulators
     public class GestureManagerManager : MonoBehaviour
     {
         [SerializeField] private GestureManager Manager;
@@ -21,7 +22,6 @@ namespace BlackStartX.GestureManager
         AccessTools.FieldRef<AvatarTools.ClickableContacts, bool> isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
         
         bool isButtonСonfigured;
-        RuntimeAnimatorController avatarControllerME;
         MenuActions menuActions;
         int actionsClothesIndex;
         MenuEntry actionsClothesEntryOrigin;
@@ -41,8 +41,6 @@ namespace BlackStartX.GestureManager
         void Start()
         {
             CacheClothesItems();
-
-            avatarControllerME = FindFirstObjectByType<VRMLoader>().animatorController;
         }
         void Update()
         {
@@ -139,13 +137,16 @@ namespace BlackStartX.GestureManager
 
         private void BindMEControllerToDescriptor()
         {
+            var animator = CurrentModel.GetComponent<Animator>();
+            var controller = animator.runtimeAnimatorController;    
+
             var descriptor = CurrentModel.GetComponent<VRCAvatarDescriptor>();
             var baseLayers = descriptor.baseAnimationLayers;
 
             for (int i = 0; i < baseLayers.Length; i++)
                 if (baseLayers[i].type == VRCAvatarDescriptor.AnimLayerType.Base)
                 {
-                    baseLayers[i].animatorController = avatarControllerME;
+                    baseLayers[i].animatorController = controller;
                     baseLayers[i].isDefault = false;
                     break;
                 }
