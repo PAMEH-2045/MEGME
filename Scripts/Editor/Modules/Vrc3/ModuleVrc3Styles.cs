@@ -21,6 +21,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private static GUIStyle _url;
         private static GUIStyle _urlPro;
 
+        private static GameObject _cullingDiamond;
+
         private static Texture2D _emojis;
         private static Texture2D _option;
         private static Texture2D _expressions;
@@ -71,6 +73,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private static Texture2D _isLocal;
         private static Texture2D _extras;
         private static Texture2D _isOnFriendsList;
+        private static Texture2D _isAnimatorEnabled;
 
         internal static GUIStyle Url => _url ??= new GUIStyle(GUI.skin.label) { padding = new RectOffset(-6, -6, 1, 0), normal = { textColor = Color.blue } };
         internal static GUIStyle UrlPro => _urlPro ??= new GUIStyle(GUI.skin.label) { padding = new RectOffset(-6, -6, 1, 0), normal = { textColor = Color.cyan } };
@@ -125,6 +128,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal static Texture2D IsLocal => !_isLocal ? _isLocal = LoadEmbeddedTexture("BSX_GM_IsLocal") : _isLocal;
         internal static Texture2D Extras => !_extras ? _extras = LoadEmbeddedTexture("BSX_GM_Extras") : _extras;
         internal static Texture2D IsOnFriendsList => !_isOnFriendsList ? _isOnFriendsList = LoadEmbeddedTexture("BSX_GM_IsOnFriendsList") : _isOnFriendsList;
+        internal static Texture2D IsAnimatorEnabled => !_isAnimatorEnabled ? _isAnimatorEnabled = LoadEmbeddedTexture("BSX_GM_IsAnimatorEnabled") : _isAnimatorEnabled;
 
 
         private static readonly string[] resNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
@@ -169,11 +173,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 AnimLayerType.IKPose => Masks.Armature,
                 AnimLayerType.TPose => Masks.Armature,
                 AnimLayerType.FX => Masks.Empty,
-                AnimLayerType.Deprecated0 => null,
-                AnimLayerType.Additive => null,
-                AnimLayerType.Sitting => null,
-                AnimLayerType.Action => null,
-                AnimLayerType.Base => null,
                 _ => null
             };
 

@@ -12,10 +12,12 @@ namespace BlackStartX.GestureManager.Modules
     public class ModuleSettings
     {
         public GmgAvatarDescriptor favourite;
-        public Pose initialPose;
+        public Pose initialPose = Pose.None;
         public int userIndex;
 
+        public float cullingDistance;
         public bool isOnFriendsList;
+        public bool simulateCulling;
         public bool loadStored;
         public bool isRemote;
         public bool vrMode;

@@ -12,6 +12,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal const string EyeHeightAsMeters = "EyeHeightAsMeters";
         internal const string GestureLeftWeight = "GestureLeftWeight";
         internal const string VelocityMagnitude = "VelocityMagnitude";
+        internal const string IsAnimatorEnabled = "IsAnimatorEnabled";
         internal const string IsOnFriendsList = "IsOnFriendsList";
         internal const string ScaleModified = "ScaleModified";
         internal const string AvatarVersion = "AvatarVersion";
@@ -19,6 +20,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal const string GestureRight = "GestureRight";
         internal const string ScaleFactor = "ScaleFactor";
         internal const string GestureLeft = "GestureLeft";
+        internal const string PreviewMode = "PreviewMode";
         internal const string VelocityX = "VelocityX";
         internal const string VelocityY = "VelocityY";
         internal const string VelocityZ = "VelocityZ";
@@ -47,6 +49,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             { EyeHeightAsMeters, AnimatorControllerParameterType.Float },
             { GestureLeftWeight, AnimatorControllerParameterType.Float },
             { VelocityMagnitude, AnimatorControllerParameterType.Float },
+            { IsAnimatorEnabled, AnimatorControllerParameterType.Bool },
             { IsOnFriendsList, AnimatorControllerParameterType.Bool },
             { VrcFaceBlendH, AnimatorControllerParameterType.Float },
             { VrcFaceBlendV, AnimatorControllerParameterType.Float },
@@ -56,6 +59,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             { GestureRight, AnimatorControllerParameterType.Int },
             { ScaleFactor, AnimatorControllerParameterType.Float },
             { GestureLeft, AnimatorControllerParameterType.Int },
+            { PreviewMode, AnimatorControllerParameterType.Int },
             { VelocityX, AnimatorControllerParameterType.Float },
             { VelocityY, AnimatorControllerParameterType.Float },
             { VelocityZ, AnimatorControllerParameterType.Float },

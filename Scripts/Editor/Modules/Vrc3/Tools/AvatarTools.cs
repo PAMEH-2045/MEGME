@@ -16,9 +16,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
 {
     public class AvatarTools
     {
-        private static Camera ToolCamera => Camera.allCameras.FirstOrDefault(CameraRule);
-        private static bool CameraRule(Camera camera) => camera.enabled && camera.gameObject.activeInHierarchy;
-
         //private UpdateSceneCamera _sceneCamera;
         //public UpdateSceneCamera SceneCamera => _sceneCamera ??= new UpdateSceneCamera();
 
@@ -90,13 +87,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             protected override string Description => "This will match your game view with your scene view!\n\nClick the button to setup the main camera automatically~";
             protected internal override bool Active => IsActive.Property;
 
-            public UpdateSceneCamera() => Set(IsActive.Property ? ToolCamera : null);
+            public UpdateSceneCamera() => Set(IsActive.Property ? ModuleVrc3.MainCamera : null);
 
             protected internal override void Toggle(ModuleVrc3 module) => AutoToggle();
 
             protected override void Gui(ModuleVrc3 module)
             {
-                if (GmgLayoutHelper.ButtonObjectField("Scene Camera: ", _camera, _camera ? 'X' : 'A', Set)) AutoToggle();
+                if (GmgLayoutHelper.ButtonObjectField("Scene Camera: ", _camera, !_camera ? 'A' : 'X', Set)) AutoToggle();
             }
 
             protected override void Update(ModuleVrc3 module)
@@ -117,7 +114,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
                 transform.position = new Vector3(positionVector.x, positionVector.y + 0.001f, positionVector.z);
             }
 
-            private static void AutoToggle() => Set(_camera ? null : ToolCamera);
+            private static void AutoToggle() => Set(!_camera ? ModuleVrc3.MainCamera : null);
 
             private static void Set(Camera camera)
             {
@@ -146,13 +143,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             //protected internal bool Active => _isActive.Property;
 
             //private static Mesh _sphereMesh;
-            //private static Mesh SphereMesh => _sphereMesh ? _sphereMesh : _sphereMesh = FetchSpherePrimitive();
+            //private static Mesh SphereMesh => !_sphereMesh ? _sphereMesh = FetchSpherePrimitive() : _sphereMesh;
 
             //private static Mesh _capsuleMesh;
-            //private static Mesh CapsuleMesh => _capsuleMesh ? _capsuleMesh : _capsuleMesh = FetchCapsulePrimitive();
+            //private static Mesh CapsuleMesh => !_capsuleMesh ? _capsuleMesh = FetchCapsulePrimitive() : _capsuleMesh;
 
-            private Camera _camera = ToolCamera;
-            private Camera Camera => _camera ? _camera : _camera = ToolCamera;
+            private Camera _camera = ModuleVrc3.MainCamera;
+            private Camera Camera => !_camera ? _camera = ModuleVrc3.MainCamera : _camera;
 
             //internal void Toggle(ModuleVrc3 module) => _isActive = !_isActive;
             //protected internal override void Toggle(ModuleVrc3 module) => _isActive.Property = !_isActive.Property;
