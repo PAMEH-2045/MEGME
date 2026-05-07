@@ -1,7 +1,10 @@
 ﻿using CustomDancePlayer;
 using HarmonyLib;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
+using VRC.Dynamics;
 
 namespace BlackStartX.GestureManager
 {
@@ -88,6 +91,28 @@ namespace BlackStartX.GestureManager
             }
 
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(PhysBoneManager.PhysBoneJob), "SolveChain")]
+    class Patch_SolveChain
+    {
+        public static float3 currentForce;
+
+        static void Prefix(ref PhysBoneManager.PhysBoneJob __instance, ref PhysBoneManager.Chain chain)
+        {
+            NativeArray<PhysBoneManager.Bone> bones = __instance.bones;
+
+            for (int i = 0; i < chain.boneCount; i++)
+            {
+                int index = chain.boneOffset + i;
+                var bone = bones[index];
+                if (bone.isSimulated)
+                {
+                    bone.prevVelocity += currentForce;
+                    bones[index] = bone;
+                }
+            }
         }
     }
 }

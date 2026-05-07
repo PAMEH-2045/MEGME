@@ -100,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CurrentModel.cs" />
+    <Compile Include="PhysBoneGravityController.cs" />
     <Compile Include="Scripts\Editor\Modules\Vrc3\Cache\ExpressionCache.cs" />
     <Compile Include="Stuff.cs" />
     <Compile Include="GestureManagerManager.cs" />
@@ -191,6 +192,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Dependences\unity_editor_6000.2.6f2\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>Dependences\unity_2022.3.22f1_build\Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.dll</HintPath>
