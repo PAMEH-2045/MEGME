@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if false
+#if VRC_SDK_VRCSDK3
 using System;
 
 namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
@@ -25,4 +26,5 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         public static readonly Vrc3Warning InitLoadUnexisting = new("Init Error", "Unable to load local stored parameters. (File doesn't exist)");
     }
 }
+#endif
 #endif

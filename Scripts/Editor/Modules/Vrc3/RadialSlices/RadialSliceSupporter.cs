@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if false
+#if VRC_SDK_VRCSDK3
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -96,4 +97,5 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices
         }
     }
 }
+#endif
 #endif

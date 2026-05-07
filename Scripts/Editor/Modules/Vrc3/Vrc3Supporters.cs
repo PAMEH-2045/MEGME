@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if false
+#if VRC_SDK_VRCSDK3
 using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
@@ -71,11 +72,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             JsonUtility.FromJsonOverwrite(supporters, SupObject);
         }
 
-        //public static void Check()
-        //{
-        //    if (_checkedForSupporter) return;
-        //    GestureManagerEditor.CheckSupporters(OnSupporters);
-        //}
+        public static void Check()
+        {
+            if (_checkedForSupporter) return;
+            GestureManagerEditor.CheckSupporters(OnSupporters);
+        }
     }
 }
+#endif
 #endif

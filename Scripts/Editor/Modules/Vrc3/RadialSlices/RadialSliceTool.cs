@@ -1,4 +1,4 @@
-﻿#if
+﻿#if false
 #if VRC_SDK_VRCSDK3
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
 using UnityEngine;
@@ -38,4 +38,5 @@ protected override void OnValueChanged(bool active)
 }
     }
 }
+#endif
 #endif

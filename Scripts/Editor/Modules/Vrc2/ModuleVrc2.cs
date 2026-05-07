@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK2
+﻿#if false
+#if VRC_SDK_VRCSDK2
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -428,4 +429,5 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc2
         public string GetOriginalName() => _originalName;
     }
 }
+#endif
 #endif

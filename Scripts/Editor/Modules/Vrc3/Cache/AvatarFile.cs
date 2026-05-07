@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if false
+#if VRC_SDK_VRCSDK3
 using System;
 using UnityEngine;
 
@@ -29,4 +30,5 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
         public float value;
     }
 }
+#endif
 #endif

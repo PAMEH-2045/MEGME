@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if false
+#if VRC_SDK_VRCSDK3
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -381,4 +382,5 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.OpenSoundControl
         }
     }
 }
+#endif
 #endif

@@ -1,4 +1,5 @@
-﻿namespace BlackStartX.GestureManager.Library
+﻿#if false
+namespace BlackStartX.GestureManager.Library
 {
     public static class GmgEditorCallbacks
     {
@@ -32,3 +33,4 @@
         }
     }
 }
+#endif

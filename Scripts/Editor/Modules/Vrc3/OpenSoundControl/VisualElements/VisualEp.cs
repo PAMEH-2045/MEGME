@@ -1,4 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if false
+#if VRC_SDK_VRCSDK3
 using UnityEngine;
 using UnityEngine.UIElements;
 using BlackStartX.GestureManager.Library;
@@ -119,4 +120,5 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.OpenSoundControl.Visual
         }
     }
 }
+#endif
 #endif

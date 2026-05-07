@@ -1,4 +1,4 @@
-﻿#if
+﻿#if false
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -321,3 +321,4 @@ namespace BlackStartX.GestureManager.Editor.Library
         }
     }
 }
+#endif
