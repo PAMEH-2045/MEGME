@@ -264,9 +264,9 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             private static float DistanceFrom(ContactBase receiver, Vector3 s, Vector3 b, out float radius)
             {
                 receiver.InitShape();
-                var vector = receiver.transform.lossyScale;
-                var scale = Mathf.Max(vector.x, vector.y, vector.z);
-                GetShapeData(receiver.shape, receiver.transform, scale, out radius, out var aPointVector, out var bPointVector);
+                var transform = !receiver.rootTransform ? receiver.transform : receiver.rootTransform;
+                var scale = Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+                GetShapeData(receiver.shape, transform, scale, out radius, out var aPointVector, out var bPointVector);
                 ClosestPointsBetweenLineSegments(s, b, aPointVector, bPointVector, out var vector0, out var vector1);
                 return (vector0 - vector1).magnitude - radius;
             }
@@ -650,5 +650,4 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
 #endif
     }
 }
-
 #endif
