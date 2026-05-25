@@ -40,7 +40,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.AvatarDynamics
             if (!PhysBoneManager.Inst) RestartPhysBoneManager();
         }
 
-        private static bool IsNotPersistent(Object uObject) => !UnityEditor.EditorUtility.IsPersistent(uObject);
+        //private static bool IsNotPersistent(Object uObject) => !UnityEditor.EditorUtility.IsPersistent(uObject);
 
         private static void RecreateComponent<T>(T original) where T : Component
         {
@@ -57,7 +57,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.AvatarDynamics
             var obj = new GameObject(TriggerManagerName);
             Object.DontDestroyOnLoad(obj);
             obj.AddComponent<ContactManager>();
-            foreach (var contact in Resources.FindObjectsOfTypeAll<ContactBase>().Where(IsNotPersistent)) RecreateComponent(contact);
+            //foreach (var contact in Resources.FindObjectsOfTypeAll<ContactBase>().Where(IsNotPersistent)) RecreateComponent(contact);
         }
 
         private static void RestartPhysBoneManager()
@@ -68,8 +68,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.AvatarDynamics
             obj.AddComponent<PhysBoneManager>();
             PhysBoneManager.Inst.IsSDK = true;
             PhysBoneManager.Inst.Init();
-            obj.AddComponent<PhysBoneGrabHelper>();
-            foreach (var physBone in Resources.FindObjectsOfTypeAll<VRCPhysBoneBase>().Where(IsNotPersistent)) RecreateComponent(physBone);
+            //obj.AddComponent<PhysBoneGrabHelper>();
+            //foreach (var physBone in Resources.FindObjectsOfTypeAll<VRCPhysBoneBase>().Where(IsNotPersistent)) RecreateComponent(physBone);
         }
 
         public static void ReinstallAvatarColliders(ModuleVrc3 module)
