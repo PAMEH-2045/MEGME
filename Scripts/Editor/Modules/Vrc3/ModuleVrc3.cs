@@ -1158,6 +1158,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             Receivers.Add(receiver);
             receiver.playerId = _playerId;
             receiver.paramAccess = new AnimParameterAccessAvatarGmg(this, receiver.parameter);
+            receiver.allowSelf = false; // prevent model self collision in animations
         }
 
         private void SenderBaseSetup(ContactSender sender) => sender.playerId = _playerId;
