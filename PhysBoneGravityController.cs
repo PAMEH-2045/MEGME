@@ -8,6 +8,7 @@ namespace BlackStartX.GestureManager
 {
     public class PhysBoneGravityController : MonoBehaviour
     {
+
         [SerializeField]
         private float inputRange = 1.5f;
         [SerializeField]
@@ -45,6 +46,7 @@ namespace BlackStartX.GestureManager
 
             Patch_SolveChain.currentForce = currentForce;
         }
+
         float Map(float value)
         {
             float sign = Mathf.Sign(value);

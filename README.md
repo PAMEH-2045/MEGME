@@ -6,7 +6,7 @@ A port of BlackStartx's [Gesture Manager](https://github.com/BlackStartx/VRC-Ges
 |:-------------------------------------- |:-------:| ------------------------------ |
 | Locomotion, Tracking, States and Extra | -       |                                |
 | Edit Mode                              | -       |                                |
-| Expressions menu                       | +       | As is                          |
+| Expressions menu                       | +       | Replaces the clothing menu     |
 | Gestures control                       | -       |                                |
 | Scene Camera                           | -       |                                |
 | Clickable Contacts                     | +       | Active only in Big Screen mode |
@@ -60,7 +60,7 @@ So copy it from ME project and place in `Editor` directory ( If dont have one cr
 
 ### 3.A In case of Modular Avatar
 
-- RMB to a avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar
+- RMB to a avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar`
 
 ### 3.B In case of VRCFury
 

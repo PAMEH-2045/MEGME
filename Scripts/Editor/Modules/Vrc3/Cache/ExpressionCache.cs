@@ -11,7 +11,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
 {
     public class ExpressionsCacheHandler
     {
-        public static ExpressionsCache Data;
+        public static ExpressionsCache Cache;
         public static SaveLoadHandler saveLoadHandler;
 
         static string BaseDir;
@@ -25,7 +25,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
             BaseDir = (string)typeof(SaveLoadHandler).GetProperty("BaseDir", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(saveLoadHandler);
             expressionsCacheFilepath = Path.Combine(BaseDir, "megme_expressions_cache.json");
 
-            Data = LoadData();
+            Cache = LoadCache();
 
             RemoveDeleted();
         }
@@ -37,13 +37,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
 
             var ids = new HashSet<string>(avatarEntries.Select(e => e.filePath));
 
-            var updatedData = Data.avatarsParams
+            var updatedData = Cache
                 .Where(pair => ids.Contains(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            if (Data.avatarsParams.Count != updatedData.Count)
+            if (Cache.Count != updatedData.Count)
             {
-                Data.avatarsParams = updatedData;
+                Cache = updatedData as ExpressionsCache;
                 SaveToDisk();
             }
         }
@@ -51,7 +51,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
         {
             try
             {
-                string json = JsonConvert.SerializeObject(Data, Formatting.Indented);
+                string json = JsonConvert.SerializeObject(Cache, Formatting.Indented);
                 File.WriteAllText(expressionsCacheFilepath, json);
             }
             catch (Exception e)
@@ -60,12 +60,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
             }
         }
 
-        public static ExpressionsCache LoadData()
+        public static ExpressionsCache LoadCache()
         {
             try
             {
-                var data = File.ReadAllText(expressionsCacheFilepath);
-                return JsonConvert.DeserializeObject<ExpressionsCache>(data);
+                var json = File.ReadAllText(expressionsCacheFilepath);
+                var data = JsonConvert.DeserializeObject<ExpressionsCache>(json);
+                return data ?? new ExpressionsCache();
             }
             catch (Exception e)
             {
@@ -75,9 +76,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
         }
 
         [Serializable]
-        public class ExpressionsCache
-        {
-            public Dictionary<string, Dictionary<string, float>> avatarsParams = new();
-        }
+        public class ExpressionsCache : Dictionary<string, Dictionary<string, float>> { }
     }
 }

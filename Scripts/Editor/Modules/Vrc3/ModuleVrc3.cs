@@ -183,7 +183,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _playableGraph = PlayableGraph.Create(GestureManager.Version);
             _playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
             var mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount + 1);
-            //mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
+            //var mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
             AnimationPlayableOutput.Create(_playableGraph, OutputName, AvatarAnimator).SetSourcePlayable(mixer);
 
             _layers.Clear();
@@ -811,12 +811,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         {
             var currentAvatarPath = ExpressionsCacheHandler.saveLoadHandler.data.selectedModelPath;
 
-            var data = ExpressionsCacheHandler.Data;
+            var cache = ExpressionsCacheHandler.Cache;
 
-            if (!data.avatarsParams.TryGetValue(currentAvatarPath, out var parameters))
+            if (!cache.TryGetValue(currentAvatarPath, out var parameters))
             {
                 parameters = new Dictionary<string, float>();
-                data.avatarsParams[currentAvatarPath] = parameters;
+                cache[currentAvatarPath] = parameters;
             }
 
             parameters[param.Name] = value;
@@ -827,7 +827,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         void InitStored()
         {
             var currentAvatarPath = ExpressionsCacheHandler.saveLoadHandler.data.selectedModelPath;
-            if (!ExpressionsCacheHandler.Data.avatarsParams.TryGetValue(currentAvatarPath, out var parameters))
+            if (!ExpressionsCacheHandler.Cache.TryGetValue(currentAvatarPath, out var parameters))
             {
                 Debug.Log("[MEGME] Avatar not found in the cache");
                 return;
