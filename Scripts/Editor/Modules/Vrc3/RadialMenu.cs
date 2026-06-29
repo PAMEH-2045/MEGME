@@ -128,7 +128,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _puppet.AfterCursor();
         }
 
-        private void ClosePuppet()
+        internal void ClosePuppet()
         {
             if (_puppet == null) return;
 

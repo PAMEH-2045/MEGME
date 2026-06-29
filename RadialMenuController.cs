@@ -1,5 +1,5 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
-using System.Reflection;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,27 +10,31 @@ namespace BlackStartX.GestureManager
         [SerializeField] private GestureManager Manager;
 
         VisualElement _root;
+        UIDocument doc;
         RadialMenu Menu;
         SettingsMenuPosition settingsMenuPosition;
-        FieldInfo lastAtRightEdgeField;
+        AccessTools.FieldRef<SettingsMenuPosition, bool> lastAtRightEdge = AccessTools.FieldRefAccess<SettingsMenuPosition, bool>("lastAtRightEdge");
 
         Vector2 screenSize;
         Vector2 menuPosOrigin = new(1017, 493);
         Rect menuRectCurrent = new(1017, 493, 300, 300);
         Vector2 targetRes = new(1536, 1024);
 
-        private void OnEnable()
+        void Awake()
         {
-            _root = GetComponent<UIDocument>().rootVisualElement;
+            doc = GetComponent<UIDocument>();
+
+            settingsMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
+        }
+        void OnEnable()
+        {
+            _root = doc.rootVisualElement;
 
             _root.pickingMode = PickingMode.Position;
             _root.style.color = Color.white; // text color is inherited from parent
 
-            _root.RegisterCallback<GeometryChangedEvent>(_ => screenSize = _root.layout.size);
-            _root.RegisterCallback<MouseMoveEvent>(e => Menu.mousePos = e.mousePosition);
-
-            settingsMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
-            lastAtRightEdgeField = typeof(SettingsMenuPosition).GetField("lastAtRightEdge", BindingFlags.Instance | BindingFlags.NonPublic);
+            _root.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            _root.RegisterCallback<MouseMoveEvent>(OnMouseMove);
         }
 
         void OnGUI()
@@ -41,23 +45,28 @@ namespace BlackStartX.GestureManager
             Manager.SetDrag(!Event.current.alt);
             var _module = (ModuleVrc3)Manager.Module;
 
-            if (settingsMenuPosition != null && lastAtRightEdgeField != null) CalculateMenuPosition();
+            if (settingsMenuPosition != null) CalculateMenuPosition();
 
             Menu = _module.GetOrCreateRadial(this);
 
             Menu.Rect = menuRectCurrent;
             Menu.Render(_root, menuRectCurrent);
         }
+        void OnDisable()
+        {
+            _root.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            _root.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
 
-        // need rework ( or is it? )
+            Menu.ClosePuppet();
+        }
         void CalculateMenuPosition()
         {
-            var lastAtRightEdge = (bool)lastAtRightEdgeField.GetValue(settingsMenuPosition);
-
-            var offsetX = lastAtRightEdge ? screenSize.x / 2 - targetRes.x : screenSize.x - targetRes.x;
+            var offsetX = lastAtRightEdge(settingsMenuPosition) ? screenSize.x / 2 - targetRes.x : screenSize.x - targetRes.x;
             var offsetY = screenSize.y - targetRes.y;
 
             menuRectCurrent.position = menuPosOrigin + new Vector2(offsetX, offsetY);
         }
+        void OnMouseMove(MouseMoveEvent e) => Menu.mousePos = e.mousePosition;
+        void OnGeometryChanged(GeometryChangedEvent e) => screenSize = _root.layout.size;
     }
 }
