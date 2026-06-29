@@ -12,7 +12,7 @@ namespace BlackStartX.GestureManager
         [SerializeField]
         private float inputRange = 1.5f;
         [SerializeField]
-        private float outputRange = 0.01f;
+        private float outputRange = 0.015f;
 
         private Vector2Int previousWindowPos;
         private float3 currentForce;
