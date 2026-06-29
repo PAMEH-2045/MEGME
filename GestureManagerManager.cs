@@ -51,7 +51,7 @@ namespace BlackStartX.GestureManager
             var isBigScreenActive = CurrentModel.AvatarBigScreenHandlerProxy.isBigScreenActive;
             if (bigScreenWasActive != (bigScreenWasActive = isBigScreenActive))
             {
-                var m = (ModuleVrc3)Manager.Module; // some day it will be changed
+                var m = (ModuleVrc3)Manager.Module;
                 isClickableContactsActive(m.AvatarTools.ContactsClickable) = isBigScreenActive;
             }
         }

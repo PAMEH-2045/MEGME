@@ -24,9 +24,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
-using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
-using VRC.Core;
+//using UnityEngine.SceneManagement;
+//using UnityEngine.UIElements;
+//using VRC.Core;
 using VRC.Dynamics;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
@@ -39,7 +39,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
     {
         private static bool CameraRule(Camera camera) => camera.isActiveAndEnabled && camera.targetDisplay == 0;
         internal static Camera MainCamera => Camera.allCameras.FirstOrDefault(CameraRule);
-        private Camera Camera => !_camera ? _camera = MainCamera : _camera;
+        //private Camera Camera => !_camera ? _camera = MainCamera : _camera;
 
         [PublicAPI] public new readonly VRCAvatarDescriptor AvatarDescriptor;
 
@@ -105,7 +105,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal string Edit;
 
         private static readonly GUILayoutOption SizeOptions = GUILayout.Height(RadialMenu.Size);
-        private static readonly GUILayoutOption[] Options = { GUILayout.ExpandWidth(true), SizeOptions };
+        //private static readonly GUILayoutOption[] Options = { GUILayout.ExpandWidth(true), SizeOptions };
 
         private VRCExpressionParameters Parameters => AvatarDescriptor.expressionParameters;
         //internal PipelineManager Pipeline => Avatar.GetComponent<PipelineManager>();
@@ -135,7 +135,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 AvatarTools.OnUpdate(this);
                 if (PoseMode) SavePose(AvatarAnimator);
                 //if (DummyMode != null) DummyMode.Update(Avatar);
-                else if (_layers.Any(IsBroken)) OnBrokenSimulation();
+                //else if (_layers.Any(IsBroken)) OnBrokenSimulation();
                 foreach (var pair in _layers) pair.Value.Weight.Update();
                 //if (_preCullCountdown > 0 && --_preCullCountdown == 0 && !_isCulled) SetAvatarCulled(true);
                 //if (Settings.simulateCulling) CheckCameraCulling(GetParam(Vrc3DefaultParams.IsAnimatorEnabled));
@@ -443,13 +443,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         private void RemoveVise() => SetViseVisual(0);
 
-        private void OnBrokenSimulation()
-        {
-            Broken = true;
-            //foreach (var menu in Radials) menu.ToolBar.Selected = 0;
-            //if (OscModule.Enabled) OscModule.Stop();
-            //CloseDebugWindows();
-        }
+        //private void OnBrokenSimulation()
+        //{
+        //    Broken = true;
+        //    foreach (var menu in Radials) menu.ToolBar.Selected = 0;
+        //    if (OscModule.Enabled) OscModule.Stop();
+        //    CloseDebugWindows();
+        //}
 
         //private void CloseDebugWindows()
         //{
@@ -855,7 +855,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             return param;
         }
 
-        private static bool IsBroken(KeyValuePair<VRCAvatarDescriptor.AnimLayerType, LayerData> pair) => IsBroken(pair.Value);
+        //private static bool IsBroken(KeyValuePair<VRCAvatarDescriptor.AnimLayerType, LayerData> pair) => IsBroken(pair.Value);
 
         private static bool IsBroken(LayerData layerData) => !layerData.Empty && !IsValid(layerData.Playable);
 

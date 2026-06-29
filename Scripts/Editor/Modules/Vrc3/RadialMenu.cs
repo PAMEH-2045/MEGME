@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BlackStartX.GestureManager.Editor.Data;
+//using BlackStartX.GestureManager.Editor.Data;
 //using BlackStartX.GestureManager.Editor.Library;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
@@ -30,7 +30,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private const float Clamp = Size / 3;
         private const float ClampReset = Size / 2f;
 
-        private const string TrackingDocumentationUrl = "https://creators.vrchat.com/avatars/animator-parameters/#trackingtype-parameter";
+        //private const string TrackingDocumentationUrl = "https://creators.vrchat.com/avatars/animator-parameters/#trackingtype-parameter";
 
         public Vector2 mousePos;
         private Vector2 MousePosition()
@@ -64,7 +64,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal RadialSliceBase PressingButton;
         private RadialSliceBase[] _buttons;
 
-        private readonly bool _official;
+        //private readonly bool _official;
 
         public RadialMenu(ModuleVrc3 module, bool official)
         {
