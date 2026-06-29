@@ -9,6 +9,7 @@ namespace BlackStartX.GestureManager
         public static event Action OnAvatarSwitch;
         public static GameObject ModelGO { get; private set; }
         public static Transform ModelRoot { get; private set; }
+        public static Animator Animator { get; private set; }
 
         static readonly float avatarScanInterval = 0.25f;
         static float nextAvatarScan;
@@ -46,6 +47,7 @@ namespace BlackStartX.GestureManager
         }
         static void UpdateAvatarComponents()
         {
+            CurrentModel.Animator = GetComponent<Animator>();
             AvatarBigScreenHandlerProxy.Inst = GetComponent<AvatarBigScreenHandler>();
         }
         public static T GetComponent<T>() where T : Component

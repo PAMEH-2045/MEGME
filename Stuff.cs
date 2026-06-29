@@ -1,5 +1,6 @@
 ﻿using CustomDancePlayer;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -46,6 +47,46 @@ namespace BlackStartX.GestureManager
             if (manager.Module == null) return;
 
             animator(__instance).runtimeAnimatorController = null; // remove ME controller
+        }
+    }
+
+    [HarmonyPatch(typeof(AvatarDanceHandler), "RefreshAnimatorIfChanged")]
+    class Patch_RefreshAnimatorIfChanged
+    {
+
+        static readonly AccessTools.FieldRef<AvatarDanceHandler, Animator> animator = AccessTools.FieldRefAccess<AvatarDanceHandler, Animator>("animator");
+        static readonly AccessTools.FieldRef<AvatarDanceHandler, Animator> lastAnimator = AccessTools.FieldRefAccess<AvatarDanceHandler, Animator>("lastAnimator");
+        static readonly AccessTools.FieldRef<AvatarDanceHandler, RuntimeAnimatorController> defaultController = AccessTools.FieldRefAccess<AvatarDanceHandler, RuntimeAnimatorController>("defaultController");
+        static readonly AccessTools.FieldRef<AvatarDanceHandler, RuntimeAnimatorController> overrideController = AccessTools.FieldRefAccess<AvatarDanceHandler, RuntimeAnimatorController>("overrideController");
+        static readonly AccessTools.FieldRef<AvatarDanceHandler, int> layerIndex = AccessTools.FieldRefAccess<AvatarDanceHandler, int>("layerIndex");
+        static readonly AccessTools.FieldRef<AvatarDanceHandler, int> stateHash = AccessTools.FieldRefAccess<AvatarDanceHandler, int>("stateHash");
+
+        static AvatarDanceHandler danceHandler;
+        static Patch_RefreshAnimatorIfChanged()
+        {
+            CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
+
+            danceHandler = GameObject.FindFirstObjectByType<AvatarDanceHandler>();
+        }
+
+        static void OnAvatarSwitch()
+        {
+            var animatorNew = CurrentModel.Animator;
+
+            if (animator(danceHandler) == null || animator(danceHandler) != animatorNew)
+            {
+                animator(danceHandler) = animatorNew;
+                lastAnimator(danceHandler) = animatorNew;
+                defaultController(danceHandler) = animatorNew != null ? animatorNew.runtimeAnimatorController : null;
+                layerIndex(danceHandler) = animatorNew != null ? animatorNew.GetLayerIndex(danceHandler.danceLayerName) : -1;
+                stateHash(danceHandler) = Animator.StringToHash(danceHandler.danceStateName);
+                if (GameObject.FindFirstObjectByType<GestureManager>().Module == null)
+                    overrideController(danceHandler) = null;
+            }
+        }
+        static bool Prefix()
+        {
+            return false;
         }
     }
 
