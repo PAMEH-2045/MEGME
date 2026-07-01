@@ -47,7 +47,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private const int OutputValue = 0;
 
         internal readonly AvatarTools AvatarTools;
-        //internal readonly AvatarTools AvatarTools;
         //internal readonly OscModule OscModule;
 
         internal RadialSliceControl.RadialSettings HeightSettings;
@@ -59,7 +58,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private Vector3 _baseScale;
         private Vector3 _baseView;
         private float _baseHeight;
-        private Camera _camera;
+        //private Camera _camera;
         private float _scale;
         private bool _hooked;
 
@@ -68,7 +67,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private readonly Dictionary<MonoBehaviour, RadialMenu> _radialMenus = new();
         //private readonly Dictionary<ScriptableObject, RadialMenu> _radialMenus = new();
 
-        private readonly List<VRCAvatarDescriptor.AnimLayerType> _brokenLayers = new();
+        //private readonly List<VRCAvatarDescriptor.AnimLayerType> _brokenLayers = new();
         //private readonly List<Vrc3Warning> _warnings = new();
         private readonly int _playerId;
 
@@ -80,7 +79,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal bool LocomotionDisabled;
         internal bool PoseSpace;
 
-        private readonly Dictionary<(Motion, VRCAvatarDescriptor.AnimLayerType), MotionItem> _motions = new();
+        //private readonly Dictionary<(Motion, VRCAvatarDescriptor.AnimLayerType), MotionItem> _motions = new();
         internal readonly Dictionary<int, VRCAvatarDescriptor.DebugHash> AnimationHashSet = new();
         private readonly Dictionary<VRCAvatarDescriptor.AnimLayerType, LayerData> _layers = new();
         internal readonly HashSet<ContactReceiver> Receivers = new();
@@ -99,19 +98,19 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         //private bool _isCulled;
 
         //internal Vrc3DummyMode DummyMode;
-        internal int DebugToolBar;
-        internal bool PoseMode;
-        internal bool Broken;
-        internal string Edit;
+        //internal int DebugToolBar;
+        //internal bool PoseMode;
+        //internal bool Broken;
+        //internal string Edit;
 
-        private static readonly GUILayoutOption SizeOptions = GUILayout.Height(RadialMenu.Size);
+        //private static readonly GUILayoutOption SizeOptions = GUILayout.Height(RadialMenu.Size);
         //private static readonly GUILayoutOption[] Options = { GUILayout.ExpandWidth(true), SizeOptions };
 
         private VRCExpressionParameters Parameters => AvatarDescriptor.expressionParameters;
         //internal PipelineManager Pipeline => Avatar.GetComponent<PipelineManager>();
         private VRCExpressionsMenu Menu => AvatarDescriptor.expressionsMenu;
         internal IEnumerable<RadialMenu> Radials => _radialMenus.Values;
-        internal float ViseAmount => AvatarDescriptor.lipSync == VRC_AvatarDescriptor.LipSyncStyle.VisemeBlendShape ? 14 : 100;
+        //internal float ViseAmount => AvatarDescriptor.lipSync == VRC_AvatarDescriptor.LipSyncStyle.VisemeBlendShape ? 14 : 100;
         protected override List<HumanBodyBones> PoseBones => Enum.GetValues(typeof(HumanBodyBones)).Cast<HumanBodyBones>().Where(bones => bones != HumanBodyBones.LastBone).ToList();
 
         public ModuleVrc3(VRCAvatarDescriptor avatarDescriptor) : base(avatarDescriptor)
@@ -127,20 +126,19 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         public override void Update()
         {
-            if (Application.isPlaying)
             //if (!EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                if (Broken) return;
-                //OscModule.Update();
+            //{
+            //    if (Broken) return;
+            //    OscModule.Update();
                 AvatarTools.OnUpdate(this);
-                if (PoseMode) SavePose(AvatarAnimator);
-                //if (DummyMode != null) DummyMode.Update(Avatar);
-                //else if (_layers.Any(IsBroken)) OnBrokenSimulation();
+            //    if (PoseMode) SavePose(AvatarAnimator);
+            //    if (DummyMode != null) DummyMode.Update(Avatar);
+            //    else if (_layers.Any(IsBroken)) OnBrokenSimulation();
                 foreach (var pair in _layers) pair.Value.Weight.Update();
-                //if (_preCullCountdown > 0 && --_preCullCountdown == 0 && !_isCulled) SetAvatarCulled(true);
-                //if (Settings.simulateCulling) CheckCameraCulling(GetParam(Vrc3DefaultParams.IsAnimatorEnabled));
-            }
-            else DestroyGraphs();
+            //    if (_preCullCountdown > 0 && --_preCullCountdown == 0 && !_isCulled) SetAvatarCulled(true);
+            //    if (Settings.simulateCulling) CheckCameraCulling(GetParam(Vrc3DefaultParams.IsAnimatorEnabled));
+            //}
+            //else DestroyGraphs();
         }
 
         //private void CheckCameraCulling(Vrc3Param param)
@@ -153,7 +151,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         public override void LateUpdate()
         {
-            if (PoseMode) SetPose(AvatarAnimator);
+            //if (PoseMode) SetPose(AvatarAnimator);
             //if (DummyMode == null && Avatar != null) Avatar.transform.localScale = _baseScale * _scale; // scale setting controlled by GM
             AvatarTools.OnLateUpdate(this);
         }
@@ -188,9 +186,9 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             _layers.Clear();
             _cloths.Clear();
-            _motions.Clear();
+            //_motions.Clear();
             _animators.Clear();
-            _brokenLayers.Clear();
+            //_brokenLayers.Clear();
 
             Receivers.Clear();
 
@@ -205,12 +203,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var isAction = layer.type is VRCAvatarDescriptor.AnimLayerType.Sitting or VRCAvatarDescriptor.AnimLayerType.Action;
                 var isLim = isPose || isAction;
 
-                if (layer.animatorController)
-                    foreach (var clip in layer.animatorController.animationClips)
-                        if (!_motions.ContainsKey((clip, layer.type)))
-                            _motions[(clip, layer.type)] = new MotionItem(clip, layer.type);
+                //if (layer.animatorController)
+                //    foreach (var clip in layer.animatorController.animationClips)
+                //        if (!_motions.ContainsKey((clip, layer.type)))
+                //            _motions[(clip, layer.type)] = new MotionItem(clip, layer.type);
 
-                var controller = layer.isDefault ? RequestBuiltInController(layer.type) : layer.animatorController;
+                var controller = layer.animatorController;
+                //var controller = layer.isDefault ? RequestBuiltInController(layer.type) : layer.animatorController;
                 var mask = layer.isDefault || !layer.mask && isFx ? ModuleVrc3Styles.Data.MaskOf(layer.type) : layer.mask;
 
                 var playable = AnimatorControllerPlayable.Create(_playableGraph, Vrc3ProxyOverride.OverrideController(controller));
@@ -254,21 +253,20 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             GetParam(Vrc3DefaultParams.EyeHeightAsMeters).InternalSet(_baseHeight);
             GetParam(Vrc3DefaultParams.EyeHeightAsPercent).InternalSet((_baseHeight - 0.2f) / 4.8F);
 
-            GetParam(Vrc3DefaultParams.VRMode).InternalSet(Settings.vrMode ? 1f : 0f);
-            GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote ? 0f : 1f);
-            GetParam(Vrc3DefaultParams.IsOnFriendsList).InternalSet(Settings.isOnFriendsList ? 1f : 0f);
+            //GetParam(Vrc3DefaultParams.VRMode).InternalSet(Settings.vrMode ? 1f : 0f);
+            //GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote ? 0f : 1f);
+            //GetParam(Vrc3DefaultParams.IsOnFriendsList).InternalSet(Settings.isOnFriendsList ? 1f : 0f);
 
             _playableGraph.Play();
             _playableGraph.Evaluate(0f);
             //if (_brokenLayers.Count != 0) TryAddWarning(new Vrc3Warning("Animator Controllers", "Some default Animator Controllers have changed!", true, "Restore Controllers", RestoreDefaultControllers));
-            if (_brokenLayers.Count != 0) Debug.LogWarning("[MEGME] Broken Layers");
 
             Left = GetParam(Vrc3DefaultParams.GestureLeft).IntValue();
             Right = GetParam(Vrc3DefaultParams.GestureRight).IntValue();
 
             GetParam(Vrc3DefaultParams.Vise).SetOnChange(OnViseChange);
             GetParam(Vrc3DefaultParams.Seated).SetOnChange(OnSeatedChange);
-            GetParam(Vrc3DefaultParams.IsLocal).SetOnChange(OnIsLocalChange);
+            //GetParam(Vrc3DefaultParams.IsLocal).SetOnChange(OnIsLocalChange);
             GetParam(Vrc3DefaultParams.VelocityX).SetOnChange(OnVelocityChange);
             GetParam(Vrc3DefaultParams.VelocityY).SetOnChange(OnVelocityChange);
             GetParam(Vrc3DefaultParams.VelocityZ).SetOnChange(OnVelocityChange);
@@ -467,15 +465,14 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         }
 
         //private AnimatorController RequestBuiltInController(VRCAvatarDescriptor.AnimLayerType type)
-        private RuntimeAnimatorController RequestBuiltInController(VRCAvatarDescriptor.AnimLayerType type)
-        {
-            var controller = ModuleVrc3Styles.Data.ControllerOf(type);
-            //var restoreAsset = ModuleVrc3Styles.Data.RestoreOf(type);
+        //{
+        //    var controller = ModuleVrc3Styles.Data.ControllerOf(type);
+        //    var restoreAsset = ModuleVrc3Styles.Data.RestoreOf(type);
 
-            //if (!controller || !CheckIntegrity(new FileInfo(NameOf(controller)), new FileInfo(NameOf(restoreAsset)))) _brokenLayers.Add(type);
-            //return !controller ? new AnimatorController() : controller;
-            return controller;
-        }
+        //    if (!controller || !CheckIntegrity(new FileInfo(NameOf(controller)), new FileInfo(NameOf(restoreAsset)))) _brokenLayers.Add(type);
+        //    return !controller ? new AnimatorController() : controller;
+        //    return controller;
+        //}
 
         private void StopVisualElements()
         {
@@ -622,12 +619,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             foreach (var cloth in _cloths) ScaleCloth(cloth);
         }
 
-        public void ResetAvatar()
-        {
-            ResetHeight();
-            AvatarAnimator.Rebind();
-            InitForAvatar();
-        }
+        //public void ResetAvatar()
+        //{
+        //    ResetHeight();
+        //    AvatarAnimator.Rebind();
+        //    InitForAvatar();
+        //}
 
         public void ResetPoses()
         {
@@ -636,12 +633,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 manager.RemovePose(pose);
         }
 
-        public void ResetHeight() => GetParam(Vrc3DefaultParams.EyeHeightAsMeters).Set(this, _baseHeight);
+        //public void ResetHeight() => GetParam(Vrc3DefaultParams.EyeHeightAsMeters).Set(this, _baseHeight);
 
         internal void ForgetAvatar()
         {
             RemoveVise();
-            ResetHeight();
+            //ResetHeight();
             //SetAvatarCulled(false);
             //if (OscModule.Enabled) OscModule.Forget();
             AvatarAnimator.Rebind();
@@ -867,7 +864,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         //private static bool IsBroken(KeyValuePair<VRCAvatarDescriptor.AnimLayerType, LayerData> pair) => IsBroken(pair.Value);
 
-        private static bool IsBroken(LayerData layerData) => !layerData.Empty && !IsValid(layerData.Playable);
+        //private static bool IsBroken(LayerData layerData) => !layerData.Empty && !IsValid(layerData.Playable);
 
         internal static bool IsValid(AnimatorControllerPlayable playable) => playable.IsValid() && !playable.GetInput(0).IsNull();
 

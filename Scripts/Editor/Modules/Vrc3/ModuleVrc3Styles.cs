@@ -2,7 +2,7 @@
 using BlackStartX.GestureManager.Library;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+//using System.Text;
 //using UnityEditor.Animations;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
@@ -152,18 +152,16 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         public static class Data
         {
-            private const string VrcSdk3ControllerPath = "Vrc3/Controllers/";
-            private const string VrcSdk3RestorePath = "Vrc3/Controllers/Restore/";
+            //private const string VrcSdk3ControllerPath = "Vrc3/Controllers/";
+            //private const string VrcSdk3RestorePath = "Vrc3/Controllers/Restore/";
 
             //private static AnimatorController ControllerOfPath(string path) => Resources.Load<AnimatorController>(VrcSdk3ControllerPath + path);
-            private static RuntimeAnimatorController ControllerOfPath(string path) => Resources.Load<RuntimeAnimatorController>(VrcSdk3ControllerPath + path);
 
-            private static TextAsset RestoreOfPath(string path) => Resources.Load<TextAsset>(VrcSdk3RestorePath + path);
+            //private static TextAsset RestoreOfPath(string path) => Resources.Load<TextAsset>(VrcSdk3RestorePath + path);
 
-            internal static TextAsset RestoreOf(AnimLayerType type) => RestoreOfPath(NameOf[type]);
+            //internal static TextAsset RestoreOf(AnimLayerType type) => RestoreOfPath(NameOf[type]);
 
             //internal static AnimatorController ControllerOf(AnimLayerType type) => ControllerOfPath(NameOf[type]);
-            internal static RuntimeAnimatorController ControllerOf(AnimLayerType type) => ControllerOfPath(NameOf[type]);
 
             internal static int LayerSort(VRCAvatarDescriptor.CustomAnimLayer x, VRCAvatarDescriptor.CustomAnimLayer y) => SortValue[x.type] - SortValue[y.type];
 
@@ -176,17 +174,17 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 _ => null
             };
 
-            private static readonly Dictionary<AnimLayerType, string> NameOf = new()
-            {
-                { AnimLayerType.FX, "GmgFxLayer" },
-                { AnimLayerType.Base, "GmgBaseLayer" },
-                { AnimLayerType.TPose, "GmgUtilityTPose" },
-                { AnimLayerType.Action, "GmgActionLayer" },
-                { AnimLayerType.IKPose, "GmgUtilityIKPose" },
-                { AnimLayerType.Gesture, "GmgGestureLayer" },
-                { AnimLayerType.Sitting, "GmgSittingLayer" },
-                { AnimLayerType.Additive, "GmgAdditiveLayer" }
-            };
+            //private static readonly Dictionary<AnimLayerType, string> NameOf = new()
+            //{
+            //    { AnimLayerType.FX, "GmgFxLayer" },
+            //    { AnimLayerType.Base, "GmgBaseLayer" },
+            //    { AnimLayerType.TPose, "GmgUtilityTPose" },
+            //    { AnimLayerType.Action, "GmgActionLayer" },
+            //    { AnimLayerType.IKPose, "GmgUtilityIKPose" },
+            //    { AnimLayerType.Gesture, "GmgGestureLayer" },
+            //    { AnimLayerType.Sitting, "GmgSittingLayer" },
+            //    { AnimLayerType.Additive, "GmgAdditiveLayer" }
+            //};
 
             internal static readonly Dictionary<BlendableAnimatorLayer, AnimLayerType> AnimatorToLayer = new()
             {
