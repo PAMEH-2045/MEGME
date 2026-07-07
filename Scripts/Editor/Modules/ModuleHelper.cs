@@ -1,4 +1,5 @@
-﻿using BlackStartX.GestureManager.Data;
+﻿#if false
+using BlackStartX.GestureManager.Data;
 using GmgAvatarDescriptor =
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
     VRC.SDKBase.VRC_AvatarDescriptor;
@@ -13,7 +14,7 @@ namespace BlackStartX.GestureManager.Editor.Modules
     {
         public static readonly string LocalLowPath =
 #if VRC_SDK_VRCSDK3
-            null; //VRC.SDKBase.Editor.VRC_SdkBuilder.GetLocalLowPath();
+            VRC.SDKBase.Editor.VRC_SdkBuilder.GetLocalLowPath();
 #else
             null;
 #endif
@@ -32,3 +33,4 @@ namespace BlackStartX.GestureManager.Editor.Modules
         };
     }
 }
+#endif

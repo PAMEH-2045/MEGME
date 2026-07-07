@@ -7,18 +7,18 @@ namespace BlackStartX.GestureManager
     public static class CurrentModel
     {
         public static event Action OnAvatarSwitch;
-        public static GameObject ModelGO { get; private set; }
-        public static Transform ModelRoot { get; private set; }
+        public static GameObject gameObject { get; private set; }
+        public static Transform Root { get; private set; }
         public static Animator Animator { get; private set; }
 
         static readonly float avatarScanInterval = 0.25f;
         static float nextAvatarScan;
 
-        public static void OnAwake()
+        public static void OnStart()
         {
             var modelRootGO = GameObject.Find("Model");
             if (modelRootGO != null)
-                ModelRoot = modelRootGO.transform;
+                Root = modelRootGO.transform;
         }
         public static void OnUpdate()
         {
@@ -30,14 +30,14 @@ namespace BlackStartX.GestureManager
         }
         static void UpdateCurrentAvatar()
         {
-            if (!ModelRoot) return;
+            if (!Root) return;
 
-            for (int i = 0; i < ModelRoot.childCount; i++)
+            for (int i = 0; i < Root.childCount; i++)
             {
-                var child = ModelRoot.GetChild(i).gameObject;
+                var child = Root.GetChild(i).gameObject;
                 if (!child.activeInHierarchy) continue;
-                if (ModelGO == child) return;
-                ModelGO = child;
+                if (gameObject == child) return;
+                gameObject = child;
 
                 UpdateAvatarComponents();
                 OnAvatarSwitch?.Invoke();
@@ -51,7 +51,7 @@ namespace BlackStartX.GestureManager
             AvatarBigScreenHandlerProxy.Inst = GetComponent<AvatarBigScreenHandler>();
         }
         public static T GetComponent<T>() where T : Component
-            => ModelGO.GetComponent<T>();
+            => gameObject.GetComponent<T>();
 
 
         public static class AvatarBigScreenHandlerProxy
@@ -61,7 +61,7 @@ namespace BlackStartX.GestureManager
             static readonly AccessTools.FieldRef<AvatarBigScreenHandler, bool> _isBigScreenActive = AccessTools.FieldRefAccess<AvatarBigScreenHandler, bool>("isBigScreenActive");
             public static bool isBigScreenActive
             {
-                get => _isBigScreenActive(Inst);
+                get => _isBigScreenActive != null ? _isBigScreenActive(Inst) : false;
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BlackStartX.GestureManager.Data;
+using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Library;
 using BlackStartX.GestureManager.Modules;
 using JetBrains.Annotations;
@@ -17,7 +18,8 @@ namespace BlackStartX.GestureManager
         private TransformData _managerTransform;
         private bool _drag;
 
-        public ModuleBase Module;
+        public ModuleVrc3 Module;
+        //public ModuleBase Module;
         public ModuleSettings settings;
 
         //private void OnEnable() => GmgEditorCallbacks.Undo.UndoRedoPerformed += HandleUndoRedo;
@@ -71,7 +73,8 @@ namespace BlackStartX.GestureManager
             Module = null;
         }
 
-        public void SetModule([NotNull] ModuleBase module)
+        public void SetModule([NotNull] ModuleVrc3 module)
+        //public void SetModule([NotNull] ModuleBase module)
         {
             if (!module.IsValidDesc()) return;
 

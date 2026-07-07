@@ -1,5 +1,4 @@
-﻿using BlackStartX.GestureManager.Editor.Modules;
-using BlackStartX.GestureManager.Editor.Modules.Vrc3;
+﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
 using HarmonyLib;
 using UnityEngine;
@@ -29,17 +28,13 @@ namespace BlackStartX.GestureManager
         int selectorClothesIndex;
         GameObject selectorClothesButtonOrigin;
 
-
-        void Awake()
-        {
-            CurrentModel.OnAwake();
-        }
         void OnEnable()
         {
             CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
         }
         void Start()
         {
+            CurrentModel.OnStart();
             CacheClothesItems();
         }
         void Update()
@@ -51,8 +46,7 @@ namespace BlackStartX.GestureManager
             var isBigScreenActive = CurrentModel.AvatarBigScreenHandlerProxy.isBigScreenActive;
             if (bigScreenWasActive != (bigScreenWasActive = isBigScreenActive))
             {
-                var m = (ModuleVrc3)Manager.Module;
-                isClickableContactsActive(m.AvatarTools.ContactsClickable) = isBigScreenActive;
+                isClickableContactsActive(Manager.Module.AvatarTools.ContactsClickable) = isBigScreenActive;
             }
         }
         void OnDisable()
@@ -91,13 +85,15 @@ namespace BlackStartX.GestureManager
         }
         private void OnAvatarSwitch()
         {
-            var module = ModuleHelper.GetModuleFor(CurrentModel.ModelGO);
-            if (module == null)
+            var descriptor = CurrentModel.GetComponent<VRCAvatarDescriptor>();
+            if (descriptor == null)
             {
                 Manager.UnlinkModule();
                 if (isButtonСonfigured) RestoreOriginalClothesButton();
                 return;
             }
+
+            var module = new ModuleVrc3(descriptor);
 
             if (bindMEController)
                 BindMEControllerToDescriptor();
