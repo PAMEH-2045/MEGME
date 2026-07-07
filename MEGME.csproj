@@ -45,58 +45,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Gm\BSX_GM_PlusSign.png" />
-    <EmbeddedResource Include="Resources\Gm\BSX_GM_PlusSign[Pro].png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_2_Axis.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_4_Axis.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_AFK.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Avatar_Height.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Axis_Down.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Axis_Left.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Axis_Right.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Axis_Up.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Back.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_BackHome.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Default.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Earmuffs.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Emojis.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Expressions.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Extras.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_FallingSpeed.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_FourPoint.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_FullBody.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Gear.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Generic.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_GestureLeftWeight.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_GestureRightWeight.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Grounded.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_HandsOnly.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_HeadHands.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_IsLocal.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_IsOnFriendsList.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_MuteSelf.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Option.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Pose_IK.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Pose_T.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Radial.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Release_Poses.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Reset.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Reset_Height.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Running_Param.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Seated.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Support_Gold.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Support_Heart.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Support_Like.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Toggle.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Tools.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Tool_Camera.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Tool_Click.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Tool_Pose.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Uninitialized.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Upright.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Velocity.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_Visemes.png" />
-    <EmbeddedResource Include="Resources\Vrc3\BSX_GM_VRMode.png" />
+    <EmbeddedResource Include="Resources\Resources.assetbundle" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />
