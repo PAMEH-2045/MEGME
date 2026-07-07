@@ -43,11 +43,8 @@ namespace BlackStartX.GestureManager
                 return;
 
             Manager.SetDrag(!Event.current.alt);
-            var _module = (ModuleVrc3)Manager.Module;
 
             if (settingsMenuPosition != null) CalculateMenuPosition();
-
-            Menu = _module.GetOrCreateRadial(this);
 
             Menu.Rect = menuRectCurrent;
             Menu.Render(_root, menuRectCurrent);
@@ -58,6 +55,13 @@ namespace BlackStartX.GestureManager
             _root.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
 
             Menu.ClosePuppet();
+        }
+        internal void OnAvatarSwitch()
+        {
+            if (Manager.Module == null) 
+                return;
+
+            Menu = Manager.Module.GetOrCreateRadial(this);
         }
         void CalculateMenuPosition()
         {

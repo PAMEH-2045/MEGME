@@ -31,6 +31,7 @@ namespace BlackStartX.GestureManager
         void OnEnable()
         {
             CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
+            CurrentModel.OnAvatarSwitch += radialMenuController.OnAvatarSwitch;
         }
         void Start()
         {
@@ -52,6 +53,7 @@ namespace BlackStartX.GestureManager
         void OnDisable()
         {
             CurrentModel.OnAvatarSwitch -= OnAvatarSwitch;
+            CurrentModel.OnAvatarSwitch -= radialMenuController.OnAvatarSwitch;
         }
         void CacheClothesItems()
         {
