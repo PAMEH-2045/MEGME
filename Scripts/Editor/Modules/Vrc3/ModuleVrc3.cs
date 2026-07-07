@@ -3,7 +3,7 @@ using BlackStartX.GestureManager.Data;
 using BlackStartX.GestureManager.Editor.Data;
 //using BlackStartX.GestureManager.Editor.Library;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.AvatarDynamics;
-using BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache;
+//using BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.DummyModes;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.OpenSoundControl;
 //using BlackStartX.GestureManager.Editor.Modules.Vrc3.OpenSoundControl.VisualElements;
@@ -199,9 +199,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var isBase = layer.type == VRCAvatarDescriptor.AnimLayerType.Base;
                 var isFx = layer.type == VRCAvatarDescriptor.AnimLayerType.FX;
                 var isAdd = layer.type == VRCAvatarDescriptor.AnimLayerType.Additive;
+                var isGesture = layer.type == VRCAvatarDescriptor.AnimLayerType.Gesture;
                 var isPose = layer.type is VRCAvatarDescriptor.AnimLayerType.IKPose or VRCAvatarDescriptor.AnimLayerType.TPose;
                 var isAction = layer.type is VRCAvatarDescriptor.AnimLayerType.Sitting or VRCAvatarDescriptor.AnimLayerType.Action;
                 var isLim = isPose || isAction;
+
+                if (isAdd || isGesture || isAction || isPose) continue; //
 
                 //if (layer.animatorController)
                 //    foreach (var clip in layer.animatorController.animationClips)
@@ -254,7 +257,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             GetParam(Vrc3DefaultParams.EyeHeightAsPercent).InternalSet((_baseHeight - 0.2f) / 4.8F);
 
             //GetParam(Vrc3DefaultParams.VRMode).InternalSet(Settings.vrMode ? 1f : 0f);
-            //GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote ? 0f : 1f);
+            GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote ? 0f : 1f);
             //GetParam(Vrc3DefaultParams.IsOnFriendsList).InternalSet(Settings.isOnFriendsList ? 1f : 0f);
 
             _playableGraph.Play();
@@ -266,7 +269,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             GetParam(Vrc3DefaultParams.Vise).SetOnChange(OnViseChange);
             GetParam(Vrc3DefaultParams.Seated).SetOnChange(OnSeatedChange);
-            //GetParam(Vrc3DefaultParams.IsLocal).SetOnChange(OnIsLocalChange);
+            GetParam(Vrc3DefaultParams.IsLocal).SetOnChange(OnIsLocalChange);
             GetParam(Vrc3DefaultParams.VelocityX).SetOnChange(OnVelocityChange);
             GetParam(Vrc3DefaultParams.VelocityY).SetOnChange(OnVelocityChange);
             GetParam(Vrc3DefaultParams.VelocityZ).SetOnChange(OnVelocityChange);
@@ -837,22 +840,22 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             }
             catch
             {
-                File.Copy(ExpressionsCacheHandler.expressionsCacheFilepath,
-                    Path.Combine(ExpressionsCacheHandler.BaseDir, "megme_expressions_cache.backup.json"), true);
+                File.WriteAllText(JsonConvert.SerializeObject(ExpressionsCacheHandler.Cache, Formatting.Indented),
+                    Path.Combine(Application.persistentDataPath, "megme_expressions_cache.backup.json"));
                 throw;
             }
         }
         //private Vrc3Warning InitStored()
         //{
-        //if (string.IsNullOrEmpty(Pipeline.blueprintId)) return null;
-        //var localString = GestureManagerSettings.UserPath(Settings.userIndex);
-        //if (localString == null) return null;
-        //var fileString = Path.Combine(localString, Pipeline.blueprintId);
-        //if (!File.Exists(fileString)) return Vrc3Warning.InitLoadUnexisting;
-        //var file = AvatarFile.LoadData(File.ReadAllText(fileString));
-        //if (file == null) return Vrc3Warning.InitLoadJsonError;
-        //foreach (var parameters in file.animationParameters) GetParam(parameters.name)?.InternalSet(parameters.value);
-        //return null;
+        //    if (string.IsNullOrEmpty(Pipeline.blueprintId)) return null;
+        //    var localString = GestureManagerSettings.UserPath(Settings.userIndex);
+        //    if (localString == null) return null;
+        //    var fileString = Path.Combine(localString, Pipeline.blueprintId);
+        //    if (!File.Exists(fileString)) return Vrc3Warning.InitLoadUnexisting;
+        //    var file = AvatarFile.LoadData(File.ReadAllText(fileString));
+        //    if (file == null) return Vrc3Warning.InitLoadJsonError;
+        //    foreach (var parameters in file.animationParameters) GetParam(parameters.name)?.InternalSet(parameters.value);
+        //    return null;
         //}
 
         public Vrc3Param GetParam(string paramName)
