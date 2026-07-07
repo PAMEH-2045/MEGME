@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Cache
+namespace BlackStartX.GestureManager
 {
     public class ExpressionsCacheHandler : MonoBehaviour
     {
