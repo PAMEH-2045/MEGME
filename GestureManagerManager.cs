@@ -1,6 +1,7 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
 using HarmonyLib;
+using System.Collections.Generic;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 using Xamin;
@@ -28,6 +29,8 @@ namespace BlackStartX.GestureManager
         int selectorClothesIndex;
         GameObject selectorClothesButtonOrigin;
 
+        public static Queue<(string, List<ModSettings>)> registerRequests = new();
+
         void OnEnable()
         {
             CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
@@ -41,6 +44,12 @@ namespace BlackStartX.GestureManager
         void Update()
         {
             CurrentModel.OnUpdate();
+
+            while (registerRequests.Count > 0)
+            {
+                var record = registerRequests.Dequeue();
+                radialMenuController.RegisterSettingsMenu(record.Item1, record.Item2);
+            }
 
             if (Manager == null || Manager.Module == null) return;
 
@@ -149,5 +158,7 @@ namespace BlackStartX.GestureManager
                     break;
                 }
         }
+
+        public static void RegisterSettingsMenu(string name, List<ModSettings> settings) => registerRequests.Enqueue((name, settings));
     }
 }

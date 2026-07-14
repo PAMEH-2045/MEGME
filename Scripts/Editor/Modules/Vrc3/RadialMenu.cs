@@ -1,13 +1,13 @@
 ﻿#if VRC_SDK_VRCSDK3
-using System;
-using System.Collections.Generic;
-using System.Linq;
 //using BlackStartX.GestureManager.Editor.Data;
 //using BlackStartX.GestureManager.Editor.Library;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
-using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialPuppets.Base;
+using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
 using BlackStartX.GestureManager.Library;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VRC.SDK3.Avatars.ScriptableObjects;
@@ -263,6 +263,30 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             //else QuickActionsMenuPrefab();
         }
 
+        public static Dictionary<string, List<ModSettings>> modSettings = new();
+        private void SettingsMenu()
+        {
+            var btns = new List<RadialSliceButton>();
+
+            foreach (var (name, settings) in modSettings)
+            {
+                void OnClick()
+                {
+                    var controls = new List<RadialSliceBase>();
+
+                    foreach (var s in settings)
+                    {
+                        s.UpdateParamValue();
+                        controls.Add(new RadialSliceControl(this, s.name, s.icon, s.controlType, s.offValue, s.onValue, s.bind?.param,
+                            s.subBinds?.Select(b => b.param).ToArray(), subMenu: null, s.subLabels, amplify: null, s.radialSettings));
+                    }
+                    OpenCustom(controls);
+                };
+                btns.Add(new RadialSliceButton(OnClick, name));
+            }
+            OpenCustom(btns);
+        }
+
         /*
          * Menu
          */
@@ -284,7 +308,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             SetButtons(intCount, intMax, intCurrent => intCurrent switch
             {
                 //0 => new RadialSliceButton(GoBack, "Back", isMain ? ModuleVrc3Styles.BackHome : ModuleVrc3Styles.Back),
-                0 => !isMain ? new RadialSliceButton(GoBack, "Back", ModuleVrc3Styles.Back) : new RadialSliceControl(this, menu.controls[intCurrent - defaultButtonsInt]),
+                0 => !isMain ? new RadialSliceButton(GoBack, "Back", ModuleVrc3Styles.Back) : new RadialSliceButton(SettingsMenu, "Settings", ModuleVrc3Styles.Gear),
                 //1 when isMain => new RadialSliceButton(QuickActionsMenuPrefab, "Quick Actions", ModuleVrc3Styles.Gear),
                 _ => new RadialSliceControl(this, menu.controls[intCurrent - defaultButtonsInt])
             });
@@ -294,11 +318,11 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
          * Custom Menu
          */
 
-        //private void OpenCustom(IReadOnlyList<RadialSliceBase> controls)
-        //{
-        //    _menuPath.Add(new RadialPage(this, controls));
-        //    SetCustom(controls);
-        //}
+        private void OpenCustom(IReadOnlyList<RadialSliceBase> controls)
+        {
+            _menuPath.Add(new RadialPage(this, controls));
+            SetCustom(controls);
+        }
 
         internal void SetCustom(IReadOnlyList<RadialSliceBase> controls)
         {

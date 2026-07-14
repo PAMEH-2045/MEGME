@@ -302,6 +302,28 @@ namespace BlackStartX.GestureManager
          * https://github.com/shinyflvre/Mate-Engine/issues/526
          */
 
+        static FixSpringBoneJittering()
+        {
+            Func<object> InstLookup = () => CurrentModel.AvatarGravityControllerProxy.Inst ?? GameObject.FindFirstObjectByType<AvatarGravityController>();
+            GestureManagerManager.RegisterSettingsMenu(
+                "MEGME",
+                [
+                    ModSettings.Radial(
+                        name: "SpringBone inertia power",
+                        radialField: new ModSettings.FieldRef(
+                                InstLookup,
+                                AccessTools.Field(typeof(AvatarGravityController), "impactMultiplier")
+                            ),
+                        min: 0f,
+                        max: 10f,
+                        checkpoint: 1.5f,
+                        displayType: ModSettings.DisplayType.Percentage
+                    )
+                ]
+            );
+
+            Debug.Log($"GMM {GestureManagerManager.registerRequests.Count}");
+        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(AvatarGravityController), "Start")]

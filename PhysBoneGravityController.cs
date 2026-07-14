@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
@@ -23,6 +24,20 @@ namespace BlackStartX.GestureManager
         {
             previousWindowPos = GetWindowPosition();
             unityHWND = Process.GetCurrentProcess().MainWindowHandle;
+
+            GestureManagerManager.RegisterSettingsMenu(
+                "MEGME",
+                [
+                    ModSettings.Radial(
+                        name: "PhysBone inertia power",
+                        radialField: new ModSettings.FieldRef(this, AccessTools.Field(this.GetType(), nameof(outputRange))),
+                        min: 0f,
+                        max : 0.1f,
+                        checkpoint: 0.015f,
+                        displayType: ModSettings.DisplayType.Percentage
+                    )
+                ]
+            );
         }
 
         void Update()

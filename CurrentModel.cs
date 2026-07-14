@@ -49,6 +49,7 @@ namespace BlackStartX.GestureManager
         {
             CurrentModel.Animator = GetComponent<Animator>();
             AvatarBigScreenHandlerProxy.Inst = GetComponent<AvatarBigScreenHandler>();
+            AvatarGravityControllerProxy.Inst = GetComponent<AvatarGravityController>();
         }
         public static T GetComponent<T>() where T : Component
             => gameObject.GetComponent<T>();
@@ -63,6 +64,10 @@ namespace BlackStartX.GestureManager
             {
                 get => _isBigScreenActive != null ? _isBigScreenActive(Inst) : false;
             }
+        }
+        public static class AvatarGravityControllerProxy
+        {
+            public static AvatarGravityController Inst;
         }
     }
 }

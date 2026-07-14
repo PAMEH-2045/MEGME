@@ -1,7 +1,14 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
+using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices.RadialSliceControl;
+using static BlackStartX.GestureManager.ModSettings;
+using static VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu;
 
 namespace BlackStartX.GestureManager
 {
@@ -72,5 +79,127 @@ namespace BlackStartX.GestureManager
         }
         void OnMouseMove(MouseMoveEvent e) => Menu.mousePos = e.mousePosition;
         void OnGeometryChanged(GeometryChangedEvent e) => screenSize = _root.layout.size;
+
+        public void RegisterSettingsMenu(string name, List<ModSettings> settings)
+        {
+            if (RadialMenu.modSettings.TryGetValue(name, out var s))
+            {
+                s.AddRange(settings);
+                Debug.Log($"Expanded existing settings menu '{name}'");
+            }
+            else
+            {
+                RadialMenu.modSettings.Add(name, settings);
+                Debug.Log($"Registered new settings menu '{name}', with total of {RadialMenu.modSettings.Count}");
+            }
+        }
+    }
+    public class ModSettings(string name, ParamBinding bind, Control.ControlType controlType, Texture2D icon = null,
+            float offValue = 0, float onValue = 1, RadialSettings radialSettings = null,
+            ParamBinding[] subBinds = null, Control.Label[] subLabels = null)
+    {
+        public string name = name;
+        public Texture2D icon = icon;
+        public float onValue = onValue;
+        public ParamBinding bind = bind;
+        public float offValue = offValue;
+        public ParamBinding[] subBinds = subBinds;
+        public Control.Label[] subLabels = subLabels;
+        public Control.ControlType controlType = controlType;
+        public RadialSettings radialSettings = radialSettings;
+
+        public static ModSettings Toggle(string name, FieldRef toggleField, Texture2D icon = null)
+        {
+            return new ModSettings(name, new ParamBinding(toggleField, ParamFromFieldRef(toggleField)), Control.ControlType.Toggle, icon);
+        }
+        public static ModSettings Radial(string name, FieldRef radialField, float min = 0, float max = 1, float? checkpoint = null, DisplayType displayType = DisplayType.Percentage, Texture2D icon = null)
+        {
+            return new ModSettings(name, null, Control.ControlType.RadialPuppet, icon, 0f, 1f, new RadialSettings((RadialSettings.DisplayType)displayType, min, max, checkpoint), [ new ParamBinding(radialField, ParamFromFieldRef(radialField)) ]);
+        }
+
+        public enum DisplayType
+        {
+            Percentage = RadialSettings.DisplayType.Percentage,
+            Meters = RadialSettings.DisplayType.Meters,
+            Absolute = RadialSettings.DisplayType.Absolute
+        }
+
+        static Vrc3Param ParamFromFieldRef(FieldRef fieldRef)
+        {
+            var field = fieldRef.field;
+            var inst = fieldRef.inst;
+
+            void OnChange(Vrc3Param param, float value) // todo saving to disk
+            {
+                fieldRef.Value = value;
+            }
+
+            var param = new Vrc3Param($"{field.DeclaringType.FullName}.{field.Name}", AnimatorControllerParameterType.Float, OnChange);
+
+            return param;
+        }
+        public void UpdateParamValue()
+        {
+            var value = GetFieldValue();
+            SetParamValue(value);
+        }
+        public float GetFieldValue()
+        {
+            var target = controlType switch
+            {
+                Control.ControlType.Toggle => bind,
+                Control.ControlType.RadialPuppet => subBinds[0],
+                _ => throw new NotImplementedException()
+            };
+            return target.fieldRef.Value;
+        }
+        public void SetParamValue(float value)
+        {
+            var target = controlType switch
+            {
+                Control.ControlType.Toggle => bind,
+                Control.ControlType.RadialPuppet => subBinds[0],
+                _ => throw new NotImplementedException()
+            };
+            target.param.InternalSet(value);
+        }
+
+        public class ParamBinding(FieldRef FieldRef, Vrc3Param param)
+        {
+            public FieldRef fieldRef = FieldRef;
+            public Vrc3Param param = param;
+        }
+        public class FieldRef(object inst, FieldInfo field)
+        {
+            public object inst = inst;
+            public FieldInfo field = field;
+
+            Func<object> GetTarget = inst switch
+            {
+                Func<object> getInst => getInst,
+                not null => () => inst,
+                null => field.IsStatic ? () => null : throw new TargetException()
+            };
+            Func<float, object> Convert = field.FieldType switch
+            {
+                Type t when t == typeof(float) => v => v,
+                Type t when t == typeof(int) => v => (int)v,
+                Type t when t == typeof(bool) => v => v != 0f,
+                _ => throw new NotSupportedException()
+            };
+            Func<object, float> ToFloat = field.FieldType switch
+            {
+                Type t when t == typeof(float) => v => (float)v,
+                Type t when t == typeof(int) => v => (float)v,
+                Type t when t == typeof(bool) => v => (bool)v ? 1f : 0f,
+                _ => throw new NotSupportedException()
+            };
+
+            public float Value
+            {
+                get => ToFloat(field.GetValue(GetTarget()));
+                set => field.SetValue(GetTarget(), Convert(value));
+            }
+        }
     }
 }
