@@ -4,11 +4,14 @@ using SFB;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UniVRM10;
 using VRC.Dynamics;
-using System.Runtime.CompilerServices;
+using VRM;
 
 namespace BlackStartX.GestureManager
 {
@@ -30,19 +33,30 @@ namespace BlackStartX.GestureManager
                 {
                     processor = harmony.CreateClassProcessor(type);
                     processor.Patch();
-                    
+
                     RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+
+                    Debug.Log($"[MEGME] Patch {type} applied");
                 }
                 catch (Exception e)
                 {
-                    var declaringType = type.GetCustomAttribute<HarmonyAttribute>().info.declaringType;
-                    var methodName = type.GetCustomAttribute<HarmonyAttribute>().info.methodName;
+                    var attr = HarmonyMethodExtensions.GetMergedFromType(type);
+
+                    var declaringType = attr.declaringType;
+                    var methodName = attr.methodName;
 
                     if (type.GetCustomAttribute<OptionalPatchAttribute>() != null)
                     {
                         Debug.LogError($"[MEGME] Optional harmony patch {type.FullName} failed for {declaringType}.{methodName}\n {e}");
 
-                        processor?.Unpatch();
+                        if (attr.category is string category)
+                        {
+                            harmony.UnpatchCategory(category);
+                        }
+                        else
+                        {
+                            processor?.Unpatch();
+                        }
                     }
                     else
                     {
@@ -59,10 +73,15 @@ namespace BlackStartX.GestureManager
         }
     }
 
-    [HarmonyPatch(typeof(AvatarDanceHandler), "EnsureAnimatorReady")]
-    class Patch_EnsureAnimatorReady
+    [HarmonyPatch]
+    class FixGraphConflict
     {
-        static void Postfix(bool __result, ref Animator ___animator)
+        /**
+         * Without removing, runtimeAnimatorController's graph would fight with GM's graph for animtor, resulting in unpredictable behavior
+         */
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarDanceHandler), "EnsureAnimatorReady")]
+        static void RemoveControllerIfGMActive(bool __result, Animator ___animator)
         {
             if (!__result) return;
 
@@ -74,10 +93,12 @@ namespace BlackStartX.GestureManager
         }
     }
 
-    [OptionalPatch]
-    [HarmonyPatch(typeof(AvatarDanceHandler), "RefreshAnimatorIfChanged")]
-    class Patch_RefreshAnimatorIfChanged
+    [HarmonyPatch, OptionalPatch]
+    class FixRedundantFindAvatarSmartExecution
     {
+        /**
+         * Since animator.runtimeAnimatorController is always null the condition is always true, so unity-heavy FindAvatarSmart() is called every frame, reducing preformance
+         */
         static readonly AccessTools.FieldRef<AvatarDanceHandler, Animator> animator = AccessTools.FieldRefAccess<AvatarDanceHandler, Animator>("animator");
         static readonly AccessTools.FieldRef<AvatarDanceHandler, Animator> lastAnimator = AccessTools.FieldRefAccess<AvatarDanceHandler, Animator>("lastAnimator");
         static readonly AccessTools.FieldRef<AvatarDanceHandler, RuntimeAnimatorController> defaultController = AccessTools.FieldRefAccess<AvatarDanceHandler, RuntimeAnimatorController>("defaultController");
@@ -86,14 +107,14 @@ namespace BlackStartX.GestureManager
         static readonly AccessTools.FieldRef<AvatarDanceHandler, int> stateHash = AccessTools.FieldRefAccess<AvatarDanceHandler, int>("stateHash");
 
         static AvatarDanceHandler danceHandler;
-        static Patch_RefreshAnimatorIfChanged()
+        static FixRedundantFindAvatarSmartExecution() => SceneManager.sceneLoaded += (scene, mode) =>
         {
             CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
 
             danceHandler = GameObject.FindFirstObjectByType<AvatarDanceHandler>();
-        }
+        };
 
-        static void OnAvatarSwitch()
+        static void OnAvatarSwitch() // null reference if vrc model loaded first on app startup
         {
             var animatorNew = CurrentModel.Animator;
 
@@ -108,21 +129,26 @@ namespace BlackStartX.GestureManager
                     overrideController(danceHandler) = null;
             }
         }
-        static bool Prefix()
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarDanceHandler), "RefreshAnimatorIfChanged")]
+        static bool BlockMethodExecution()
         {
             return false;
         }
     }
 
-    [OptionalPatch]
-    [HarmonyPatch(typeof(AvatarBigScreenToggleHandler), "Update")]
-    class Patch_Update
+    [HarmonyPatch, OptionalPatch]
+    class FixNullReferenceOnMissingScript
     {
         /**
          * https://github.com/shinyflvre/Mate-Engine/issues/535
          */
         static readonly AccessTools.FieldRef<AvatarBigScreenHandler, bool> isBigScreenActiveField = AccessTools.FieldRefAccess<AvatarBigScreenHandler, bool>("isBigScreenActive");
-        static bool Prefix(AvatarBigScreenToggleHandler __instance, ref AvatarBigScreenHandler ___bigScreenHandler, ref Dictionary<Behaviour, bool> ___wasEnabledBefore)
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarBigScreenToggleHandler), "Update")]
+        static bool ReplaceWithNullCheck(AvatarBigScreenToggleHandler __instance, AvatarBigScreenHandler ___bigScreenHandler, Dictionary<Behaviour, bool> ___wasEnabledBefore)
         {
             if (!___bigScreenHandler) return false;
 
@@ -159,13 +185,17 @@ namespace BlackStartX.GestureManager
         }
     }
 
-    [OptionalPatch]
-    [HarmonyPatch(typeof(PhysBoneManager.PhysBoneJob), "SolveChain")]
-    class Patch_SolveChain
+    [HarmonyPatch, OptionalPatch]
+    class PhysBoneExternalForce
     {
+        /**
+         * Force control for GravityController™ implementation for PhysBones
+         */
         public static float3 currentForce;
 
-        static void Prefix(ref PhysBoneManager.PhysBoneJob __instance, ref PhysBoneManager.Chain chain)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PhysBoneManager.PhysBoneJob), "SolveChain")]
+        static void AddBoneVelocityControl(ref PhysBoneManager.PhysBoneJob __instance, ref PhysBoneManager.Chain chain)
         {
             NativeArray<PhysBoneManager.Bone> bones = __instance.bones;
 
@@ -182,14 +212,15 @@ namespace BlackStartX.GestureManager
         }
     }
 
-    [OptionalPatch]
-    [HarmonyPatch(typeof(VRMLoader), "LoadVRM")]
-    class Patch_LoadVRM
+    [HarmonyPatch, OptionalPatch]
+    class VRCASupport
     {
         static readonly Action<VRMLoader, string> LoadAssetBundleModel = AccessTools.MethodDelegate<Action<VRMLoader, string>>(
             AccessTools.Method(typeof(VRMLoader), "LoadAssetBundleModel"));
 
-        static bool Prefix(VRMLoader __instance, string path)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(VRMLoader), "LoadVRM")]
+        static bool AddVRCALoad(VRMLoader __instance, string path)
         {
             if (path.EndsWith(".vrca", StringComparison.OrdinalIgnoreCase))
             {
@@ -205,16 +236,13 @@ namespace BlackStartX.GestureManager
 
             return true;
         }
-    }
 
-    [OptionalPatch]
-    [HarmonyPatch(typeof(VRMLoader), "OpenFileDialogAndLoadVRM")]
-    class Patch_OpenFileDialogAndLoadVRM
-    {
         static readonly Action<VRMLoader, string> LoadVRM = AccessTools.MethodDelegate<Action<VRMLoader, string>>(
             AccessTools.Method(typeof(VRMLoader), "LoadVRM"));
 
-        static bool Prefix(VRMLoader __instance, ref bool ___isLoading)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(VRMLoader), "OpenFileDialogAndLoadVRM")]
+        static bool ShowVRCAInExplorer(VRMLoader __instance, ref bool ___isLoading)
         {
             if (___isLoading) return false;
 
@@ -225,6 +253,108 @@ namespace BlackStartX.GestureManager
                 LoadVRM(__instance, paths[0]);
 
             ___isLoading = false;
+
+            return false;
+        }
+
+    }
+
+    [HarmonyPatch, OptionalPatch]
+    class FixVRM1Eyetracking
+    {
+        /**
+         * https://github.com/shinyflvre/Mate-Engine/issues/536
+         */
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarMouseTracking), "DoEye")]
+        static bool ReplaceWithVRM1Eyetracking(Vrm10Instance ___vrm10, Camera ___mainCam, Animator ___animator,
+            Transform ___leftEyeBone, Transform ___rightEyeBone, Transform ___eyeCenter, Transform ___leftEyeDriver, Transform ___rightEyeDriver, 
+             float ___eyeYawLimit, float ___eyePitchLimit, float ___eyeSmoothness)
+        {
+            var mouse = Input.mousePosition;
+            var world = ___mainCam.ScreenToWorldPoint(new Vector3(mouse.x, mouse.y, ___mainCam.nearClipPlane));
+            if (!___leftEyeBone || !___rightEyeBone || !___eyeCenter) return false;
+            ___eyeCenter.position = (___leftEyeBone.position + ___rightEyeBone.position) * 0.5f;
+            var dir = (world - ___eyeCenter.position).normalized;
+            var localDir = ___animator.GetBoneTransform(HumanBodyBones.Head).InverseTransformDirection(dir);
+            float eyeYaw = Mathf.Clamp(Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg, -___eyeYawLimit, ___eyeYawLimit);
+            float eyePitch = Mathf.Clamp(Mathf.Asin(localDir.y) * Mathf.Rad2Deg, -___eyePitchLimit, ___eyePitchLimit);
+            if (___vrm10)
+            {
+                var smoothYaw = Mathf.Lerp(___vrm10.Runtime.LookAt.Yaw, eyeYaw, Time.deltaTime * ___eyeSmoothness);
+                var smoothPitch = Mathf.Lerp(___vrm10.Runtime.LookAt.Pitch, eyePitch, Time.deltaTime * ___eyeSmoothness);
+
+                ___vrm10.Runtime.LookAt.SetYawPitchManually(smoothYaw, smoothPitch);
+                return false;
+            }
+            var eyeRot = Quaternion.Euler(-eyePitch, eyeYaw, 0f);
+            ___leftEyeDriver.localRotation = Quaternion.Slerp(___leftEyeDriver.localRotation, eyeRot, Time.deltaTime * ___eyeSmoothness);
+            ___rightEyeDriver.localRotation = Quaternion.Slerp(___rightEyeDriver.localRotation, eyeRot, Time.deltaTime * ___eyeSmoothness);
+
+            return false;
+        }
+    }
+    
+    [HarmonyPatch, OptionalPatch]
+    class FixSpringBoneJittering
+    {
+        /**
+         * https://github.com/shinyflvre/Mate-Engine/issues/526
+         */
+
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarGravityController), "Start")]
+        static void OverrideDefaultValue(ref float ___impactMultiplier)
+        {
+            ___impactMultiplier = 1.5f;
+        }
+
+        static readonly Func<AvatarGravityController, Vector2Int> GetWindowPosition = AccessTools.MethodDelegate<Func<AvatarGravityController, Vector2Int>>(
+            AccessTools.Method(typeof(AvatarGravityController), "GetWindowPosition"));
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarGravityController), "Update")]
+        static bool ReplaceWithNoForceNormalization(AvatarGravityController __instance, ref Vector2Int ___previousWindowPos, ref Vector3 ___currentForce, float ___impactMultiplier,
+            List<VRMSpringBone> ___springBones, List<VRM10SpringBoneJoint> ___springBoneJoints, Vrm10Instance ___vrm10Instance)
+        {
+            Vector2Int currentWindowPos = GetWindowPosition(__instance);
+            Vector2Int delta = currentWindowPos - ___previousWindowPos;
+            ___previousWindowPos = currentWindowPos;
+
+            if (delta != Vector2Int.zero)
+            {
+                ___currentForce = new Vector3(
+                    -delta.x / Screen.dpi,
+                    delta.y / Screen.dpi,
+                    0
+                ) * ___impactMultiplier;
+            }
+            else
+            {
+                ___currentForce = Vector3.zero;
+            }
+
+            // VRM0: set external force
+            foreach (var spring in ___springBones)
+            {
+                if (spring != null)
+                    spring.ExternalForce = ___currentForce;
+            }
+
+            // VRM1: apply gravity dir/power and notify runtime
+            foreach (var joint in ___springBoneJoints)
+            {
+                if (joint == null) continue;
+
+                joint.m_gravityDir = ___currentForce.normalized;
+                joint.m_gravityPower = ___currentForce.magnitude;
+
+                if (___vrm10Instance != null && ___vrm10Instance.Runtime != null)
+                {
+                    ___vrm10Instance.Runtime.SpringBone.SetJointLevel(joint.transform, joint.Blittable);
+                }
+            }
 
             return false;
         }

@@ -44,7 +44,7 @@ namespace BlackStartX.GestureManager
                 currentForce = float3.zero;
             }
 
-            Patch_SolveChain.currentForce = currentForce;
+            PhysBoneExternalForce.currentForce = currentForce;
         }
 
         float Map(float value)
