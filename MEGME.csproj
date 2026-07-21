@@ -45,7 +45,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Resources.assetbundle" />
+    <EmbeddedResource Include="Resources\MEGME_Resources.assetbundle" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="**\*.cs" />

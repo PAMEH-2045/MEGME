@@ -9,7 +9,7 @@ namespace BlackStartX.GestureManager
     {
         private static readonly Assembly assembly = Assembly.GetExecutingAssembly();
         private static readonly string[] resNames = assembly.GetManifestResourceNames();
-        private static AssetBundle resBundle = AssetBundle.LoadFromMemory(LoadBuffer("Resources.assetbundle"));
+        private static AssetBundle resBundle = AssetBundle.LoadFromMemory(LoadBuffer("MEGME_Resources.assetbundle"));
 
         private static byte[] LoadBuffer(string resourceName)
         {
