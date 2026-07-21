@@ -1,38 +1,32 @@
 ﻿using HarmonyLib;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static BlackStartX.GestureManager.ExpressionsCacheHandler;
 
 namespace BlackStartX.GestureManager
 {
-    public class ExpressionsCacheHandler : MonoBehaviour
+    public class ExpressionsCacheHandler : CacheHandler<ExpressionsCache>
     {
-        public static ExpressionsCache Cache;
         public static SaveLoadHandler saveLoadHandler;
 
-        public static string BaseDir;
-        public static string expressionsCacheFilepath;
-
-        public static bool isDirty;
+        protected override string FilePath => Path.Combine(BaseDir, "megme_expressions_cache.json");
+        static string BaseDir;
 
         static AccessTools.FieldRef<AvatarLibraryMenu, List<AvatarLibraryMenu.AvatarEntry>> avatarEntries = AccessTools.FieldRefAccess<AvatarLibraryMenu, List<AvatarLibraryMenu.AvatarEntry>>("avatarEntries");
 
-        void Start()
+        protected override void Start()
         {
             saveLoadHandler = GameObject.FindFirstObjectByType<SaveLoadHandler>();
             BaseDir = (string)typeof(SaveLoadHandler).GetProperty("BaseDir", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(saveLoadHandler);
-            expressionsCacheFilepath = Path.Combine(BaseDir, "megme_expressions_cache.json");
 
-            Cache = LoadCache();
+            Init();
 
             RemoveDeleted();
-
-            StartCoroutine(AutoSave());
         }
         void RemoveDeleted()
         {
@@ -52,23 +46,12 @@ namespace BlackStartX.GestureManager
                 SaveToDisk();
             }
         }
-        public static void SaveToDisk()
+
+        protected override ExpressionsCache LoadCache()
         {
             try
             {
-                string json = JsonConvert.SerializeObject(Cache, Formatting.Indented);
-                File.WriteAllText(expressionsCacheFilepath, json);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("[MEGME] Failed to save Expressions cache: " + e);
-            }
-        }
-        public static ExpressionsCache LoadCache()
-        {
-            try
-            {
-                var json = File.ReadAllText(expressionsCacheFilepath);
+                var json = File.ReadAllText(FilePath);
                 var data = JsonConvert.DeserializeObject<ExpressionsCache>(json);
                 return data ?? new ExpressionsCache();
             }
@@ -76,27 +59,15 @@ namespace BlackStartX.GestureManager
             {
                 try
                 {
-                    var json = File.ReadAllText(expressionsCacheFilepath);
+                    var json = File.ReadAllText(FilePath);
                     var data = JsonConvert.DeserializeObject<ExpressionsCache_Old>(json);
-                    Debug.Log("[MEGME] Migrating cache");
+                    Debug.Log($"[MEGME] Migrating {typeof(ExpressionsCache).Name}");
                     return new ExpressionsCache(data.avatarsParams);
-                } catch { }
-
-                Debug.LogError("[MEGME] Failed to load Expressions cache: " + e);
-                return new ExpressionsCache();
-            }
-        }
-        IEnumerator AutoSave()
-        {
-            while (true)
-            {
-                if (isDirty)
-                {
-                    SaveToDisk();
-                    isDirty = false;
                 }
+                catch { }
 
-                yield return new WaitForSeconds(10);
+                Debug.LogError($"[MEGME] Failed to load {typeof(ExpressionsCache).Name}: {e}");
+                return new ExpressionsCache();
             }
         }
 

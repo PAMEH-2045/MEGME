@@ -1,10 +1,15 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UniVRM10;
 using VRC.SDK3.Avatars.Components;
+using VRM;
 using Xamin;
+using static VRC.SDKBase.VRC_AvatarDescriptor;
 
 namespace BlackStartX.GestureManager
 {
@@ -20,7 +25,7 @@ namespace BlackStartX.GestureManager
         bool bigScreenWasActive;
 
         AccessTools.FieldRef<AvatarTools.ClickableContacts, bool> isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
-        
+
         bool isButtonСonfigured;
         MenuActions menuActions;
         int actionsClothesIndex;
@@ -29,7 +34,7 @@ namespace BlackStartX.GestureManager
         int selectorClothesIndex;
         GameObject selectorClothesButtonOrigin;
 
-        public static Queue<(string, List<ModSettings>)> registerRequests = new();
+        public static Queue<(string name, List<ModSettings> settings)> settingRegisterRequests = new();
 
         void OnEnable()
         {
@@ -45,10 +50,10 @@ namespace BlackStartX.GestureManager
         {
             CurrentModel.OnUpdate();
 
-            while (registerRequests.Count > 0)
+            while (settingRegisterRequests.Count > 0)
             {
-                var record = registerRequests.Dequeue();
-                radialMenuController.RegisterSettingsMenu(record.Item1, record.Item2);
+                var record = settingRegisterRequests.Dequeue();
+                radialMenuController.RegisterSettingsMenu(record.name, record.settings);
             }
 
             if (Manager == null || Manager.Module == null) return;
@@ -68,7 +73,7 @@ namespace BlackStartX.GestureManager
         {
             var circleMenu = GameObject.Find("CircleMenu");
 
-            if (circleMenu == null)  return;
+            if (circleMenu == null) return;
 
             menuActions = circleMenu.GetComponentInChildren<MenuActions>();
             circleSelector = circleMenu.GetComponentInChildren<CircleSelector>();
@@ -145,7 +150,7 @@ namespace BlackStartX.GestureManager
         private void BindMEControllerToDescriptor()
         {
             var animator = CurrentModel.GetComponent<Animator>();
-            var controller = animator.runtimeAnimatorController;    
+            var controller = animator.runtimeAnimatorController;
 
             var descriptor = CurrentModel.GetComponent<VRCAvatarDescriptor>();
             var baseLayers = descriptor.baseAnimationLayers;
@@ -160,5 +165,6 @@ namespace BlackStartX.GestureManager
         }
 
         public static void RegisterSettingsMenu(string name, List<ModSettings> settings) => registerRequests.Enqueue((name, settings));
+        public static void RegisterSettingsMenu(string name, List<ModSettings> settings) => settingRegisterRequests.Enqueue((name, settings));
     }
 }
