@@ -5,12 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UniVRM10;
-using VRC.Dynamics;
 using VRM;
 
 namespace BlackStartX.GestureManager
@@ -36,7 +33,7 @@ namespace BlackStartX.GestureManager
 
                     RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 
-                    Debug.Log($"[MEGME] Patch {type} applied");
+                    Debug.Log($"[MEGME] Patch {type.Name} applied");
                 }
                 catch (Exception e)
                 {
@@ -186,33 +183,6 @@ namespace BlackStartX.GestureManager
     }
 
     [HarmonyPatch, OptionalPatch]
-    class PhysBoneExternalForce
-    {
-        /**
-         * Force control for GravityController™ implementation for PhysBones
-         */
-        public static float3 currentForce;
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PhysBoneManager.PhysBoneJob), "SolveChain")]
-        static void AddBoneVelocityControl(ref PhysBoneManager.PhysBoneJob __instance, ref PhysBoneManager.Chain chain)
-        {
-            NativeArray<PhysBoneManager.Bone> bones = __instance.bones;
-
-            for (int i = 0; i < chain.boneCount; i++)
-            {
-                int index = chain.boneOffset + i;
-                var bone = bones[index];
-                if (bone.isSimulated)
-                {
-                    bone.prevVelocity += currentForce;
-                    bones[index] = bone;
-                }
-            }
-        }
-    }
-
-    [HarmonyPatch, OptionalPatch]
     class VRCASupport
     {
         static readonly Action<VRMLoader, string> LoadAssetBundleModel = AccessTools.MethodDelegate<Action<VRMLoader, string>>(
@@ -268,7 +238,7 @@ namespace BlackStartX.GestureManager
         [HarmonyPrefix]
         [HarmonyPatch(typeof(AvatarMouseTracking), "DoEye")]
         static bool ReplaceWithVRM1Eyetracking(Vrm10Instance ___vrm10, Camera ___mainCam, Animator ___animator,
-            Transform ___leftEyeBone, Transform ___rightEyeBone, Transform ___eyeCenter, Transform ___leftEyeDriver, Transform ___rightEyeDriver, 
+            Transform ___leftEyeBone, Transform ___rightEyeBone, Transform ___eyeCenter, Transform ___leftEyeDriver, Transform ___rightEyeDriver,
              float ___eyeYawLimit, float ___eyePitchLimit, float ___eyeSmoothness)
         {
             var mouse = Input.mousePosition;
@@ -294,7 +264,7 @@ namespace BlackStartX.GestureManager
             return false;
         }
     }
-    
+
     [HarmonyPatch, OptionalPatch]
     class FixSpringBoneJittering
     {
@@ -304,7 +274,7 @@ namespace BlackStartX.GestureManager
 
         static FixSpringBoneJittering()
         {
-            Func<object> InstLookup = () => CurrentModel.AvatarGravityControllerProxy.Inst ?? GameObject.FindFirstObjectByType<AvatarGravityController>();
+            Func<object> InstLookup = () => CurrentModel.AvatarGravityControllerProxy.Inst;
             GestureManagerManager.RegisterSettingsMenu(
                 "MEGME",
                 [
@@ -321,8 +291,6 @@ namespace BlackStartX.GestureManager
                     )
                 ]
             );
-
-            Debug.Log($"GMM {GestureManagerManager.registerRequests.Count}");
         }
 
         [HarmonyPrefix]
