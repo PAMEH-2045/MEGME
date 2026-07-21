@@ -140,7 +140,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices
 
             public readonly float? Checkpoint;
 
-            private RadialSettings(DisplayType type, float min, float max, float? checkpoint)
+            public RadialSettings(DisplayType type, float min, float max, float? checkpoint)
+            //private RadialSettings(DisplayType type, float min, float max, float? checkpoint)
             {
                 _type = type;
                 Checkpoint = checkpoint;
@@ -151,13 +152,18 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices
             {
                 DisplayType.Meters => $"{value:F}m",
                 DisplayType.Percentage => $"{RangeFrom(value).Percentage}%",
+                DisplayType.Absolute => $"{value}",
+                DisplayType.Degree => $"{value:F0}°",
                 _ => null
             };
 
-            private enum DisplayType
+            public enum DisplayType
+            //private enum DisplayType
             {
                 Meters,
-                Percentage
+                Percentage,
+                Absolute,
+                Degree
             }
 
             public Range RangeFrom(float value) => new((value - _min) / _gap);

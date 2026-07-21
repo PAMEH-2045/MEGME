@@ -821,29 +821,20 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             parameters[param.Name] = value;
 
-            ExpressionsCacheHandler.isDirty = true;
+            ExpressionsCacheHandler.MarkDirty();
         }
 
         void InitStored()
         {
-            try // to catch that odd bug
+            var currentAvatarPath = ExpressionsCacheHandler.saveLoadHandler.data.selectedModelPath;
+            if (!ExpressionsCacheHandler.Cache.TryGetValue(currentAvatarPath, out var parameters))
             {
-                var currentAvatarPath = ExpressionsCacheHandler.saveLoadHandler.data.selectedModelPath;
-                if (!ExpressionsCacheHandler.Cache.TryGetValue(currentAvatarPath, out var parameters))
-                {
-                    Debug.Log("[MEGME] Avatar not found in the cache");
-                    return;
-                }
+                Debug.Log("[MEGME] Avatar not found in the cache");
+                return;
+            }
 
-                foreach (var pair in parameters)
-                    GetParam(pair.Key)?.InternalSet(pair.Value);
-            }
-            catch
-            {
-                File.WriteAllText(JsonConvert.SerializeObject(ExpressionsCacheHandler.Cache, Formatting.Indented),
-                    Path.Combine(Application.persistentDataPath, "megme_expressions_cache.backup.json"));
-                throw;
-            }
+            foreach (var pair in parameters)
+                GetParam(pair.Key)?.InternalSet(pair.Value);
         }
         //private Vrc3Warning InitStored()
         //{

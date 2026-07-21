@@ -132,7 +132,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _puppet.OnClose();
             _puppet = null;
 
-            _cursor.Update(Event.current.mousePosition, _buttons, Puppet);
+            _cursor.Update(Event.current?.mousePosition ?? Vector2.zero, _buttons, Puppet);
+            //_cursor.Update(Event.current.mousePosition, _buttons, Puppet);
         }
 
         /*
@@ -263,27 +264,44 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             //else QuickActionsMenuPrefab();
         }
 
-        public static Dictionary<string, List<ModSettings>> modSettings = new();
         private void SettingsMenu()
         {
             var btns = new List<RadialSliceButton>();
 
-            foreach (var (name, settings) in modSettings)
+            List<RadialSliceBase> CreateMenu(List<ModSettings> settings)
+            {
+                var controls = new List<RadialSliceBase>();
+
+                foreach (var s in settings)
+                {
+                    if (s.controlType == VRCExpressionsMenu.Control.ControlType.SubMenu)
+                    {
+                        void OnClick()
+                        {
+                            OpenCustom(CreateMenu(s.subSettings));
+                        }
+                        controls.Add(new RadialSliceButton(OnClick, s.name, s.icon));
+                        continue;
+                    }
+
+                    s.UpdateParamValue();
+
+                    controls.Add(new RadialSliceControl(this, s.name, s.icon, s.controlType, s.offValue, s.onValue, s.bind?.Param,
+                        s.subBinds?.Select(b => b.Param).ToArray(), subMenu: null, s.subLabels, amplify: null, s.radialSettings));
+                }
+
+                return controls;
+            }
+
+            foreach (var (name, settings) in RadialMenuController.ModSettings)
             {
                 void OnClick()
                 {
-                    var controls = new List<RadialSliceBase>();
-
-                    foreach (var s in settings)
-                    {
-                        s.UpdateParamValue();
-                        controls.Add(new RadialSliceControl(this, s.name, s.icon, s.controlType, s.offValue, s.onValue, s.bind?.param,
-                            s.subBinds?.Select(b => b.param).ToArray(), subMenu: null, s.subLabels, amplify: null, s.radialSettings));
-                    }
-                    OpenCustom(controls);
-                };
-                btns.Add(new RadialSliceButton(OnClick, name));
+                    OpenCustom(CreateMenu(settings));
+                }
+                btns.Add(new RadialSliceButton(OnClick, name, EResources.Load<Texture2D>("Void")));
             }
+
             OpenCustom(btns);
         }
 
@@ -301,7 +319,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         {
             var isMain = menu == _menu;
             //var defaultButtonsInt = isMain ? 2 : 1;
-            var defaultButtonsInt = isMain ? 0 : 1;
+            var defaultButtonsInt = 1;
             var intCount = menu.controls.Count + defaultButtonsInt;
             var intMax = defaultButtonsInt + 8;
 

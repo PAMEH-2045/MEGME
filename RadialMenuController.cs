@@ -27,6 +27,8 @@ namespace BlackStartX.GestureManager
         Rect menuRectCurrent = new(1017, 493, 300, 300);
         Vector2 targetRes = new(1536, 1024);
 
+        public static Dictionary<string, List<ModSettings>> ModSettings = new();
+
         void Awake()
         {
             doc = GetComponent<UIDocument>();
@@ -65,7 +67,7 @@ namespace BlackStartX.GestureManager
         }
         internal void OnAvatarSwitch()
         {
-            if (Manager.Module == null) 
+            if (Manager.Module == null)
                 return;
 
             Menu = Manager.Module.GetOrCreateRadial(this);
@@ -82,61 +84,66 @@ namespace BlackStartX.GestureManager
 
         public void RegisterSettingsMenu(string name, List<ModSettings> settings)
         {
-            if (RadialMenu.modSettings.TryGetValue(name, out var s))
+            foreach (var set in settings)
             {
-                s.AddRange(settings);
-                Debug.Log($"Expanded existing settings menu '{name}'");
+                set.GetBind().Init();
+            }
+
+            if (ModSettings.TryGetValue(name, out var sets))
+            {
+                sets.AddRange(settings);
+                Debug.Log($"[MEGME] Expanded existing settings menu '{name}'");
             }
             else
             {
-                RadialMenu.modSettings.Add(name, settings);
-                Debug.Log($"Registered new settings menu '{name}', with total of {RadialMenu.modSettings.Count}");
+                ModSettings.Add(name, settings);
+                Debug.Log($"[MEGME] Registered new settings menu '{name}', with total of {ModSettings.Count}");
             }
         }
     }
     public class ModSettings(string name, ParamBinding bind, Control.ControlType controlType, Texture2D icon = null,
             float offValue = 0, float onValue = 1, RadialSettings radialSettings = null,
-            ParamBinding[] subBinds = null, Control.Label[] subLabels = null)
+            ParamBinding[] subBinds = null, List<ModSettings> subSettings = null, Control.Label[] subLabels = null)
     {
         public string name = name;
-        public Texture2D icon = icon;
+        public Texture2D icon = icon ?? EResources.Load<Texture2D>("Void");
         public float onValue = onValue;
         public ParamBinding bind = bind;
         public float offValue = offValue;
         public ParamBinding[] subBinds = subBinds;
+        public List<ModSettings> subSettings = subSettings;
         public Control.Label[] subLabels = subLabels;
         public Control.ControlType controlType = controlType;
         public RadialSettings radialSettings = radialSettings;
 
         public static ModSettings Toggle(string name, FieldRef toggleField, Texture2D icon = null)
         {
-            return new ModSettings(name, new ParamBinding(toggleField, ParamFromFieldRef(toggleField)), Control.ControlType.Toggle, icon);
+            return new ModSettings(name, new ParamBinding(toggleField), Control.ControlType.Toggle, icon);
         }
         public static ModSettings Radial(string name, FieldRef radialField, float min = 0, float max = 1, float? checkpoint = null, DisplayType displayType = DisplayType.Percentage, Texture2D icon = null)
         {
-            return new ModSettings(name, null, Control.ControlType.RadialPuppet, icon, 0f, 1f, new RadialSettings((RadialSettings.DisplayType)displayType, min, max, checkpoint), [ new ParamBinding(radialField, ParamFromFieldRef(radialField)) ]);
+            return new ModSettings(name, null, Control.ControlType.RadialPuppet, icon, radialSettings: new RadialSettings((RadialSettings.DisplayType)displayType, min, max, checkpoint), subBinds: [new ParamBinding(radialField)]);
+        }
+        public static ModSettings SubMenu(string name, List<ModSettings> subSettings, Texture2D icon = null)
+        {
+            return new ModSettings(name, null, Control.ControlType.SubMenu, icon, subSettings: subSettings);
         }
 
         public enum DisplayType
         {
             Percentage = RadialSettings.DisplayType.Percentage,
             Meters = RadialSettings.DisplayType.Meters,
-            Absolute = RadialSettings.DisplayType.Absolute
+            Absolute = RadialSettings.DisplayType.Absolute,
+            Degree = RadialSettings.DisplayType.Degree
         }
-
-        static Vrc3Param ParamFromFieldRef(FieldRef fieldRef)
+        public ParamBinding GetBind()
         {
-            var field = fieldRef.field;
-            var inst = fieldRef.inst;
-
-            void OnChange(Vrc3Param param, float value) // todo saving to disk
+            return controlType switch
             {
-                fieldRef.Value = value;
-            }
-
-            var param = new Vrc3Param($"{field.DeclaringType.FullName}.{field.Name}", AnimatorControllerParameterType.Float, OnChange);
-
-            return param;
+                Control.ControlType.Toggle => bind,
+                Control.ControlType.RadialPuppet => subBinds[0],
+                _ => throw new NotImplementedException()
+            };
         }
         public void UpdateParamValue()
         {
@@ -145,29 +152,47 @@ namespace BlackStartX.GestureManager
         }
         public float GetFieldValue()
         {
-            var target = controlType switch
-            {
-                Control.ControlType.Toggle => bind,
-                Control.ControlType.RadialPuppet => subBinds[0],
-                _ => throw new NotImplementedException()
-            };
-            return target.fieldRef.Value;
+            var target = GetBind();
+            return target.FieldRef.Value;
         }
         public void SetParamValue(float value)
         {
-            var target = controlType switch
-            {
-                Control.ControlType.Toggle => bind,
-                Control.ControlType.RadialPuppet => subBinds[0],
-                _ => throw new NotImplementedException()
-            };
-            target.param.InternalSet(value);
+            var target = GetBind();
+            target.Param.InternalSet(value);
         }
 
-        public class ParamBinding(FieldRef FieldRef, Vrc3Param param)
+        public class ParamBinding(FieldRef FieldRef)
         {
-            public FieldRef fieldRef = FieldRef;
-            public Vrc3Param param = param;
+            public FieldRef FieldRef = FieldRef;
+            public Vrc3Param Param;
+
+            public void Init()
+            {
+                Param = ParamFromFieldRef(FieldRef);
+
+                if (SettingsCacheHandler.Cache.TryGetValue(Param.Name, out var value))
+                {
+                    FieldRef.Value = value;
+                }
+            }
+
+            Vrc3Param ParamFromFieldRef(FieldRef fieldRef)
+            {
+                var field = fieldRef.field;
+                var inst = fieldRef.inst;
+
+                void OnChange(Vrc3Param param, float value)
+                {
+                    fieldRef.Value = value;
+
+                    SettingsCacheHandler.Cache[param.Name] = value;
+                    SettingsCacheHandler.MarkDirty();
+                }
+
+                var param = new Vrc3Param($"{field.DeclaringType.FullName}.{field.Name}", AnimatorControllerParameterType.Float, OnChange);
+
+                return param;
+            }
         }
         public class FieldRef(object inst, FieldInfo field)
         {
