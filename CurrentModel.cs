@@ -1,6 +1,7 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using UnityEngine;
-using HarmonyLib;
+using VRM;
 
 namespace BlackStartX.GestureManager
 {
@@ -9,6 +10,7 @@ namespace BlackStartX.GestureManager
         public static event Action OnAvatarSwitch;
         public static GameObject gameObject { get; private set; }
         public static Transform Root { get; private set; }
+    public static Transform transform => gameObject.transform;
         public static Animator Animator { get; private set; }
 
         static readonly float avatarScanInterval = 0.25f;
@@ -50,9 +52,12 @@ namespace BlackStartX.GestureManager
             CurrentModel.Animator = GetComponent<Animator>();
             AvatarBigScreenHandlerProxy.Inst = GetComponent<AvatarBigScreenHandler>();
             AvatarGravityControllerProxy.Inst = GetComponent<AvatarGravityController>();
+            UniversalBlendshapesProxy.Inst = GetComponent<UniversalBlendshapes>();
         }
         public static T GetComponent<T>() where T : Component
             => gameObject.GetComponent<T>();
+        public static T AddComponent<T>() where T : Component
+            => gameObject.AddComponent<T>();
 
 
         public static class AvatarBigScreenHandlerProxy
@@ -68,6 +73,17 @@ namespace BlackStartX.GestureManager
         public static class AvatarGravityControllerProxy
         {
             public static AvatarGravityController Inst;
+        }
+        public static class UniversalBlendshapesProxy
+        {
+            public static UniversalBlendshapes Inst;
+
+            static readonly AccessTools.FieldRef<UniversalBlendshapes, VRMBlendShapeProxy> _proxy0 = AccessTools.FieldRefAccess<UniversalBlendshapes, VRMBlendShapeProxy>("proxy0");
+            public static VRMBlendShapeProxy proxy0
+            {
+                set => _proxy0(Inst) = value;
+                get => _proxy0(Inst);
+            }
         }
     }
 }
