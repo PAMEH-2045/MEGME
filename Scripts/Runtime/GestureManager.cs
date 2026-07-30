@@ -15,8 +15,8 @@ namespace BlackStartX.GestureManager
         public static List<ModuleBase> LastCheckedActiveModules = new();
         public static bool InWebClientRequest;
 
-        private TransformData _managerTransform;
-        private bool _drag;
+        //private TransformData _managerTransform;
+        //private bool _drag;
 
         public ModuleVrc3 Module;
         //public ModuleBase Module;
@@ -53,18 +53,18 @@ namespace BlackStartX.GestureManager
 
         private void ModuleUpdate()
         {
-            if (_drag) _managerTransform.Difference(transform).AddTo(Module.Avatar.transform);
-            _managerTransform = new TransformData(transform);
+            //if (_drag) _managerTransform.Difference(transform).AddTo(Module.Avatar.transform);
+            //_managerTransform = new TransformData(transform);
             Module.Update();
         }
 
         private void LateUpdate()
         {
-            _managerTransform = new TransformData(transform);
+            //_managerTransform = new TransformData(transform);
             Module?.LateUpdate();
         }
 
-        public void SetDrag(bool drag) => _drag = drag;
+        //public void SetDrag(bool drag) => _drag = drag;
 
         public void UnlinkModule()
         {
@@ -80,10 +80,10 @@ namespace BlackStartX.GestureManager
 
             Module?.Disconnect();
             Module = module;
-            Module.Avatar.transform.ApplyTo(transform);
+            //Module.Avatar.transform.ApplyTo(transform);
 
             Module.Connect(settings);
-            _managerTransform = new TransformData(transform);
+            //_managerTransform = new TransformData(transform);
         }
     }
 }
