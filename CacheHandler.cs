@@ -13,7 +13,7 @@ namespace BlackStartX.GestureManager
         protected abstract string FilePath { get; }
         public static T Cache;
 
-        static bool isDirty;
+        private static bool isDirty;
 
         protected virtual void Start()
         {
@@ -24,6 +24,7 @@ namespace BlackStartX.GestureManager
             Cache = LoadCache();
             StartCoroutine(AutoSave());
         }
+        private void OnApplicationQuit() => SaveToDisk();
         protected void SaveToDisk()
         {
             try
@@ -60,7 +61,7 @@ namespace BlackStartX.GestureManager
                     isDirty = false;
                 }
 
-                yield return new WaitForSeconds(10);
+                yield return new WaitForSeconds(30);
             }
         }
         public static void MarkDirty() => isDirty = true;
