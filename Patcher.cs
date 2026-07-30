@@ -2,6 +2,7 @@
 using HarmonyLib;
 using SFB;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -323,6 +324,121 @@ namespace BlackStartX.GestureManager
                 {
                     ___vrm10Instance.Runtime.SpringBone.SetJointLevel(joint.transform, joint.Blittable);
                 }
+            }
+
+            return false;
+        }
+    }
+
+    [HarmonyPatch, OptionalPatch]
+    class FixSaveLoadHandlerStattering
+    {
+        static bool isDirty;
+        static SaveLoadHandler saveLoadHandler;
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveLoadHandler), "Awake")]
+        static void Init(SaveLoadHandler __instance)
+        {
+            __instance.StartCoroutine(AutoSave());
+            saveLoadHandler = __instance;
+        }
+
+        static IEnumerator AutoSave()
+        {
+            while (true)
+            {
+                if (isDirty)
+                {
+                    ActualSaveToDisk(saveLoadHandler);
+                    isDirty = false;
+                }
+
+                yield return new WaitForSeconds(5);
+            }
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(SaveLoadHandler), nameof(SaveLoadHandler.SaveToDisk))]
+        static void ActualSaveToDisk(SaveLoadHandler instance) => 
+            throw new NotImplementedException();
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveLoadHandler), nameof(SaveLoadHandler.SaveToDisk))]
+        static bool ReplaceWithMarkDirtyInsteadOfSaving()
+        {
+            isDirty = true;
+            return false;
+        }
+
+        static Transform _root;
+        static Transform Root => _root ??= GameObject.Find("Model").transform;
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveLoadHandler), nameof(SaveLoadHandler.ApplyAllSettingsToAllAvatars))]
+        static bool ReplaceWithoutFindObjectsOfTypeAll()
+        {
+            var data = SaveLoadHandler.Instance.data;
+            var avatars = Root.GetComponentsInChildren<AvatarAnimatorController>(true);
+            //var avatars = Resources.FindObjectsOfTypeAll<AvatarAnimatorController>();
+
+            foreach (var avatar in avatars)
+            {
+                avatar.SOUND_THRESHOLD = data.soundThreshold;
+                avatar.IDLE_SWITCH_TIME = data.idleSwitchTime;
+                avatar.IDLE_TRANSITION_TIME = data.idleTransitionTime;
+                avatar.enableDancing = data.enableDancing;
+                avatar.allowedApps = new List<string>(data.allowedApps);
+                avatar.transform.localScale = Vector3.one * data.avatarSize;
+                avatar.DANCE_SWITCH_TIME = data.danceSwitchTime;
+                avatar.DANCE_TRANSITION_TIME = data.danceTransitionTime;
+                avatar.enableDanceSwitch = data.enableDanceSwitch;
+                avatar.enableHusbandoMode = data.enableHusbandoMode;
+
+                foreach (var tracker in avatar.GetComponentsInChildren<AvatarMouseTracking>(true))
+                {
+                    tracker.enableMouseTracking = data.enableMouseTracking;
+                    tracker.headBlend = data.headBlend;
+                    tracker.spineBlend = data.spineBlend;
+                    tracker.eyeBlend = data.eyeBlend;
+                }
+
+                foreach (var ik in avatar.GetComponentsInChildren<IKFix>(true))
+                    ik.enableIK = data.enableIK;
+
+                foreach (var handler in avatar.GetComponentsInChildren<AvatarParticleHandler>(true))
+                {
+                    handler.featureEnabled = data.enableParticles;
+                    handler.enabled = data.enableParticles;
+                    handler.selectedTheme = data.selectedParticleTheme;
+                    try { handler.SetTheme(data.selectedParticleTheme); } catch { }
+                }
+
+                foreach (var holder in avatar.GetComponentsInChildren<HandHolder>(true))
+                    holder.enableHandHolding = data.enableHandHolding;
+
+                if (avatar.animator != null &&
+                    avatar.animator.isActiveAndEnabled &&
+                    avatar.animator.runtimeAnimatorController != null)
+                {
+                    avatar.animator.SetBool("isDancing", false);
+                    avatar.animator.SetBool("isDragging", false);
+                    avatar.isDancing = false;
+                    avatar.isDragging = false;
+                }
+
+                foreach (var food in Root.GetComponentsInChildren<AvatarFoodController>(true))
+                //foreach (var food in Resources.FindObjectsOfTypeAll<AvatarFoodController>())
+                    food.SetFeatureEnabled(SaveLoadHandler.Instance.data.enableFeedSystem);
+
+                foreach (var handler in Root.GetComponentsInChildren<AvatarWindowHandler>(true))
+                //foreach (var handler in Resources.FindObjectsOfTypeAll<AvatarWindowHandler>())
+                    handler.windowSitYOffset = data.windowSitYOffset;
+
+                foreach (var loco in Root.GetComponentsInChildren<AvatarLocomotionController>(true))
+                //foreach (var loco in Resources.FindObjectsOfTypeAll<AvatarLocomotionController>())
+                    loco.EnableLocomotion = data.enableLocomotion;
+
             }
 
             return false;
