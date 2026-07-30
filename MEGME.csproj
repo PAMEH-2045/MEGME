@@ -126,30 +126,6 @@
       <HintPath>Dependences\unity_editor_6000.2.6f2\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="VRCSDK3A">
-      <HintPath>Dependences\com.vrchat.avatars-3.10.2\VRCSDK3A.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRC.SDK3.Dynamics.Constraint">
-      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.Constraint.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRC.SDK3.Dynamics.Contact">
-      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.Contact.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRC.SDK3.Dynamics.PhysBone">
-      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.SDK3.Dynamics.PhysBone.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRCSDKBase">
-      <HintPath>Dependences\com.vrchat.base-3.10.2\VRCSDKBase.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="VRC.Dynamics">
-      <HintPath>Dependences\com.vrchat.base-3.10.2\VRC.Dynamics.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Core">
       <HintPath>Dependences\unity_editor_6000.2.6f2\System.Core.dll</HintPath>
       <Private>False</Private>
@@ -181,6 +157,24 @@
     <Reference Include="System.Reflection">
       <HintPath>Dependences\unity_editor_6000.2.6f2\System.Reflection.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="VRC.Dynamics">
+      <HintPath>Dependences\com.vrchat.base-3.10.4\VRC.Dynamics.dll</HintPath>
+    </Reference>
+    <Reference Include="VRC.SDK3.Dynamics.Constraint">
+      <HintPath>Dependences\com.vrchat.base-3.10.4\VRC.SDK3.Dynamics.Constraint.dll</HintPath>
+    </Reference>
+    <Reference Include="VRC.SDK3.Dynamics.Contact">
+      <HintPath>Dependences\com.vrchat.base-3.10.4\VRC.SDK3.Dynamics.Contact.dll</HintPath>
+    </Reference>
+    <Reference Include="VRC.SDK3.Dynamics.PhysBone">
+      <HintPath>Dependences\com.vrchat.base-3.10.4\VRC.SDK3.Dynamics.PhysBone.dll</HintPath>
+    </Reference>
+    <Reference Include="VRCSDK3A">
+      <HintPath>Dependences\com.vrchat.avatars-3.10.4\VRCSDK3A.dll</HintPath>
+    </Reference>
+    <Reference Include="VRCSDKBase">
+      <HintPath>Dependences\com.vrchat.base-3.10.4\VRCSDKBase.dll</HintPath>
     </Reference>
     <Reference Include="VRM">
       <HintPath>Dependences\Public.Release.X3.3.0.HOTFIX-1\VRM.dll</HintPath>
