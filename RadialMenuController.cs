@@ -1,11 +1,16 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using HarmonyLib;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VRC.SDK3.Avatars.Components;
 using static BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices.RadialSliceControl;
 using static BlackStartX.GestureManager.ModSettings;
 using static VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu;
@@ -18,92 +23,287 @@ namespace BlackStartX.GestureManager
 
         VisualElement _root;
         UIDocument doc;
-        RadialMenu Menu;
+        RadialMenu ExpressionsMenu;
         SettingsMenuPosition settingsMenuPosition;
         AccessTools.FieldRef<SettingsMenuPosition, bool> lastAtRightEdge = AccessTools.FieldRefAccess<SettingsMenuPosition, bool>("lastAtRightEdge");
 
-        Vector2 screenSize;
-        Vector2 menuPosOrigin = new(1017, 493);
-        Rect menuRectCurrent = new(1017, 493, 300, 300);
+        Vector2 menuPosOrigin = new(1168, 632);
         Vector2 targetRes = new(1536, 1024);
+        Rect expressionsMenuRect = new(1017, 493, 300, 300);
+        Rect settingsMenuRect = new(1017, 493, 300, 300);
 
-        public static Dictionary<string, List<ModSettings>> ModSettings = new();
+        List<ModSettings> ModSettings = new();
+        RadialMenu SettingsMenu;
+
+        bool isExpressionsMenuRendering;
+        bool isSettingsMenuRendering;
+
+        public GameObject SettingsMenuToggle;
+        public GameObject ExpressionsMenuToggle;
+
+        public GameObject MenuBlur;
+
+        static Queue<List<ModSettings>> registerRequests = new();
+
+        bool layoutChanged;
+
+        ModuleVrc3 dummyModule;
+        VRCAvatarDescriptor dummyDescriptor;
+
+        AccessTools.FieldRef<MenuActions, Xamin.CircleSelector> radialMenu = AccessTools.FieldRefAccess<MenuActions, Xamin.CircleSelector>("radialMenu");
+        Xamin.CircleSelector radialMenuOrig;
+        MenuActions menuActions;
+
+        RectTransform outerTransform;
+        UiTooltip[] tooltips;
 
         void Awake()
         {
             doc = GetComponent<UIDocument>();
-
-            settingsMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
         }
         void OnEnable()
         {
             _root = doc.rootVisualElement;
 
-            _root.pickingMode = PickingMode.Position;
+            _root.pickingMode = PickingMode.Ignore;
             _root.style.color = Color.white; // text color is inherited from parent
-
-            _root.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
-            _root.RegisterCallback<MouseMoveEvent>(OnMouseMove);
         }
+        void Start()
+        {
+            settingsMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
 
+            menuActions = GameObject.Find("CircleMenu")?.GetComponentInChildren<MenuActions>();
+
+            if (settingsMenuPosition && menuActions)
+                SetupSettingsMenu();
+        }
+        public void OnUpdate()
+        {
+            if (SettingsMenu != null)
+            {
+                while (registerRequests.Count > 0)
+                {
+                    var record = registerRequests.Dequeue();
+                    RegisterSettingsMenu(record);
+                }
+
+                if (layoutChanged)
+                {
+                    dummyModule.ReloadRadials();
+
+                    SettingsMenu = dummyModule.GetOrCreateRadial(this);
+                    SettingsMenu.Controller = this;
+                    SettingsMenu.OpenSettingsMenu(ModSettings);
+
+                    layoutChanged = false;
+                }
+            }
+        }
         void OnGUI()
         {
-            if (Manager.Module == null)
-                return;
+            if (ExpressionsMenu != null)
+            {
+                if (isExpressionsMenuRendering)
+                {
+                    CalculateExpressionsMenuPosition();
 
-            Manager.SetDrag(!Event.current.alt);
+                    ExpressionsMenu.Rect = expressionsMenuRect;
+                    ExpressionsMenu.Render(_root, expressionsMenuRect);
+                }
+                else
+                    ExpressionsMenu.StopRendering();
+            }
 
-            if (settingsMenuPosition != null) CalculateMenuPosition();
+            if (SettingsMenu != null)
+            {
+                if (isSettingsMenuRendering)
+                {
+                    CalculateSettingsMenuPosition();
 
-            Menu.Rect = menuRectCurrent;
-            Menu.Render(_root, menuRectCurrent);
-        }
-        void OnDisable()
-        {
-            _root.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
-            _root.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
+                    SettingsMenu.Rect = settingsMenuRect;
+                    SettingsMenu.Render(_root, settingsMenuRect);
 
-            Menu.ClosePuppet();
+                    if (Input.GetKeyDown(menuActions.radialMenuKey))
+                        ToggleSettingsMenu();
+                }
+                else
+                    SettingsMenu.StopRendering();
+            }
         }
         internal void OnAvatarSwitch()
         {
             if (Manager.Module == null)
                 return;
 
-            Menu = Manager.Module.GetOrCreateRadial(this);
+            ExpressionsMenu = Manager.Module.GetOrCreateRadial(this);
         }
-        void CalculateMenuPosition()
+        void CalculateExpressionsMenuPosition()
         {
+            if (!settingsMenuPosition) return;
+
+            var screenSize = _root.layout.size;
+
             var offsetX = lastAtRightEdge(settingsMenuPosition) ? screenSize.x / 2 - targetRes.x : screenSize.x - targetRes.x;
             var offsetY = screenSize.y - targetRes.y;
 
-            menuRectCurrent.position = menuPosOrigin + new Vector2(offsetX, offsetY);
+            expressionsMenuRect.center = menuPosOrigin + new Vector2(offsetX, offsetY);
         }
-        void OnMouseMove(MouseMoveEvent e) => Menu.mousePos = e.mousePosition;
-        void OnGeometryChanged(GeometryChangedEvent e) => screenSize = _root.layout.size;
-
-        public void RegisterSettingsMenu(string name, List<ModSettings> settings)
+        void CalculateSettingsMenuPosition()
         {
-            foreach (var set in settings)
-            {
-                set.GetBind().Init();
-            }
+            var world = outerTransform.TransformPoint(outerTransform.rect.center);
+            var screen = RectTransformUtility.WorldToScreenPoint(
+                Camera.main,
+                world
+            );
+            var panel = RuntimePanelUtils.ScreenToPanel(
+                _root.panel,
+                new Vector2(
+                    screen.x,
+                    Screen.height - screen.y
+                )
+            );
+            settingsMenuRect.center = panel;
+        }
 
-            if (ModSettings.TryGetValue(name, out var sets))
+        public void ToggleExpressionsMenu()
+        {
+            isExpressionsMenuRendering = !isExpressionsMenuRendering;
+            if (!isExpressionsMenuRendering)
             {
-                sets.AddRange(settings);
-                Debug.Log($"[MEGME] Expanded existing settings menu '{name}'");
+                ExpressionsMenu.ClosePuppet();
+            }
+        }
+        public void ToggleSettingsMenu()
+        {
+            isSettingsMenuRendering = !isSettingsMenuRendering;
+            if (isSettingsMenuRendering)
+            {
+                MenuBlur.SetActive(true);
+                radialMenu(menuActions) = null;
+                foreach (var t in tooltips)
+                {
+                    t.enabled = false;
+                }
             }
             else
             {
-                ModSettings.Add(name, settings);
-                Debug.Log($"[MEGME] Registered new settings menu '{name}', with total of {ModSettings.Count}");
+                SettingsMenu.ClosePuppet();
+                StartCoroutine(RestoreRadialMenu());
             }
+        }
+        IEnumerator RestoreRadialMenu() // Input.GetKeyDown(radialMenuKey) in MenuActions still recives Input event the next frame after it occur (unity moment?)
+        {
+            yield return null;
+            MenuBlur.SetActive(false);
+            radialMenu(menuActions) = radialMenuOrig;
+            foreach (var t in tooltips)
+            {
+                t.enabled = true;
+            }
+        }
+
+        void SetupSettingsMenu()
+        {
+            radialMenuOrig = radialMenu(menuActions);
+
+            var settings = GameObject.Find("/Settings");
+            var canvas = settings?.transform.Find("SettingsMenuCanvas");
+            var outerMenu = settings?.transform.Find("SettingsMenuCanvas/OuterMenu");
+            var mainMenu = settings?.transform.Find("SettingsMenuCanvas/Main Menu/Viewport/Content/MenuPanel/Main Menu");
+            if (!settings || !canvas || !outerMenu || !mainMenu)
+            {
+                Debug.Log($"[MEGME] SettingsMenu setup failed, Settings:{settings} SettingsMenuCanvas:{canvas} OutherMenu:{outerMenu} MainMenu:{mainMenu}");
+                return;
+            }
+
+            outerTransform = outerMenu.GetComponent<RectTransform>();
+            var blurTransform = MenuBlur.GetComponent<RectTransform>();
+            CopyRectTransform(outerTransform, blurTransform);
+
+            MenuBlur.transform.SetParent(canvas, false);
+
+            settingsMenuPosition.menus.Add(new SettingsMenuPosition.MenuEntry
+            {
+                settingsMenu = blurTransform,
+                originalX = blurTransform.anchoredPosition.x,
+                originalY = blurTransform.anchoredPosition.y,
+                lastApplied = blurTransform.anchoredPosition
+            });
+
+            SettingsMenuToggle.transform.SetParent(mainMenu, false);
+
+            dummyDescriptor = gameObject.AddComponent<VRCAvatarDescriptor>();
+            dummyModule = new ModuleVrc3(dummyDescriptor);
+
+            SettingsMenu = dummyModule.GetOrCreateRadial(this);
+
+            SettingsMenu.Controller = this;
+
+            SettingsMenu.OpenSettingsMenu(ModSettings);
+
+            tooltips = canvas.GetComponentsInChildren<UiTooltip>();
+        }
+        static void CopyRectTransform(RectTransform from, RectTransform to)
+        {
+            to.localPosition = from.localPosition;
+            to.localScale = from.localScale;
+            to.localRotation = from.localRotation;
+
+            to.anchorMin = from.anchorMin;
+            to.anchorMax = from.anchorMax;
+            to.anchoredPosition = from.anchoredPosition;
+
+            to.sizeDelta = from.sizeDelta;
+            to.pivot = from.pivot;
+        }
+
+        public static void RegisterSettingsMenu(ModSettings setting, params ModSettings[] s) => registerRequests.Enqueue([setting, .. s]);
+
+        void RegisterSettingsMenu(List<ModSettings> settings)
+        {
+            Integrate(settings, ModSettings);
+
+            void Integrate(List<ModSettings> from, List<ModSettings> to, string menuName = null)
+            {
+                foreach (var set in from)
+                {
+                    var existingMenu = to.FirstOrDefault(s =>
+                        s.name == set.name && s.controlType == set.controlType && s.controlType == Control.ControlType.SubMenu);
+
+                    if (existingMenu != null)
+                    {
+                        Debug.Log($"[MEGME] Expanding menu '{set.name}'");
+                        Integrate(set.subSettings, existingMenu.subSettings, set.name);
+                    }
+                    else
+                    {
+                        to.Add(set);
+                        try
+                        {
+                            var binds = set.GetBinds();
+                            foreach (var bind in binds)
+                                bind.Init();
+
+                            Debug.Log($"[MEGME] Added new element '{set.name}' of type {set.controlType}" +
+                                $"{(binds.Length != 1 ? $"({binds.Length})" : "")} to {menuName ?? "Root"} menu");
+                        }
+                        catch (Exception e)
+                        {
+                            to.Remove(set);
+
+                            Debug.LogError($"[MEGME] Registration of element '{set.name}:{set.controlType}" +
+                                $"{(set.subBinds != null ? $"({set.subBinds.Length})" : "")}' to {menuName ?? "Root"} failed:{e}");
+                        }
+                    }
+                }
+            }
+
+            layoutChanged = true;
         }
     }
     public class ModSettings(string name, ParamBinding bind, Control.ControlType controlType, Texture2D icon = null,
-            float offValue = 0, float onValue = 1, RadialSettings radialSettings = null,
-            ParamBinding[] subBinds = null, List<ModSettings> subSettings = null, Control.Label[] subLabels = null)
+        float offValue = 0, float onValue = 1, RadialSettings radialSettings = null,
+        ParamBinding[] subBinds = null, List<ModSettings> subSettings = null, Control.Label[] subLabels = null)
     {
         public string name = name;
         public Texture2D icon = icon ?? EResources.Load<Texture2D>("Void");
@@ -116,17 +316,18 @@ namespace BlackStartX.GestureManager
         public Control.ControlType controlType = controlType;
         public RadialSettings radialSettings = radialSettings;
 
-        public static ModSettings Toggle(string name, FieldRef toggleField, Texture2D icon = null)
+        public static ModSettings Toggle(string name, ValueRef toggleField, Texture2D icon = null)
         {
             return new ModSettings(name, new ParamBinding(toggleField), Control.ControlType.Toggle, icon);
         }
-        public static ModSettings Radial(string name, FieldRef radialField, float min = 0, float max = 1, float? checkpoint = null, DisplayType displayType = DisplayType.Percentage, Texture2D icon = null)
+        public static ModSettings Radial(string name, ValueRef radialField, float min = 0, float max = 1, float? checkpoint = null, DisplayType displayType = DisplayType.Percentage, Texture2D icon = null)
         {
             return new ModSettings(name, null, Control.ControlType.RadialPuppet, icon, radialSettings: new RadialSettings((RadialSettings.DisplayType)displayType, min, max, checkpoint), subBinds: [new ParamBinding(radialField)]);
         }
-        public static ModSettings SubMenu(string name, List<ModSettings> subSettings, Texture2D icon = null)
+        public static ModSettings SubMenu(string name, ModSettings subSetting, params ModSettings[] s) => SubMenu(name, null, subSetting, s);
+        public static ModSettings SubMenu(string name, Texture2D icon, ModSettings subSetting, params ModSettings[] s)
         {
-            return new ModSettings(name, null, Control.ControlType.SubMenu, icon, subSettings: subSettings);
+            return new ModSettings(name, null, Control.ControlType.SubMenu, icon, subSettings: [subSetting, .. s]);
         }
 
         public enum DisplayType
@@ -136,14 +337,25 @@ namespace BlackStartX.GestureManager
             Absolute = RadialSettings.DisplayType.Absolute,
             Degree = RadialSettings.DisplayType.Degree
         }
-        public ParamBinding GetBind()
+        public ParamBinding[] GetBinds()
         {
             return controlType switch
             {
-                Control.ControlType.Toggle => bind,
-                Control.ControlType.RadialPuppet => subBinds[0],
+                Control.ControlType.Toggle => [bind],
+                Control.ControlType.RadialPuppet => subBinds,
+                Control.ControlType.SubMenu => GetSubBinds().ToArray(),
                 _ => throw new NotImplementedException()
             };
+
+            List<ParamBinding> GetSubBinds()
+            {
+                var binds = new List<ParamBinding>();
+                foreach (var subs in subSettings)
+                {
+                    binds.AddRange(subs.GetBinds());
+                }
+                return binds;
+            }
         }
         public void UpdateParamValue()
         {
@@ -152,79 +364,121 @@ namespace BlackStartX.GestureManager
         }
         public float GetFieldValue()
         {
-            var target = GetBind();
-            return target.FieldRef.Value;
+            var target = GetBinds()[0];
+            return target.ValueRef.Value;
         }
         public void SetParamValue(float value)
         {
-            var target = GetBind();
+            var target = GetBinds()[0];
             target.Param.InternalSet(value);
         }
 
-        public class ParamBinding(FieldRef FieldRef)
+        public class ParamBinding(ValueRef valueRef)
         {
-            public FieldRef FieldRef = FieldRef;
+            public ValueRef ValueRef = valueRef;
             public Vrc3Param Param;
 
             public void Init()
             {
-                Param = ParamFromFieldRef(FieldRef);
+                Param = ParamFromValueRef(ValueRef);
 
+                ApplyStored();
+
+                CurrentModel.OnAvatarSwitch += ApplyStored;
+            }
+            void ApplyStored()
+            {
                 if (SettingsCacheHandler.Cache.TryGetValue(Param.Name, out var value))
                 {
-                    FieldRef.Value = value;
+                    ValueRef.Value = value;
                 }
             }
-
-            Vrc3Param ParamFromFieldRef(FieldRef fieldRef)
+            Vrc3Param ParamFromValueRef(ValueRef valueRef)
             {
-                var field = fieldRef.field;
-                var inst = fieldRef.inst;
-
                 void OnChange(Vrc3Param param, float value)
                 {
-                    fieldRef.Value = value;
+                    valueRef.Value = value;
 
                     SettingsCacheHandler.Cache[param.Name] = value;
                     SettingsCacheHandler.MarkDirty();
                 }
 
-                var param = new Vrc3Param($"{field.DeclaringType.FullName}.{field.Name}", AnimatorControllerParameterType.Float, OnChange);
+                var param = new Vrc3Param($"{valueRef.info.ReflectedType.FullName}.{valueRef.info.Name}", AnimatorControllerParameterType.Float, OnChange);
 
                 return param;
             }
         }
-        public class FieldRef(object inst, FieldInfo field)
+        public class ValueRef
         {
-            public object inst = inst;
-            public FieldInfo field = field;
+            readonly Func<float> Get;
+            readonly Action<float> Set;
 
-            Func<object> GetTarget = inst switch
-            {
-                Func<object> getInst => getInst,
-                not null => () => inst,
-                null => field.IsStatic ? () => null : throw new TargetException()
-            };
-            Func<float, object> Convert = field.FieldType switch
-            {
-                Type t when t == typeof(float) => v => v,
-                Type t when t == typeof(int) => v => (int)v,
-                Type t when t == typeof(bool) => v => v != 0f,
-                _ => throw new NotSupportedException()
-            };
-            Func<object, float> ToFloat = field.FieldType switch
-            {
-                Type t when t == typeof(float) => v => (float)v,
-                Type t when t == typeof(int) => v => (float)v,
-                Type t when t == typeof(bool) => v => (bool)v ? 1f : 0f,
-                _ => throw new NotSupportedException()
-            };
+            public readonly MemberInfo info;
 
             public float Value
             {
-                get => ToFloat(field.GetValue(GetTarget()));
-                set => field.SetValue(GetTarget(), Convert(value));
+                get => Get();
+                set => Set(value);
             }
+
+            ValueRef(MemberInfo info, Type type, Func<object> get, Action<object> set)
+            {
+                var (ToFloat, FromFloat) = Converters.TryGetValue(type, out var c)
+                    ? c
+                    : throw new NotSupportedException();
+
+                this.info = info;
+
+                Get = () => ToFloat(get());
+                Set = v => set(FromFloat(v));
+            }
+
+            public static ValueRef From(object instOrLookup, FieldInfo field)
+            {
+                var GetTarget = GetLookup(instOrLookup, field.IsStatic);
+                return new ValueRef(
+                    field,
+                    field.FieldType,
+                    () => field.GetValue(GetTarget()),
+                    v => field.SetValue(GetTarget(), v)
+                );
+            }
+            public static ValueRef From(object instOrLookup, PropertyInfo property)
+            {
+                var GetTarget = GetLookup(instOrLookup, property.GetMethod.IsStatic);
+                return new ValueRef(
+                    property,
+                    property.PropertyType,
+                    () => property.GetValue(GetTarget()),
+                    v => property.SetValue(GetTarget(), v)
+                );
+            }
+
+            static Func<object> GetLookup(object inst, bool isStatic)
+            {
+                return inst switch
+                {
+                    Func<object> getInst => getInst,
+                    not null             => () => inst,
+                    null when isStatic   => () => null,
+                    _ => throw new TargetException()
+                };
+            }
+
+            readonly Dictionary<Type, (Func<object, float> ToFloat, Func<float, object> FromFloat)> Converters = new() {
+                [typeof(float)] = (
+                    v => (float)v,
+                    v => v
+                ),
+                [typeof(int)]   = (
+                    v => (int)v,
+                    v => (int)v
+                ),
+                [typeof(bool)]  = (
+                    v => (bool)v ? 1f : 0f,
+                    v => v != 0f
+                )
+            };
         }
     }
 }
