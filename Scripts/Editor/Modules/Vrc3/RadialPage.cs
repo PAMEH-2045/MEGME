@@ -9,6 +9,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
     public class RadialPage
     {
         private readonly IReadOnlyList<RadialSliceBase> _controls;
+        private readonly IReadOnlyList<ModSettings> _settings; //
         private readonly VRCExpressionsMenu _menu;
         private readonly RadialMenu _radialMenu;
         public readonly Vrc3Param Param;
@@ -28,10 +29,19 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _controls = controls;
         }
 
+        public RadialPage(RadialMenu radialMenu, IReadOnlyList<ModSettings> settings) //
+        {
+            _radialMenu = radialMenu;
+            _settings = settings;
+        }
+
         public void Open()
         {
             if (_menu) _radialMenu.SetMenu(_menu);
-            else _radialMenu.SetCustom(_controls);
+            else if (_controls != null) _radialMenu.SetCustom(_controls);
+            else _radialMenu.SetSettingsMenu(_settings);
+            //if (_menu) _radialMenu.SetMenu(_menu);
+            //else _radialMenu.SetCustom(_controls);
         }
     }
 }

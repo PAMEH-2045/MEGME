@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -12,10 +13,10 @@ namespace BlackStartX.GestureManager
         protected override string FilePath => Path.Combine(Application.persistentDataPath, "megme_settings.json");
 
         [Serializable]
-        public class SettingsCache : Dictionary<string, float>
+        public class SettingsCache : Dictionary<string, JToken>
         {
             public SettingsCache() { }
-            public SettingsCache(Dictionary<string, float> source) : base(source) { }
+            public SettingsCache(Dictionary<string, JToken> source) : base(source) { }
         }
     }
 }

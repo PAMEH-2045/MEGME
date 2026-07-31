@@ -5,6 +5,7 @@
     UnityEngine.UI.GraphicRaycaster;
 #endif
 using System;
+using MEGME.Settings;
 
 namespace BlackStartX.GestureManager.Modules
 {
@@ -19,7 +20,8 @@ namespace BlackStartX.GestureManager.Modules
         public bool isOnFriendsList;
         public bool simulateCulling;
         public bool loadStored;
-        public bool isRemote;
+        public Setting<float> isRemote = Setting<float>.Create("IsLocal");
+        //public bool isRemote;
         public bool vrMode;
     }
 

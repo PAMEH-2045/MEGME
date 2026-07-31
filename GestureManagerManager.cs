@@ -1,6 +1,6 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
-using BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools;
-using HarmonyLib;
+using BlackStartX.GestureManager.Modules;
+using MEGME.Settings;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -24,8 +24,6 @@ namespace BlackStartX.GestureManager
 
         bool bigScreenWasActive;
 
-        AccessTools.FieldRef<AvatarTools.ClickableContacts, bool> isClickableContactsActive = AccessTools.FieldRefAccess<AvatarTools.ClickableContacts, bool>("_isActive");
-
         bool isButtonСonfigured;
         MenuActions menuActions;
         int actionsClothesIndex;
@@ -34,10 +32,9 @@ namespace BlackStartX.GestureManager
         int selectorClothesIndex;
         GameObject selectorClothesButtonOrigin;
 
-        public static Queue<(string name, List<ModSettings> settings)> settingRegisterRequests = new();
-
         void OnEnable()
         {
+            CurrentModel.OnAvatarSwitch += SettingsManager.OnAvatarSwitch;
             CurrentModel.OnAvatarSwitch += OnAvatarSwitch;
             CurrentModel.OnAvatarSwitch += radialMenuController.OnAvatarSwitch;
         }
@@ -45,27 +42,25 @@ namespace BlackStartX.GestureManager
         {
             CurrentModel.OnStart();
             CacheClothesItems();
+
+            Manager.settings = new ModuleSettings();
         }
         void Update()
         {
             CurrentModel.OnUpdate();
-
-            while (settingRegisterRequests.Count > 0)
-            {
-                var record = settingRegisterRequests.Dequeue();
-                radialMenuController.RegisterSettingsMenu(record.name, record.settings);
-            }
+            SettingsManager.OnUpdate();
+            radialMenuController.OnUpdate();
 
             if (Manager == null || Manager.Module == null) return;
 
-            var isBigScreenActive = CurrentModel.AvatarBigScreenHandlerProxy.isBigScreenActive;
-            if (bigScreenWasActive != (bigScreenWasActive = isBigScreenActive))
+            if (bigScreenWasActive != (bigScreenWasActive = CurrentModel.IsBigScreenActive))
             {
-                isClickableContactsActive(Manager.Module.AvatarTools.ContactsClickable) = isBigScreenActive;
+                Manager.Module.AvatarTools.ContactsClickable.BlockExecution = bigScreenWasActive;
             }
         }
         void OnDisable()
         {
+            CurrentModel.OnAvatarSwitch -= SettingsManager.OnAvatarSwitch;
             CurrentModel.OnAvatarSwitch -= OnAvatarSwitch;
             CurrentModel.OnAvatarSwitch -= radialMenuController.OnAvatarSwitch;
         }
@@ -119,7 +114,7 @@ namespace BlackStartX.GestureManager
             if (!isButtonСonfigured)
                 SetupClothesButton();
 
-            var isBlendShapesConfigured = CurrentModel.GetComponent<Vrm10Instance>()?.Runtime.Expression.ExpressionKeys.Count > 0 
+            var isBlendShapesConfigured = CurrentModel.GetComponent<Vrm10Instance>()?.Runtime.Expression.ExpressionKeys.Count > 0
                 || CurrentModel.GetComponent<VRMBlendShapeProxy>()?.BlendShapeAvatar.Clips.Count > 0;
             if (!isBlendShapesConfigured)
             {
@@ -133,7 +128,7 @@ namespace BlackStartX.GestureManager
 
             menuActions.menuEntries[actionsClothesIndex] = new MenuEntry
             {
-                menu = radialMenuController.gameObject,
+                menu = radialMenuController.ExpressionsMenuToggle,
                 blockMovement = true,
                 blockHandTracking = true,
                 blockReaction = true,
@@ -170,8 +165,6 @@ namespace BlackStartX.GestureManager
                     break;
                 }
         }
-
-        public static void RegisterSettingsMenu(string name, List<ModSettings> settings) => settingRegisterRequests.Enqueue((name, settings));
 
         private void TrySetupBlendshapes()
         {
@@ -278,7 +271,7 @@ namespace BlackStartX.GestureManager
             return new Regex("^" + deGlob + "$", RegexOptions.IgnoreCase);
         }
 
-        // MEX3.3.0 UniVRM0.128.3 UniGLTF.UnityExtensions.RelativePathFrom NonExtension variant
+        // MEX3.3.0 UniVRM-0.128.3 UniGLTF.UnityExtensions.RelativePathFrom NonExtension variant
         public static string RelativePathFrom(Transform self, Transform root)
         {
             var path = new List<String>();

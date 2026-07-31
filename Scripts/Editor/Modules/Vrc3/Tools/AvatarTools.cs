@@ -1,5 +1,5 @@
 ﻿#if VRC_SDK_VRCSDK3
-using System;
+using MEGME.Settings;
 using System.Collections.Generic;
 using System.Linq;
 //using BlackStartX.GestureManager.Data;
@@ -75,7 +75,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
         //    ContactsClickable.OnDrawGizmos();
         //}
 
-//public void Unlink(ModuleVrc3 module) => PerformanceAnimator.Disable(module);
+        //public void Unlink(ModuleVrc3 module) => PerformanceAnimator.Disable(module);
 
 #if false
         public class UpdateSceneCamera : GmgDynamicFunction
@@ -124,23 +124,20 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
         }
 #endif
 
-        //public class ClickableContacts : GmgDynamicFunction
-        public class ClickableContacts
+        public class ClickableContacts : GmgDynamicFunction
         {
             private class Flat
             {
                 public float Float;
             }
 
-            private bool _isActive;
-            //private readonly BoolProperty _isActive = new("GM3 ClickableContacts");
-            private readonly string _tag;
-            //private readonly StringProperty _tag = new("GM3 ClickableContacts Tag");
+            private readonly BoolProperty _isActive = new("GM3 ClickableContacts");
+            private readonly StringProperty _tag = new("GM3 ClickableContacts Tag");
             private readonly Dictionary<ContactReceiver, Flat> _activeContact = new();
 
-            //protected internal override string Name => "Clickable Contacts";
-            //protected override string Description => "Click and trigger Avatar Contacts with your mouse!\n\nLike you can do with PhysBones~";
-            //protected internal bool Active => _isActive.Property;
+            protected internal override string Name => "Clickable Contacts";
+            protected override string Description => "Click and trigger Avatar Contacts with your mouse!\n\nLike you can do with PhysBones~";
+            protected internal override bool Active => _isActive.Property;
 
             //private static Mesh _sphereMesh;
             //private static Mesh SphereMesh => !_sphereMesh ? _sphereMesh = FetchSpherePrimitive() : _sphereMesh;
@@ -151,8 +148,20 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             private Camera _camera = ModuleVrc3.MainCamera;
             private Camera Camera => !_camera ? _camera = ModuleVrc3.MainCamera : _camera;
 
-            //internal void Toggle(ModuleVrc3 module) => _isActive = !_isActive;
-            //protected internal override void Toggle(ModuleVrc3 module) => _isActive.Property = !_isActive.Property;
+            private bool blockExecution;
+            internal bool BlockExecution
+            {
+                get => blockExecution;
+                set
+                {
+                    if (value)
+                        Disable();
+
+                    blockExecution = value;
+                }
+            }
+
+            protected internal override void Toggle(ModuleVrc3 module) => _isActive.Property = !_isActive.Property;
 
             //protected override void Gui(ModuleVrc3 module)
             //{
@@ -160,27 +169,15 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             //    _tag.Property = GmgLayoutHelper.PlaceHolderTextField("Tag: ", _tag.Property, " <leave blank to ignore tags> ");
             //}
 
-            protected void Update(ModuleVrc3 module) => LateUpdate(module);
-            //protected override void Update(ModuleVrc3 module) => LateUpdate(module);
+            protected override void Update(ModuleVrc3 module) => LateUpdate(module);
 
-            protected void LateUpdate(ModuleVrc3 module)
-            //protected override void LateUpdate(ModuleVrc3 module)
+            protected override void LateUpdate(ModuleVrc3 module)
             {
+                if (BlockExecution)
+                    return;
+
                 if (Input.GetMouseButton(0)) OnClick(module);
                 if (Input.GetMouseButtonUp(0)) Disable();
-            }
-
-            internal void OnLateUpdate(ModuleVrc3 module)
-            {
-                if (_isActive) LateUpdate(module);
-                //if (Active) LateUpdate(module);
-            }
-            private bool _value;
-            internal void OnUpdate(ModuleVrc3 module)
-            {
-                if (_value != (_value = _isActive)) module.UpdateRunning();
-                //if (_value != (_value = Active)) module.UpdateRunning();
-                if (_value) Update(module);
             }
 
             //protected override void DrawGizmos()
@@ -236,13 +233,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             }
 
             //private static Mesh FetchSpherePrimitive() => (Mesh)Resources.First(uObject => uObject.name == "Sphere");
-   
+
             //private static Mesh FetchCapsulePrimitive() => (Mesh)Resources.First(uObject => uObject.name == "Capsule");
- 
+
             //private static IEnumerable<UnityEngine.Object> Resources => AssetDatabase.LoadAllAssetsAtPath("Library/unity default resources");
 
-            private bool IsValid(ContactReceiver receiver) => receiver.isActiveAndEnabled && string.IsNullOrEmpty(_tag) || receiver.collisionTags.Contains(_tag);
-            //private bool IsValid(ContactReceiver receiver) => receiver.isActiveAndEnabled && string.IsNullOrEmpty(_tag.Property) || receiver.collisionTags.Contains(_tag.Property);
+            private bool IsValid(ContactReceiver receiver) => receiver.isActiveAndEnabled && string.IsNullOrEmpty(_tag.Property) || receiver.collisionTags.Contains(_tag.Property);
 
             /*
              * RayCast Calculation~
@@ -621,33 +617,40 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3.Tools
             {
             }
         }
-
+#endif
         private class BoolProperty
         {
-            private readonly string _key;
+            private readonly Setting<bool> _property;
+            //private readonly string _key;
 
-            public BoolProperty(string key) => _key = key;
+            public BoolProperty(string key) => _property = Setting<bool>.Create(key);
+            //public BoolProperty(string key) => _key = key;
 
             internal bool Property
             {
-                get => EditorPrefs.GetBool(_key);
-                set => EditorPrefs.SetBool(_key, value);
+                get => _property.Value;
+                //get => EditorPrefs.GetBool(_key);
+                set => _property.Value = value;
+                //set => EditorPrefs.SetBool(_key, value);
             }
         }
 
         private class StringProperty
         {
-            private readonly string _key;
+            private readonly Setting<string> _property;
+            //private readonly string _key;
 
-            public StringProperty(string key) => _key = key;
+            public StringProperty(string key) => _property = Setting<string>.Create(key);
+            //public StringProperty(string key) => _key = key;
 
             internal string Property
             {
-                get => EditorPrefs.GetString(_key);
-                set => EditorPrefs.SetString(_key, value);
+                get => _property.Value;
+                //get => EditorPrefs.GetString(_key);
+                set => _property.Value = value;
+                //set => EditorPrefs.SetString(_key, value);
             }
         }
-#endif
     }
 }
 #endif

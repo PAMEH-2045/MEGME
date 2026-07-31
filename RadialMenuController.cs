@@ -1,13 +1,11 @@
 ﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using HarmonyLib;
-using Newtonsoft.Json.Linq;
+using MEGME.Settings;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VRC.SDK3.Avatars.Components;
@@ -180,6 +178,7 @@ namespace BlackStartX.GestureManager
             {
                 MenuBlur.SetActive(true);
                 radialMenu(menuActions) = null;
+
                 foreach (var t in tooltips)
                 {
                     t.enabled = false;
@@ -194,8 +193,10 @@ namespace BlackStartX.GestureManager
         IEnumerator RestoreRadialMenu() // Input.GetKeyDown(radialMenuKey) in MenuActions still recives Input event the next frame after it occur (unity moment?)
         {
             yield return null;
+
             MenuBlur.SetActive(false);
             radialMenu(menuActions) = radialMenuOrig;
+
             foreach (var t in tooltips)
             {
                 t.enabled = true;
@@ -278,22 +279,6 @@ namespace BlackStartX.GestureManager
                     else
                     {
                         to.Add(set);
-                        try
-                        {
-                            var binds = set.GetBinds();
-                            foreach (var bind in binds)
-                                bind.Init();
-
-                            Debug.Log($"[MEGME] Added new element '{set.name}' of type {set.controlType}" +
-                                $"{(binds.Length != 1 ? $"({binds.Length})" : "")} to {menuName ?? "Root"} menu");
-                        }
-                        catch (Exception e)
-                        {
-                            to.Remove(set);
-
-                            Debug.LogError($"[MEGME] Registration of element '{set.name}:{set.controlType}" +
-                                $"{(set.subBinds != null ? $"({set.subBinds.Length})" : "")}' to {menuName ?? "Root"} failed:{e}");
-                        }
                     }
                 }
             }
@@ -306,23 +291,28 @@ namespace BlackStartX.GestureManager
         ParamBinding[] subBinds = null, List<ModSettings> subSettings = null, Control.Label[] subLabels = null)
     {
         public string name = name;
-        public Texture2D icon = icon ?? EResources.Load<Texture2D>("Void");
-        public float onValue = onValue;
-        public ParamBinding bind = bind;
-        public float offValue = offValue;
-        public ParamBinding[] subBinds = subBinds;
-        public List<ModSettings> subSettings = subSettings;
-        public Control.Label[] subLabels = subLabels;
+
         public Control.ControlType controlType = controlType;
+        public Texture2D icon = icon ?? EResources.Load<Texture2D>("Void");
+
+        public float onValue = onValue;
+        public float offValue = offValue;
+
+        public ParamBinding bind = bind;
+        public ParamBinding[] subBinds = subBinds;
+
+        public Control.Label[] subLabels = subLabels;
+        public List<ModSettings> subSettings = subSettings;
+
         public RadialSettings radialSettings = radialSettings;
 
-        public static ModSettings Toggle(string name, ValueRef toggleField, Texture2D icon = null)
+        public static ModSettings Toggle(string name, ISetting setting, Texture2D icon = null)
         {
-            return new ModSettings(name, new ParamBinding(toggleField), Control.ControlType.Toggle, icon);
+            return new ModSettings(name, new ParamBinding(setting), Control.ControlType.Toggle, icon);
         }
-        public static ModSettings Radial(string name, ValueRef radialField, float min = 0, float max = 1, float? checkpoint = null, DisplayType displayType = DisplayType.Percentage, Texture2D icon = null)
+        public static ModSettings Radial(string name, ISetting setting, float min = 0, float max = 1, float? checkpoint = null, DisplayType displayType = DisplayType.Percentage, Texture2D icon = null)
         {
-            return new ModSettings(name, null, Control.ControlType.RadialPuppet, icon, radialSettings: new RadialSettings((RadialSettings.DisplayType)displayType, min, max, checkpoint), subBinds: [new ParamBinding(radialField)]);
+            return new ModSettings(name, null, Control.ControlType.RadialPuppet, icon, radialSettings: new RadialSettings((RadialSettings.DisplayType)displayType, min, max, checkpoint), subBinds: [new ParamBinding(setting)]);
         }
         public static ModSettings SubMenu(string name, ModSettings subSetting, params ModSettings[] s) => SubMenu(name, null, subSetting, s);
         public static ModSettings SubMenu(string name, Texture2D icon, ModSettings subSetting, params ModSettings[] s)
@@ -357,124 +347,46 @@ namespace BlackStartX.GestureManager
                 return binds;
             }
         }
-        public void UpdateParamValue()
-        {
-            var value = GetFieldValue();
-            SetParamValue(value);
-        }
-        public float GetFieldValue()
-        {
-            var target = GetBinds()[0];
-            return target.ValueRef.Value;
-        }
-        public void SetParamValue(float value)
-        {
-            var target = GetBinds()[0];
-            target.Param.InternalSet(value);
-        }
 
-        public class ParamBinding(ValueRef valueRef)
+        public class ParamBinding
         {
-            public ValueRef ValueRef = valueRef;
+            public ISetting Setting;
             public Vrc3Param Param;
 
-            public void Init()
+            public ParamBinding(ISetting setting)
             {
-                Param = ParamFromValueRef(ValueRef);
-
-                ApplyStored();
-
-                CurrentModel.OnAvatarSwitch += ApplyStored;
-            }
-            void ApplyStored()
-            {
-                if (SettingsCacheHandler.Cache.TryGetValue(Param.Name, out var value))
-                {
-                    ValueRef.Value = value;
-                }
-            }
-            Vrc3Param ParamFromValueRef(ValueRef valueRef)
-            {
-                void OnChange(Vrc3Param param, float value)
-                {
-                    valueRef.Value = value;
-
-                    SettingsCacheHandler.Cache[param.Name] = value;
-                    SettingsCacheHandler.MarkDirty();
-                }
-
-                var param = new Vrc3Param($"{valueRef.info.ReflectedType.FullName}.{valueRef.info.Name}", AnimatorControllerParameterType.Float, OnChange);
-
-                return param;
-            }
-        }
-        public class ValueRef
-        {
-            readonly Func<float> Get;
-            readonly Action<float> Set;
-
-            public readonly MemberInfo info;
-
-            public float Value
-            {
-                get => Get();
-                set => Set(value);
-            }
-
-            ValueRef(MemberInfo info, Type type, Func<object> get, Action<object> set)
-            {
-                var (ToFloat, FromFloat) = Converters.TryGetValue(type, out var c)
+                var (ToFloat, FromFloat) = Converters.TryGetValue(setting.Type, out var c)
                     ? c
-                    : throw new NotSupportedException();
+                    : throw new NotSupportedException($"[MEGME] Param converter for type {setting.Type} is not supported");
 
-                this.info = info;
-
-                Get = () => ToFloat(get());
-                Set = v => set(FromFloat(v));
-            }
-
-            public static ValueRef From(object instOrLookup, FieldInfo field)
-            {
-                var GetTarget = GetLookup(instOrLookup, field.IsStatic);
-                return new ValueRef(
-                    field,
-                    field.FieldType,
-                    () => field.GetValue(GetTarget()),
-                    v => field.SetValue(GetTarget(), v)
-                );
-            }
-            public static ValueRef From(object instOrLookup, PropertyInfo property)
-            {
-                var GetTarget = GetLookup(instOrLookup, property.GetMethod.IsStatic);
-                return new ValueRef(
-                    property,
-                    property.PropertyType,
-                    () => property.GetValue(GetTarget()),
-                    v => property.SetValue(GetTarget(), v)
-                );
-            }
-
-            static Func<object> GetLookup(object inst, bool isStatic)
-            {
-                return inst switch
+                void OnParamChange(Vrc3Param param, float value)
                 {
-                    Func<object> getInst => getInst,
-                    not null             => () => inst,
-                    null when isStatic   => () => null,
-                    _ => throw new TargetException()
-                };
+                    Setting.BoxedValue = FromFloat(value);
+                }
+                void OnSettingChange(ISetting set)
+                {
+                    Param.InternalSet(ToFloat(set.BoxedValue));
+                }
+
+                var param = new Vrc3Param(setting.Key, AnimatorControllerParameterType.Float, OnParamChange);
+
+                setting.OnChange += OnSettingChange;
+
+                Param = param;
+                Setting = setting;
             }
 
-            readonly Dictionary<Type, (Func<object, float> ToFloat, Func<float, object> FromFloat)> Converters = new() {
+            static readonly Dictionary<Type, (Func<object, float> ToFloat, Func<float, object> FromFloat)> Converters = new()
+            {
                 [typeof(float)] = (
                     v => (float)v,
                     v => v
                 ),
-                [typeof(int)]   = (
+                [typeof(int)] = (
                     v => (int)v,
                     v => (int)v
                 ),
-                [typeof(bool)]  = (
+                [typeof(bool)] = (
                     v => (bool)v ? 1f : 0f,
                     v => v != 0f
                 )

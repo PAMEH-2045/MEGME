@@ -1,10 +1,11 @@
 ﻿using HarmonyLib;
+using MEGME.Settings;
 using System;
 using UnityEngine;
 
 namespace BlackStartX.GestureManager
 {
-    class Settings
+    class SettingsMenu
     {
         static readonly Func<object> AvatarGravityController = () => CurrentModel.AvatarGravityControllerProxy.Inst;
 
@@ -17,7 +18,7 @@ namespace BlackStartX.GestureManager
                     icon: EResources.Load<Texture2D>("Icon"),
                     ModSettings.Radial(
                         name: "SpringBone inertia power",
-                        radialField: ModSettings.ValueRef.From(
+                        setting: Setting<float>.From(
                             AvatarGravityController,
                             AccessTools.Field(typeof(AvatarGravityController), "impactMultiplier")
                         ),
@@ -28,7 +29,7 @@ namespace BlackStartX.GestureManager
                     ),
                     ModSettings.Radial(
                         name: "DynamicBone inertia power",
-                        radialField: ModSettings.ValueRef.From(
+                        setting: Setting<float>.From(
                             null,
                             AccessTools.Field(typeof(DynamicBoneAvatarGravityController), "outputRange")
                         ),

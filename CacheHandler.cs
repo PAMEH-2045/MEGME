@@ -10,8 +10,9 @@ namespace BlackStartX.GestureManager
         where T : new()
     {
 
-        protected abstract string FilePath { get; }
         public static T Cache;
+
+        protected abstract string FilePath { get; }
 
         private static bool isDirty;
 
@@ -24,7 +25,9 @@ namespace BlackStartX.GestureManager
             Cache = LoadCache();
             StartCoroutine(AutoSave());
         }
+
         private void OnApplicationQuit() => SaveToDisk();
+
         protected void SaveToDisk()
         {
             try
