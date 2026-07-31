@@ -110,7 +110,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         //internal PipelineManager Pipeline => Avatar.GetComponent<PipelineManager>();
         private VRCExpressionsMenu Menu => AvatarDescriptor.expressionsMenu;
         internal IEnumerable<RadialMenu> Radials => _radialMenus.Values;
-        //internal float ViseAmount => AvatarDescriptor.lipSync == VRC_AvatarDescriptor.LipSyncStyle.VisemeBlendShape ? 14 : 100;
+        internal float ViseAmount => AvatarDescriptor.lipSync == VRC_AvatarDescriptor.LipSyncStyle.VisemeBlendShape ? 14 : 100;
         protected override List<HumanBodyBones> PoseBones => Enum.GetValues(typeof(HumanBodyBones)).Cast<HumanBodyBones>().Where(bones => bones != HumanBodyBones.LastBone).ToList();
 
         public ModuleVrc3(VRCAvatarDescriptor avatarDescriptor) : base(avatarDescriptor)
@@ -123,9 +123,67 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             PoseIK = new Vrc3Param(null, AnimatorControllerParameterType.Bool, OnIKPoseChange);
             PoseT = new Vrc3Param(null, AnimatorControllerParameterType.Bool, OnTPoseChange);
         }
-
+        readonly Dictionary<string, AvatarMaskBodyPart[]> VRC_Humanoid = new()
+        {
+            ["Hip"] = [AvatarMaskBodyPart.Root, AvatarMaskBodyPart.Body],
+            ["Head"] = [AvatarMaskBodyPart.Head],
+            ["Left Hand"] = [AvatarMaskBodyPart.LeftArm],
+            ["Left Foot"] = [AvatarMaskBodyPart.LeftLeg],
+            ["Right Hand"] = [AvatarMaskBodyPart.RightArm],
+            ["Right Foot"] = [AvatarMaskBodyPart.RightLeg],
+            ["Left Fingers"] = [AvatarMaskBodyPart.LeftFingers],
+            ["Right Fingers"] = [AvatarMaskBodyPart.RightFingers]
+        };
         public override void Update()
         {
+            var mask = new AvatarMask();
+            foreach (var control in TrackingControls)
+            {
+                var trackingPart = control.Key;
+                if (!VRC_Humanoid.TryGetValue(trackingPart, out var bodyParts))
+                    continue;
+
+                var trackingType = control.Value;
+                bool trackingValue = trackingType switch
+                {
+                    VRC_AnimatorTrackingControl.TrackingType.Tracking => true,
+                    VRC_AnimatorTrackingControl.TrackingType.Animation => false,
+                    _ => throw new NotImplementedException()
+                };
+
+                foreach (var bodyPart in bodyParts)
+                {
+                    mask.SetHumanoidBodyPartActive(bodyPart, trackingValue);
+                }
+                //Debug.Log($"{control.Key} {control.Value}");
+                //if (control.Value == VRC_AnimatorTrackingControl.TrackingType.Animation)
+                //{
+                //    mixer.SetInputWeight(_MELayerIndex1, 0);
+                //    mixer.SetInputWeight(_MELayerIndex2, 0);
+                //    break;
+                //}
+                //else
+                //{
+                //    mixer.SetInputWeight(_MELayerIndex1, 1);
+                //    mixer.SetInputWeight(_MELayerIndex2, 1);
+                //}
+            }
+            List<string> masked = [];
+            foreach (AvatarMaskBodyPart bodypart in Enum.GetValues(typeof(AvatarMaskBodyPart)))
+            {
+                if (bodypart == AvatarMaskBodyPart.LastBodyPart)
+                    continue;
+
+                if (!mask.GetHumanoidBodyPartActive(bodypart))
+                {
+                    masked.Add($"{bodypart}");
+                }
+            }
+            if (masked.Count != 0) Debug.Log($"MASKED {string.Join(" ", masked)} {Time.frameCount}");
+
+            mixer.SetLayerMaskFromAvatarMask((uint)meHeadLayer, mask);
+            mixer.SetLayerMaskFromAvatarMask((uint)meTailLayer, mask);
+
             //if (!EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode)
             //{
             //    if (Broken) return;
@@ -159,8 +217,14 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         //public override void OnDrawGizmos() => AvatarTools.OnDrawGizmos();
 
         readonly AccessTools.FieldRef<AvatarDanceHandler, AnimatorOverrideController> overrideController = AccessTools.FieldRefAccess<AvatarDanceHandler, AnimatorOverrideController>("overrideController");
+        AnimationLayerMixerPlayable mixer;
+        int meHeadLayer;
+        int meTailLayer;
         public override void InitForAvatar()
         {
+
+            var controllerME = CurrentModel.GetComponent<Animator>().runtimeAnimatorController; //
+
             StartVrcHooks();
 
             AvatarAnimator.applyRootMotion = false;
@@ -180,9 +244,24 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
             _playableGraph = PlayableGraph.Create(GestureManager.Version);
             _playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
-            var mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount + 1);
+            mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount + 1);
             //var mixer = AnimationLayerMixerPlayable.Create(_playableGraph, intCount);
             AnimationPlayableOutput.Create(_playableGraph, OutputName, AvatarAnimator).SetSourcePlayable(mixer);
+
+            /////////
+            var danceHandler = GameObject.FindFirstObjectByType<AvatarDanceHandler>();
+            var overrideME = controllerME is AnimatorOverrideController alreadyOverride ? alreadyOverride : new AnimatorOverrideController(controllerME); // AnimatorOverrideController constructor do not copy override table if AnimatorOverrideController is supplied
+            overrideController(danceHandler) = overrideME;
+
+            var meHeadPlayable = AnimatorControllerPlayable.Create(_playableGraph, overrideME);
+            mixer.ConnectInput(0, meHeadPlayable, OutputValue, 1);
+
+            var meTailPlayable = AnimatorControllerPlayable.Create(_playableGraph, overrideME);
+            mixer.ConnectInput(intCount, meTailPlayable, OutputValue, 1);
+
+            meHeadLayer = 0;
+            meTailLayer = intCount;
+            /////////
 
             _layers.Clear();
             _cloths.Clear();
@@ -204,8 +283,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 var isAction = layer.type is VRCAvatarDescriptor.AnimLayerType.Sitting or VRCAvatarDescriptor.AnimLayerType.Action;
                 var isLim = isPose || isAction;
 
-                if (isAdd || isGesture || isAction || isPose) continue; //
-
                 //if (layer.animatorController)
                 //    foreach (var clip in layer.animatorController.animationClips)
                 //        if (!_motions.ContainsKey((clip, layer.type)))
@@ -222,13 +299,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
                 mixer.ConnectInput(i, playable, OutputValue, weightOn);
 
-                if (isBase) //
-                {
-                    var danceHandler = GameObject.FindFirstObjectByType<AvatarDanceHandler>();
-                    overrideController(danceHandler) = controller is AnimatorOverrideController alreadyOverride ? alreadyOverride : new AnimatorOverrideController(controller); // AnimatorOverrideController constructor do not copy override table if AnimatorOverrideController is supplied
-                    var overrideControllerPlayable = AnimatorControllerPlayable.Create(_playableGraph, overrideController(danceHandler));
-                    mixer.ConnectInput(intCount, overrideControllerPlayable, OutputValue, weightOn);
-                }
                 if (isLim) mixer.SetInputWeight(i, weightOff);
                 if (isAdd) mixer.SetLayerAdditive((uint)i, add);
                 if (mask) mixer.SetLayerMaskFromAvatarMask((uint)i, mask);
@@ -257,7 +327,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             GetParam(Vrc3DefaultParams.EyeHeightAsPercent).InternalSet((_baseHeight - 0.2f) / 4.8F);
 
             //GetParam(Vrc3DefaultParams.VRMode).InternalSet(Settings.vrMode ? 1f : 0f);
-            GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote ? 0f : 1f);
+            GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote);
+            //GetParam(Vrc3DefaultParams.IsLocal).InternalSet(Settings.isRemote ? 0f : 1f);
             //GetParam(Vrc3DefaultParams.IsOnFriendsList).InternalSet(Settings.isOnFriendsList ? 1f : 0f);
 
             _playableGraph.Play();
@@ -622,12 +693,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             foreach (var cloth in _cloths) ScaleCloth(cloth);
         }
 
-        //public void ResetAvatar()
-        //{
-        //    ResetHeight();
-        //    AvatarAnimator.Rebind();
-        //    InitForAvatar();
-        //}
+        public void ResetAvatar()
+        {
+            ResetHeight();
+            AvatarAnimator.Rebind();
+            InitForAvatar();
+        }
 
         public void ResetPoses()
         {
@@ -636,12 +707,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 manager.RemovePose(pose);
         }
 
-        //public void ResetHeight() => GetParam(Vrc3DefaultParams.EyeHeightAsMeters).Set(this, _baseHeight);
+        public void ResetHeight() => GetParam(Vrc3DefaultParams.EyeHeightAsMeters).Set(this, _baseHeight);
 
         internal void ForgetAvatar()
         {
             RemoveVise();
-            //ResetHeight();
+            ResetHeight();
             //SetAvatarCulled(false);
             //if (OscModule.Enabled) OscModule.Forget();
             AvatarAnimator.Rebind();
@@ -696,7 +767,8 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         private void OnIKPoseChange(Vrc3Param param, float state) => _layers[VRCAvatarDescriptor.AnimLayerType.IKPose].Weight.Set(state);
 
-        private void OnIsLocalChange(Vrc3Param param, float local) => Settings.isRemote = local < 0.5f;
+        private void OnIsLocalChange(Vrc3Param param, float local) => Settings.isRemote.Value = local;
+        //private void OnIsLocalChange(Vrc3Param param, float local) => Settings.isRemote = local < 0.5f;
 
         private void OnVelocityChange(Vrc3Param param, float velocity) => SetVelocityMag();
 

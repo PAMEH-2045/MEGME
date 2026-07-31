@@ -106,8 +106,8 @@ namespace BlackStartX.GestureManager
 
             var module = new ModuleVrc3(descriptor);
 
-            if (bindMEController)
-                BindMEControllerToDescriptor();
+            //if (bindMEController)
+            //    BindMEControllerToDescriptor();
 
             Manager.SetModule(module);
 
