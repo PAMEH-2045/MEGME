@@ -178,73 +178,20 @@ namespace BlackStartX.GestureManager
 
             foreach (var (preset, entry) in VRC_VRM)
             {
-                SkinnedMeshRenderer targetMesh = null;
-                int targetBlendShapeIndex = -1;
+                string match = null;
 
-                //foreach (var item in entry.se)
-                //{
-                    
-                //}
-
-                switch (entry.Source)
+                var (targetMesh, targetIndex) = entry.Source switch
                 {
-                    case BlendShapeSourceType.VisemeSkinnedMesh:
-                        if (visemeMesh == null) break;
-
-                        int visemeIndex = (int)entry.Viseme;
-
-                        var blendShapeName = descriptor.VisemeBlendShapes[visemeIndex];
-
-                        targetMesh = visemeMesh;
-                        targetBlendShapeIndex = visemeMesh.sharedMesh.GetBlendShapeIndex(blendShapeName);
-
-                        Debug.Log($"[MEGME] Preset {preset}, rule {entry.Source}, {blendShapeName} == {targetMesh.name}[{targetBlendShapeIndex}]" +
-                            $"->{targetMesh.sharedMesh.GetBlendShapeName(targetBlendShapeIndex)}");
-                        break;
-
-                    case BlendShapeSourceType.EyelidsSkinnedMesh:
-                        if (eyelidMesh == null) break;
-
-                        int eyelidIndex = (int)entry.EyelidState;
-
-                        var blendShapeIndex = descriptor.customEyeLookSettings.eyelidsBlendshapes[eyelidIndex];
-                        if (blendShapeIndex < 0) break;
-
-                        targetMesh = eyelidMesh;
-                        targetBlendShapeIndex = blendShapeIndex;
-
-                        Debug.Log($"[MEGME] Preset {preset}, rule {entry.Source}, {targetMesh.name}[{targetBlendShapeIndex}]" +
-                            $"->{targetMesh.sharedMesh.GetBlendShapeName(targetBlendShapeIndex)}");
-                        break;
-                }
+                    BlendShapeSourceType.VisemeSkinnedMesh => FromViseme(entry.Viseme),
+                    BlendShapeSourceType.EyelidsSkinnedMesh => FromEyelid(entry.EyelidState),
+                    _ => (null, -1)
+                };
 
                 if (targetMesh == null && entry.SearchNames != null)
                 {
-                    foreach (var mesh in new[] { eyelidMesh, visemeMesh })
-                    {
-                        if (mesh == null) continue;
-
-                        for (int i = 0; i < mesh.sharedMesh.blendShapeCount; i++)
-                        {
-                            var blendShapeName = mesh.sharedMesh.GetBlendShapeName(i);
-                            foreach (var search in entry.SearchNames)
-                            {
-                                if (StringToRegex(search).IsMatch(blendShapeName))
-                                {
-                                    targetBlendShapeIndex = i;
-                                    targetMesh = mesh;
-                                    Debug.Log($"[MEGME] Preset {preset}, rule {search}, {targetMesh.name}[{targetBlendShapeIndex}]" +
-                                        $"->{targetMesh.sharedMesh.GetBlendShapeName(targetBlendShapeIndex)}");
-                                    break;
-                                }
-                            }
-                            if (targetMesh != null) break;
-                        }
-                        if (targetMesh != null) break;
-                    }
+                    (targetMesh, targetIndex, match) = Search(entry.SearchNames);
                 }
-
-                if (targetMesh != null && targetBlendShapeIndex >= 0)
+                if (targetMesh != null && targetIndex >= 0)
                 {
                     var clip = ScriptableObject.CreateInstance<BlendShapeClip>();
                     clip.Preset = preset;
@@ -252,16 +199,67 @@ namespace BlackStartX.GestureManager
                         new BlendShapeBinding
                         {
                             RelativePath = RelativePathFrom(targetMesh.transform, CurrentModel.transform),
-                            Index = targetBlendShapeIndex,
+                            Index = targetIndex,
                             Weight = 100f
                         }
                     ];
 
                     blendShapeAvatar.Clips.Add(clip);
+
+                    Debug.Log($"[MEGME] Preset {preset}:{match ?? entry.Source.ToString()}, {targetMesh.name}[{targetIndex}]" +
+                        $"->{targetMesh.sharedMesh.GetBlendShapeName(targetIndex)}");
                 }
             }
 
             CurrentModel.UniversalBlendshapesProxy.proxy0.BlendShapeAvatar = blendShapeAvatar;
+
+            (SkinnedMeshRenderer targetMesh, int targetIndex) FromViseme(Viseme viseme)
+            {
+                if (visemeMesh == null) return (null, -1);
+
+                int visemeIndex = (int)viseme;
+
+                if (visemeIndex >= descriptor.VisemeBlendShapes.Length) return (null, -1);
+
+                var blendShapeName = descriptor.VisemeBlendShapes[visemeIndex];
+                var index = visemeMesh.sharedMesh.GetBlendShapeIndex(blendShapeName);
+
+                if (index <= 0) return (null, -1);
+
+                return (visemeMesh, index);
+            }
+            (SkinnedMeshRenderer targetMesh, int targetIndex) FromEyelid(EyelidState state)
+            {
+                if (eyelidMesh == null) return (null, -1);
+
+                int eyelidIndex = (int)state;
+
+                if (eyelidIndex >= descriptor.customEyeLookSettings.eyelidsBlendshapes.Length) return (null, -1);
+
+                var index = descriptor.customEyeLookSettings.eyelidsBlendshapes[eyelidIndex];
+                if (index <= 0) return (null, -1);
+
+                return (eyelidMesh, index);
+            }
+            (SkinnedMeshRenderer targetMesh, int targetIndex, string match) Search(string[] SearchNames)
+            {
+                foreach (var mesh in new[] { eyelidMesh, visemeMesh })
+                {
+                    if (mesh == null) continue;
+
+                    for (int i = 0; i < mesh.sharedMesh.blendShapeCount; i++)
+                    {
+                        var blendShapeName = mesh.sharedMesh.GetBlendShapeName(i);
+                        foreach (var search in SearchNames)
+                        {
+                            if (StringToRegex(search).IsMatch(blendShapeName))
+                                return (mesh, i, search);
+                        }
+                    }
+                }
+
+                return (null, -1, null);
+            }
         }
 
         public static Regex StringToRegex(string s)
@@ -307,18 +305,6 @@ namespace BlackStartX.GestureManager
             { BlendShapePreset.LookRight, BlendShapeMapEntry.From("*look*right*", "eyes_right", "eye_right", "eye_move_r") },
             { BlendShapePreset.Blink_L, BlendShapeMapEntry.From("*blink*l", "eye_close_l", "eye_close_left", "eye_wink_l", "eyeclosedleft", "ウィンク２") },
             { BlendShapePreset.Blink_R, BlendShapeMapEntry.From("*blink*r", "eye_close_r", "eye_close_right", "eye_wink_r", "eyeclosedright", "ｳｨﾝｸ２右") },
-            //{ BlendShapePreset.Joy, BlendShapeMapEntry.From(
-            //    new Expr("*blink*r"),
-            //    new Expr([
-            //        ["eye_close_r"],
-            //        ["eye_close_r"]
-            //    ]),
-            //    "eye_close_right",
-            //    "eye_wink_r",
-            //    "eyeclosedright",
-            //    "ｳｨﾝｸ２右"
-            //    )
-            //},
         };
         struct BlendShapeMapEntry
         {
