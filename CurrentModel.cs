@@ -10,7 +10,7 @@ namespace BlackStartX.GestureManager
         public static event Action OnAvatarSwitch;
         public static GameObject gameObject { get; private set; }
         public static Transform Root { get; private set; }
-    public static Transform transform => gameObject.transform;
+        public static Transform transform => gameObject.transform;
         public static Animator Animator { get; private set; }
 
         static readonly float avatarScanInterval = 0.25f;
@@ -53,6 +53,8 @@ namespace BlackStartX.GestureManager
             AvatarBigScreenHandlerProxy.Inst = GetComponent<AvatarBigScreenHandler>();
             AvatarGravityControllerProxy.Inst = GetComponent<AvatarGravityController>();
             UniversalBlendshapesProxy.Inst = GetComponent<UniversalBlendshapes>();
+
+            DynamicBoneAvatarGravityControllerProxy.Inst = AddComponent<DynamicBoneAvatarGravityController>();
         }
         public static T GetComponent<T>() where T : Component
             => gameObject.GetComponent<T>();
@@ -60,6 +62,7 @@ namespace BlackStartX.GestureManager
             => gameObject.AddComponent<T>();
 
 
+        public static bool IsBigScreenActive => AvatarBigScreenHandlerProxy.isBigScreenActive;
         public static class AvatarBigScreenHandlerProxy
         {
             public static AvatarBigScreenHandler Inst;
@@ -81,9 +84,13 @@ namespace BlackStartX.GestureManager
             static readonly AccessTools.FieldRef<UniversalBlendshapes, VRMBlendShapeProxy> _proxy0 = AccessTools.FieldRefAccess<UniversalBlendshapes, VRMBlendShapeProxy>("proxy0");
             public static VRMBlendShapeProxy proxy0
             {
-                set => _proxy0(Inst) = value;
                 get => _proxy0(Inst);
+                set => _proxy0(Inst) = value;
             }
+        }
+        public static class DynamicBoneAvatarGravityControllerProxy
+        {
+            public static DynamicBoneAvatarGravityController Inst;
         }
     }
 }

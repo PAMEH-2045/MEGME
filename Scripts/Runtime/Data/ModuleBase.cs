@@ -26,9 +26,9 @@ namespace BlackStartX.GestureManager.Data
         public readonly Animator AvatarAnimator;
         public readonly GmgAvatarDescriptor AvatarDescriptor;
 
-        private TransformData _beforeEmote;
-        public bool PlayingCustomAnimation { get; private set; }
-        public AnimationClip CustomAnim;
+        //private TransformData _beforeEmote;
+        //public bool PlayingCustomAnimation { get; private set; }
+        //public AnimationClip CustomAnim;
 
         public ModuleSettings Settings;
         protected bool GestureDrag;

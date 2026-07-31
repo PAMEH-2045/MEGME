@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if false
+using UnityEngine;
 
 namespace BlackStartX.GestureManager.Data
 {
@@ -36,3 +37,4 @@ namespace BlackStartX.GestureManager.Data
         public TransformData Difference(Transform t) => new(t.position - _position, t.rotation * Quaternion.Inverse(_rotation), t.localScale - _localScale);
     }
 }
+#endif
