@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using VRM;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public static class CurrentModel
     {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public class DynamicBoneAvatarGravityController : MonoBehaviour
     {

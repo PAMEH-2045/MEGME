@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public class Stuff : MonoBehaviour
     {

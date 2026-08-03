@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEngine;
 using System.Linq;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     internal class EResources
     {

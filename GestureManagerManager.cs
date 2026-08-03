@@ -1,4 +1,5 @@
-﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
+﻿using BlackStartX.GestureManager;
+using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Modules;
 using MEGME.Settings;
 using System;
@@ -11,7 +12,7 @@ using VRM;
 using Xamin;
 using static VRC.SDKBase.VRC_AvatarDescriptor;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     [DefaultExecutionOrder(+10)] // Should run after all possible MEManipulators
     public class GestureManagerManager : MonoBehaviour

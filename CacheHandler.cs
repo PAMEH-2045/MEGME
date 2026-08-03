@@ -4,7 +4,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public abstract class CacheHandler<T> : MonoBehaviour
         where T : new()

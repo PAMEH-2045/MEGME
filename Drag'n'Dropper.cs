@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     class Drag_n_Dropper : MonoBehaviour
     {

@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static BlackStartX.GestureManager.ExpressionsCacheHandler;
+using static MEGME.ExpressionsCacheHandler;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public class ExpressionsCacheHandler : CacheHandler<ExpressionsCache>
     {

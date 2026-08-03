@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using static BlackStartX.GestureManager.SettingsCacheHandler;
+using static MEGME.SettingsCacheHandler;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public class SettingsCacheHandler : CacheHandler<SettingsCache>
     {

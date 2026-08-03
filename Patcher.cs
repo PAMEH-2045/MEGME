@@ -1,4 +1,5 @@
-﻿using CustomDancePlayer;
+﻿using BlackStartX.GestureManager;
+using CustomDancePlayer;
 using HarmonyLib;
 using SFB;
 using System;
@@ -11,7 +12,7 @@ using UnityEngine.SceneManagement;
 using UniVRM10;
 using VRM;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     [AttributeUsage(AttributeTargets.Class)]
     internal class OptionalPatchAttribute : Attribute { }
