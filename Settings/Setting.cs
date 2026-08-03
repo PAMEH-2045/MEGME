@@ -42,7 +42,7 @@ namespace MEGME.Settings
 
                 InternalSet(value);
 
-                Save();
+                Settings.Set(Key, Value);
 
                 OnChange?.Invoke(this);
             }
@@ -70,7 +70,6 @@ namespace MEGME.Settings
         public static Setting<T> From(ValueRef<T> valueRef, string key = null)
         {
             T defaultValue = default;
-            //T defaultValue = valueRef.Value;
             key ??= GenerateKey(valueRef);
             return new(key, defaultValue, valueRef);
         }
@@ -103,16 +102,16 @@ namespace MEGME.Settings
         }
         public void Init()
         {
-            if (SettingsCacheHandler.Cache.TryGetValue(Key, out var token))
+            if (Settings.TryGetValue(Key, out T v))
             {
-                Value = token.ToObject<T>();
+                InternalSet(v);
+
+                OnChange?.Invoke(this);
+            } 
+            else if (valueRef != null)
+            {
+                Value = valueRef.Value;
             }
-        }
-        void Save()
-        {
-            Debug.Log($"SAVE {Key}");
-            SettingsCacheHandler.Cache[Key] = JToken.FromObject(Value);
-            SettingsCacheHandler.MarkDirty();
         }
         static string GenerateKey(ValueRef<T> valueRef)
         {
