@@ -8,7 +8,7 @@ namespace MEGME
     public class DynamicBoneAvatarGravityController : MonoBehaviour
     {
         public static float inputRange = 1.5f;
-        public static float outputRange = 0.015f;
+        public static float outputRange = 0.13f;
 
         private Vector2Int previousWindowPos;
         private Vector3 currentForce;
