@@ -3,9 +3,9 @@ using MEGME.Settings;
 using System;
 using UnityEngine;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
-    class SettingsMenu
+    class MEGMESettings
     {
         static readonly Func<object> AvatarGravityController = () => CurrentModel.AvatarGravityControllerProxy.Inst;
 
