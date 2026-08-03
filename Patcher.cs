@@ -1,6 +1,7 @@
 ﻿using BlackStartX.GestureManager;
 using CustomDancePlayer;
 using HarmonyLib;
+using Kirurobo;
 using SFB;
 using System;
 using System.Collections;
@@ -9,6 +10,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UniVRM10;
 using VRM;
 
@@ -343,6 +345,15 @@ namespace MEGME
         {
             __instance.StartCoroutine(AutoSave());
             saveLoadHandler = __instance;
+            Application.quitting += SaveOnQuit;
+        }
+
+        static void SaveOnQuit()
+        {
+            if (isDirty)
+            {
+                ActualSaveToDisk(saveLoadHandler);
+            }
         }
 
         static IEnumerator AutoSave()
@@ -355,7 +366,7 @@ namespace MEGME
                     isDirty = false;
                 }
 
-                yield return new WaitForSeconds(5);
+                yield return new WaitForSeconds(30);
             }
         }
 
@@ -444,5 +455,77 @@ namespace MEGME
 
             return false;
         }
+    }
+
+    [HarmonyPatch, OptionalPatch]
+    class FixAvatarScaleControllerDeferredData
+    {
+        /**
+         * If cursor leaves window while scale is being adjusted, controller stores unapplied data and reapplies it the next time app gains focus
+         */
+        
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarScaleController), "Update")]
+        static void Update(float ___scrollSensitivity, float ___smoothFactor, float ___minSize, float ___maxSize, float ___targetSize, 
+            Slider ___avatarSizeSlider, Transform ___modelRoot, GameObject ___currentModel, AvatarAnimatorController ___controller)
+        {
+            if (___avatarSizeSlider == null)
+                return;
+
+            if (MenuActions.IsMovementBlocked())
+                return;
+
+            if (!UniWindowController.current.isClickThrough)
+            {
+                float scroll = Input.mouseScrollDelta.y;
+                if (scroll != 0f)
+                {
+                    ___targetSize = Mathf.Clamp(
+                        ___targetSize + scroll * ___scrollSensitivity,
+                        ___minSize, ___maxSize
+                    );
+                }
+            }
+
+            if (___modelRoot != null)
+            {
+                GameObject activeModel = null;
+                for (int i = 0; i < ___modelRoot.childCount; i++)
+                {
+                    var child = ___modelRoot.GetChild(i);
+                    if (child.gameObject.activeInHierarchy)
+                    {
+                        activeModel = child.gameObject;
+                        break;
+                    }
+                }
+
+                if (activeModel != ___currentModel)
+                {
+                    ___currentModel = activeModel;
+                    ___controller = ___currentModel != null ? ___currentModel.GetComponent<AvatarAnimatorController>() : null;
+                }
+            }
+
+            if (___controller != null && ___controller.isDragging)
+                return;
+
+            float current = ___avatarSizeSlider.value;
+            float smoothed = Mathf.Lerp(
+                current,
+                ___targetSize,
+                1f - Mathf.Pow(1f - ___smoothFactor, Time.deltaTime * 60f)
+            );
+
+            if (Mathf.Abs(smoothed - current) > 0.0001f)
+            {
+                ___avatarSizeSlider.SetValueWithoutNotify(smoothed);
+
+                SaveLoadHandler.Instance.data.avatarSize = smoothed;
+                SaveLoadHandler.Instance.SaveToDisk();
+                SaveLoadHandler.ApplyAllSettingsToAllAvatars();
+            }
+        }
+
     }
 }
