@@ -4,9 +4,8 @@ using GmgAvatarDescriptor =
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
     VRC.SDKBase.VRC_AvatarDescriptor;
 #else
-    UnityEngine.Component;
+    UnityEngine.UI.GraphicRaycaster;
 #endif
-using UnityEngine;
 
 namespace BlackStartX.GestureManager.Editor.Modules
 {
@@ -18,8 +17,6 @@ namespace BlackStartX.GestureManager.Editor.Modules
 #else
             null;
 #endif
-
-        public static ModuleBase GetModuleFor(GameObject gameObject) => GetModuleFor(gameObject.GetComponent<GmgAvatarDescriptor>());
 
         public static ModuleBase GetModuleFor(GmgAvatarDescriptor descriptorComponent) => descriptorComponent switch
         {

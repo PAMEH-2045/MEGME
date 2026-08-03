@@ -1,7 +1,9 @@
-﻿using BlackStartX.GestureManager.Editor.Modules.Vrc3;
+﻿using BlackStartX.GestureManager;
+using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using HarmonyLib;
 using MEGME.Settings;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,11 +11,12 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VRC.SDK3.Avatars.Components;
-using static BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices.RadialSliceControl;
-using static BlackStartX.GestureManager.ModSettings;
+using VRC.SDK3.Avatars.ScriptableObjects;
+using static MEGME.ModSettings;
 using static VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu;
+using RadialSettings = BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices.RadialSliceControl.RadialSettings;
 
-namespace BlackStartX.GestureManager
+namespace MEGME
 {
     public class RadialMenuController : MonoBehaviour
     {
@@ -36,7 +39,7 @@ namespace BlackStartX.GestureManager
         bool isExpressionsMenuRendering;
         bool isSettingsMenuRendering;
 
-        public GameObject SettingsMenuToggle;
+        public GameObject SettingsMenuUIToggle;
         public GameObject ExpressionsMenuToggle;
 
         public GameObject MenuBlur;
@@ -55,6 +58,9 @@ namespace BlackStartX.GestureManager
         RectTransform outerTransform;
         UiTooltip[] tooltips;
 
+        VRCExpressionsMenu settingsMenuId;
+        VRCExpressionsMenu expressionsMenuId;
+
         void Awake()
         {
             doc = GetComponent<UIDocument>();
@@ -68,6 +74,9 @@ namespace BlackStartX.GestureManager
         }
         void Start()
         {
+            settingsMenuId = ScriptableObject.CreateInstance<VRCExpressionsMenu>();
+            expressionsMenuId = ScriptableObject.CreateInstance<VRCExpressionsMenu>();
+
             settingsMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
 
             menuActions = GameObject.Find("CircleMenu")?.GetComponentInChildren<MenuActions>();
@@ -87,9 +96,9 @@ namespace BlackStartX.GestureManager
 
                 if (layoutChanged)
                 {
-                    dummyModule.ReloadRadials();
+                    RefreshId(ref settingsMenuId);
 
-                    SettingsMenu = dummyModule.GetOrCreateRadial(this);
+                    SettingsMenu = dummyModule.GetOrCreateRadial(settingsMenuId);
                     SettingsMenu.Controller = this;
                     SettingsMenu.OpenSettingsMenu(ModSettings);
 
@@ -133,7 +142,7 @@ namespace BlackStartX.GestureManager
             if (Manager.Module == null)
                 return;
 
-            ExpressionsMenu = Manager.Module.GetOrCreateRadial(this);
+            ExpressionsMenu = Manager.Module.GetOrCreateRadial(expressionsMenuId);
         }
         void CalculateExpressionsMenuPosition()
         {
@@ -231,12 +240,13 @@ namespace BlackStartX.GestureManager
                 lastApplied = blurTransform.anchoredPosition
             });
 
-            SettingsMenuToggle.transform.SetParent(mainMenu, false);
+            SettingsMenuUIToggle.transform.SetParent(mainMenu, false);
 
             dummyDescriptor = gameObject.AddComponent<VRCAvatarDescriptor>();
+            gameObject.AddComponent<Animator>();
             dummyModule = new ModuleVrc3(dummyDescriptor);
 
-            SettingsMenu = dummyModule.GetOrCreateRadial(this);
+            SettingsMenu = dummyModule.GetOrCreateRadial(settingsMenuId);
 
             SettingsMenu.Controller = this;
 
@@ -256,6 +266,10 @@ namespace BlackStartX.GestureManager
 
             to.sizeDelta = from.sizeDelta;
             to.pivot = from.pivot;
+        }
+        void RefreshId<T>(ref T id) where T : ScriptableObject
+        {
+            id = ScriptableObject.CreateInstance<T>();
         }
 
         public static void RegisterSettingsMenu(ModSettings setting, params ModSettings[] s) => registerRequests.Enqueue([setting, .. s]);
@@ -293,7 +307,7 @@ namespace BlackStartX.GestureManager
         public string name = name;
 
         public Control.ControlType controlType = controlType;
-        public Texture2D icon = icon ?? EResources.Load<Texture2D>("Void");
+        public Texture2D icon = icon ?? MEGMEStyles.Void;
 
         public float onValue = onValue;
         public float offValue = offValue;

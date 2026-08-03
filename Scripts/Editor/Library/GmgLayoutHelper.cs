@@ -10,9 +10,6 @@ namespace BlackStartX.GestureManager.Editor.Library
 {
     public static class GmgLayoutHelper
     {
-        private static object _unityFieldEnterListenerData;
-        private static string _unityFieldEnterListenerName;
-
         public struct Toolbar
         {
             private GUIContent[] _contents;
@@ -31,19 +28,16 @@ namespace BlackStartX.GestureManager.Editor.Library
 
         public static IEnumerable<EditorWindow> GetInspectorWindows() => Resources.FindObjectsOfTypeAll<EditorWindow>().Where(window => window.titleContent.text == "Inspector");
 
-        public static void GuiLabel((Color? color, string text) tuple, params GUILayoutOption[] options) => GuiLabel(tuple.color, tuple.text, null, options);
+        public static void GuiLabel((Color? color, string text) tuple, params GUILayoutOption[] options) => GuiLabel(LabelRect(options), tuple);
 
-        private static void GuiLabel(Color? color, string text, GUIStyle style = null, params GUILayoutOption[] options)
+        public static void GuiLabel(Rect rect, (Color? color, string text) tuple) => GuiLabel(rect, tuple.color, tuple.text);
+
+        private static void GuiLabel(Rect rect, Color? color, string text, GUIStyle style = null)
         {
-            style ??= GUI.skin.label;
             if (color != null)
-            {
-                var textColor = GUI.contentColor;
-                GUI.contentColor = color.Value;
-                GUILayout.Label(text, style, options);
-                GUI.contentColor = textColor;
-            }
-            else GUILayout.Label(text, style, options);
+                using (new GuiContent(color.Value))
+                    GUI.Label(rect, text, style ?? GestureManagerStyles.WhiteLabel);
+            else GUI.Label(rect, text, style ?? GUI.skin.label);
         }
 
         public static bool Button(string text, Color color, params GUILayoutOption[] options)
@@ -64,6 +58,8 @@ namespace BlackStartX.GestureManager.Editor.Library
             }
         }
 
+        public static bool IconButton(Texture2D texture) => GUILayout.Button(texture, options: new[] { GUILayout.Width(37), GUILayout.Height(37) });
+
         public static bool SettingsGearLabel(string text, bool active, int pixels = 25)
         {
             using (new GUILayout.HorizontalScope())
@@ -73,35 +69,16 @@ namespace BlackStartX.GestureManager.Editor.Library
                 GUILayout.Label(text, GestureManagerStyles.TitleStyle);
                 using (new GUILayout.VerticalScope(option))
                 using (new FlexibleScope())
+                using (new GuiContent(GestureManagerStyles.IconContentColor))
                     return GUILayout.Button(active ? GestureManagerStyles.BackTexture : GestureManagerStyles.GearTexture, GUIStyle.none);
             }
         }
 
-        public static bool UnityFieldEnterListener<T1, T2>(T1 initialText, T2 argument, Rect rect, Func<Rect, T1, T1> field, Action<T2, T1, object> onEscape, string controlName)
-        {
-            if (_unityFieldEnterListenerName != controlName) _unityFieldEnterListenerData = null;
-            var isEnter = Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.KeypadEnter;
-            var isEscape = Event.current.keyCode == KeyCode.Escape;
-            _unityFieldEnterListenerName = controlName;
-            GUI.SetNextControlName(controlName);
-            GUI.FocusControl(controlName);
-            _unityFieldEnterListenerData ??= initialText;
-            var t = field(rect, _unityFieldEnterListenerData is T1 d ? d : default);
-            if (isEnter) onEscape(argument, _unityFieldEnterListenerData is T1 data ? data : default, null);
-            else _unityFieldEnterListenerData = t;
-            if (!isEnter && !isEscape) return false;
-            _unityFieldEnterListenerData = null;
-            GUI.SetNextControlName(controlName);
-            GUI.FocusControl(controlName);
-            EditorGUI.LabelField(Rect.zero, "");
-            return true;
-        }
+        /* ╭────────────────────────────╮ *
+         * │         Rect Utils         │ *
+         * ╰────────────────────────────╯ */
 
-        /*
-         *  Rect Utils!!!
-         *  Rect Utils!!!
-         *  Rect Utils!!!
-         */
+        public static Rect LabelRect(params GUILayoutOption[] options) => GUILayoutUtility.GetRect(new GUIContent(), GUI.skin.label, options);
 
         private static Rect SubtractWidthRight(Rect rect, int width, out Rect rectR)
         {
@@ -112,11 +89,15 @@ namespace BlackStartX.GestureManager.Editor.Library
             return rect;
         }
 
-        /*
-         *  Object Field!!!
-         *  Object Field!!!
-         *  Object Field!!!
-         */
+        public static Rect GetLastRect(ref Rect lastRect)
+        {
+            if (Event.current.type == EventType.Layout || Event.current.type == EventType.Used) return lastRect;
+            return lastRect = GUILayoutUtility.GetLastRect();
+        }
+
+        /* ╭────────────────────────────╮ *
+         * │        Object Field        │ *
+         * ╰────────────────────────────╯ */
 
         private static T ObjectField<T>(string label, T unityObject) where T : UnityEngine.Object
         {
@@ -137,10 +118,10 @@ namespace BlackStartX.GestureManager.Editor.Library
             return GUI.Button(rectR, text.ToString());
         }
 
-        public static Color ResetColorField(string label, Color current, Color reset)
+        public static Color ResetColorField(string label, Color color, Color reset)
         {
             var rectL = SubtractWidthRight(GUILayoutUtility.GetRect(new GUIContent(), GUI.skin.label), 20, out var rectR);
-            return GUI.Button(rectR, "X") ? reset : EditorGUI.ColorField(rectL, label, current);
+            return GUI.Button(rectR, "X") ? reset : EditorGUI.ColorField(rectL, label, color);
         }
 
         public static void Divisor(int height)
@@ -148,12 +129,6 @@ namespace BlackStartX.GestureManager.Editor.Library
             var rect = EditorGUILayout.GetControlRect(false, height);
             rect.height = height;
             EditorGUI.DrawRect(rect, new Color(0.5f, 0.5f, 0.5f, 1));
-        }
-
-        public static Rect GetLastRect(ref Rect lastRect)
-        {
-            if (Event.current.type == EventType.Layout || Event.current.type == EventType.Used) return lastRect;
-            return lastRect = GUILayoutUtility.GetLastRect();
         }
 
         public static ulong ULongField(string label, ulong value)
@@ -190,11 +165,31 @@ namespace BlackStartX.GestureManager.Editor.Library
             }
         }
 
-        /*
-         * Classes...
-         * Classes...
-         * Classes...
-         */
+        public static void HorizontalGrid<T1, T2>(T2 t2, float width, float sizeWidth, float sizeHeight, float divisor, IList<T1> data, Action<T2, Rect, T1> gridRect) where T1 : class
+        {
+            var intCount = (int)(width / sizeWidth);
+            if (intCount <= 0) return;
+            GUILayout.BeginHorizontal();
+            for (var i = 0; i < data.Count + (intCount - data.Count % intCount) % intCount; i++)
+            {
+                var t = i < data.Count ? data[i] : null;
+                GUILayout.FlexibleSpace();
+                var rect = GUILayoutUtility.GetRect(sizeWidth, sizeHeight);
+                if (t != null) gridRect(t2, rect, t);
+
+                if ((i + 1) % intCount != 0) continue;
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                GUILayout.Space(divisor);
+                GUILayout.BeginHorizontal();
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        /* ╭────────────────────────────╮ *
+         * │         Disposable         │ *
+         * ╰────────────────────────────╯ */
 
         internal class GuiContent : IDisposable
         {
@@ -242,26 +237,16 @@ namespace BlackStartX.GestureManager.Editor.Library
             public void Dispose() => GUILayout.FlexibleSpace();
         }
 
-        public static void HorizontalGrid<T1, T2>(T2 t2, float width, float sizeWidth, float sizeHeight, float divisor, IList<T1> data, Action<T2, Rect, T1> gridRect) where T1 : class
+        /* ╭────────────────────────────╮ *
+         * │  Gesture Manager Settings  │ *
+         * ╰────────────────────────────╯ */
+
+        private const string EventName = "GestureManager's settings.";
+
+        private static void RecordObjects(UnityEngine.Object[] objects, string name)
         {
-            var intCount = (int)(width / sizeWidth);
-            if (intCount <= 0) return;
-            GUILayout.BeginHorizontal();
-            for (var i = 0; i < data.Count + (intCount - data.Count % intCount) % intCount; i++)
-            {
-                var t = i < data.Count ? data[i] : null;
-                GUILayout.FlexibleSpace();
-                var rect = GUILayoutUtility.GetRect(sizeWidth, sizeHeight);
-                if (t != null) gridRect(t2, rect, t);
-
-                if ((i + 1) % intCount != 0) continue;
-                GUILayout.FlexibleSpace();
-                GUILayout.EndHorizontal();
-                GUILayout.Space(divisor);
-                GUILayout.BeginHorizontal();
-            }
-
-            GUILayout.EndHorizontal();
+            Undo.RecordObjects(objects, name);
+            foreach (var uObject in objects) EditorUtility.SetDirty(uObject);
         }
 
         public static bool FoldoutSection(string name, ref bool foldout, string content = null)
@@ -271,53 +256,96 @@ namespace BlackStartX.GestureManager.Editor.Library
             return foldout = EditorGUI.Foldout(positionRect, foldout, content);
         }
 
-        /*
-         * Gesture Manager's Settings
-         * Gesture Manager's Settings
-         * Gesture Manager's Settings
-         */
-
-        private const string EventName = "GestureManager's settings.";
-
-        public static T ComponentField<T>(string label, T descriptor, UnityEngine.Object o) where T : Component
+        public static T ComponentField<T>(string label, T descriptor, params UnityEngine.Object[] o) where T : Component
         {
             if (descriptor == (descriptor = ObjectField(label, descriptor))) return descriptor;
-            Undo.RecordObject(o, EventName);
-            EditorUtility.SetDirty(o);
+            RecordObjects(o, EventName);
             return descriptor;
         }
 
-        public static T EnumPopup<T>(string label, T flag, UnityEngine.Object o) where T : Enum
+        public static T EnumPopup<T>(string label, T flag, params UnityEngine.Object[] o) where T : Enum
         {
             var newFlag = (T)EditorGUILayout.EnumPopup(label, flag);
             if (Equals(flag, newFlag)) return flag;
-            Undo.RecordObject(o, EventName);
-            EditorUtility.SetDirty(o);
+            RecordObjects(o, EventName);
             return newFlag;
         }
 
-        public static int Popup(string label, int index, string[] choose, UnityEngine.Object o)
+        public static int Popup(string label, int index, string[] choose, params UnityEngine.Object[] o)
         {
             if (index == (index = EditorGUILayout.Popup(label, index, choose))) return index;
-            Undo.RecordObject(o, EventName);
-            EditorUtility.SetDirty(o);
+            RecordObjects(o, EventName);
             return index;
         }
 
-        public static bool Toggle(string label, bool index, UnityEngine.Object o)
+        public static bool Toggle(string label, bool index, params UnityEngine.Object[] o)
         {
             if (index == (index = EditorGUILayout.Toggle(label, index))) return index;
-            Undo.RecordObject(o, EventName);
-            EditorUtility.SetDirty(o);
+            RecordObjects(o, EventName);
             return index;
         }
 
-        public static float Slider(float value, float leftValue, float rightValue, UnityEngine.Object o)
+        public static float Slider(string label, float value, float leftValue, float rightValue, params UnityEngine.Object[] o)
         {
-            if (Mathf.Approximately(value, value = EditorGUILayout.Slider(value, leftValue, rightValue))) return value;
-            Undo.RecordObject(o, EventName);
-            EditorUtility.SetDirty(o);
+            using (new GUILayout.HorizontalScope())
+            {
+                if (label != null) GUILayout.Label(label, options: GUILayout.Width(EditorGUIUtility.labelWidth));
+                if (Mathf.Approximately(value, value = EditorGUILayout.Slider(value, leftValue, rightValue))) return value;
+                RecordObjects(o, EventName);
+                return value;
+            }
+        }
+
+        public static bool Vector3Field(string label, ref Vector3 value, params UnityEngine.Object[] o)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                if (label != null) GUILayout.Label(label, options: GUILayout.Width(EditorGUIUtility.labelWidth));
+                if (value == (value = EditorGUILayout.Vector3Field(label: "", value))) return false;
+                RecordObjects(o, EventName);
+                return true;
+            }
+        }
+
+        public static bool UnclampedBool(Rect rect, string label, bool value)
+        {
+            rect = EditorGUI.PrefixLabel(rect, new GUIContent(label));
+            var buttonRect = new Rect(rect.x, rect.y, rect.width - EditorGUIUtility.fieldWidth - 2f, rect.height);
+            var toggleRect = new Rect(rect.xMax - EditorGUIUtility.fieldWidth, rect.y, EditorGUIUtility.fieldWidth, rect.height);
+            if (Event.current.type == EventType.MouseDown && buttonRect.Contains(Event.current.mousePosition)) GUIUtility.keyboardControl = 0;
+            value = GUI.Toggle(buttonRect, value, value ? "✓" : "✗", EditorStyles.miniButton);
+            value = GUI.Toggle(toggleRect, value, value ? "True" : "False", EditorStyles.textField);
             return value;
+        }
+
+        public static float UnclampedSlider(Rect rect, string label, float value, float minLeftValue = -1, float maxRightValue = 1)
+        {
+            var fieldRect = new Rect(rect.xMax - EditorGUIUtility.fieldWidth, rect.y, EditorGUIUtility.fieldWidth, rect.height);
+            var isFieldClicked = Event.current.type == EventType.MouseDown && fieldRect.Contains(Event.current.mousePosition);
+            if (isFieldClicked) Event.current.type = EventType.Ignore;
+            EditorGUI.BeginChangeCheck();
+            var sliderResult = EditorGUI.Slider(rect, label, value, minLeftValue, maxRightValue);
+            var isSliderChanged = EditorGUI.EndChangeCheck();
+            if (isFieldClicked) Event.current.type = EventType.MouseDown;
+            GUI.SetNextControlName("UnclampedFloatField");
+            var fieldValue = EditorGUI.FloatField(fieldRect, value);
+            if (isFieldClicked) GUI.FocusControl("UnclampedFloatField");
+            return isSliderChanged ? sliderResult : fieldValue;
+        }
+
+        public static int UnclampedIntSlider(Rect rect, string label, int value, int minLeftValue = 0, int maxRightValue = 255)
+        {
+            var fieldRect = new Rect(rect.xMax - EditorGUIUtility.fieldWidth, rect.y, EditorGUIUtility.fieldWidth, rect.height);
+            var isFieldClicked = Event.current.type == EventType.MouseDown && fieldRect.Contains(Event.current.mousePosition);
+            if (isFieldClicked) Event.current.type = EventType.Ignore;
+            EditorGUI.BeginChangeCheck();
+            var intSliderResult = EditorGUI.IntSlider(rect, label, value, minLeftValue, maxRightValue);
+            var isSliderChanged = EditorGUI.EndChangeCheck();
+            if (isFieldClicked) Event.current.type = EventType.MouseDown;
+            GUI.SetNextControlName("UnclampedIntField");
+            var intFieldValue = EditorGUI.IntField(fieldRect, value);
+            if (isFieldClicked) GUI.FocusControl("UnclampedIntField");
+            return isSliderChanged ? intSliderResult : intFieldValue;
         }
     }
 }

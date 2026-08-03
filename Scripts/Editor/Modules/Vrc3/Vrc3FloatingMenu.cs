@@ -37,6 +37,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         private bool Focused
         {
+            get => _focused;
             set
             {
                 if (_focused == value) return;
@@ -45,7 +46,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 FocusElement.SetVisibility(!value);
                 if (value) Repaint();
             }
-            get => _focused;
         }
 
         private void StopRendering()

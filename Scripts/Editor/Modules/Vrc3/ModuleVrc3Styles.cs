@@ -1,18 +1,15 @@
 ﻿#if VRC_SDK_VRCSDK3
-using BlackStartX.GestureManager.Library;
 using System.Collections.Generic;
-using System.IO;
-//using System.Text;
+using BlackStartX.GestureManager.Library;
 //using UnityEditor.Animations;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
-using AnimLayerType = VRC.SDK3.Avatars.Components.VRCAvatarDescriptor.AnimLayerType;
-using BlendableAnimatorLayer = VRC.SDKBase.VRC_AnimatorLayerControl.BlendableLayer;
-using BlendablePlayableLayer = VRC.SDKBase.VRC_PlayableLayerControl.BlendableLayer;
-using TrackingType = VRC.SDKBase.VRC_AnimatorTrackingControl.TrackingType;
 using ValueType = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.ValueType;
-using System.Reflection;
-using System.Linq;
+using AnimLayerType = VRC.SDK3.Avatars.Components.VRCAvatarDescriptor.AnimLayerType;
+using BlendablePlayableLayer = VRC.SDKBase.VRC_PlayableLayerControl.BlendableLayer;
+using BlendableAnimatorLayer = VRC.SDKBase.VRC_AnimatorLayerControl.BlendableLayer;
+using TrackingType = VRC.SDKBase.VRC_AnimatorTrackingControl.TrackingType;
+using MEGME;
 
 namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 {
@@ -72,11 +69,23 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private static Texture2D _uninitialized;
         private static Texture2D _isLocal;
         private static Texture2D _extras;
+        private static Texture2D _clones;
+        private static Texture2D _looks;
+        private static Texture2D _huePicker;
+        private static Texture2D _valuePicker;
+        private static Texture2D _saturationPicker;
+        private static Texture2D _customColorMain;
+        private static Texture2D _customColorBorder;
+        private static Texture2D _customColorSelected;
         private static Texture2D _isOnFriendsList;
         private static Texture2D _isAnimatorEnabled;
+        private static Texture2D _spawnRemoteFriend;
+        private static Texture2D _spawnRemoteUser;
 
         internal static GUIStyle Url => _url ??= new GUIStyle(GUI.skin.label) { padding = new RectOffset(-6, -6, 1, 0), normal = { textColor = Color.blue } };
         internal static GUIStyle UrlPro => _urlPro ??= new GUIStyle(GUI.skin.label) { padding = new RectOffset(-6, -6, 1, 0), normal = { textColor = Color.cyan } };
+
+        internal static GameObject CullingDiamond => !_cullingDiamond ? _cullingDiamond = Resources.Load<GameObject>("Vrc3/Meshes/CullingDiamond") : _cullingDiamond;
 
         internal static Texture2D Emojis => !_emojis ? _emojis = EResources.Load<Texture2D>("BSX_GM_Emojis") : _emojis;
         internal static Texture2D Option => !_option ? _option = EResources.Load<Texture2D>("BSX_GM_Option") : _option;
@@ -127,8 +136,18 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal static Texture2D Uninitialized => !_uninitialized ? _uninitialized = EResources.Load<Texture2D>("BSX_GM_Uninitialized") : _uninitialized;
         internal static Texture2D IsLocal => !_isLocal ? _isLocal = EResources.Load<Texture2D>("BSX_GM_IsLocal") : _isLocal;
         internal static Texture2D Extras => !_extras ? _extras = EResources.Load<Texture2D>("BSX_GM_Extras") : _extras;
+        internal static Texture2D Clones => !_clones ? _clones = EResources.Load<Texture2D>("BSX_GM_Clones") : _clones;
+        internal static Texture2D Looks => !_looks ? _looks = EResources.Load<Texture2D>("BSX_GM_Looks") : _looks;
+        internal static Texture2D HuePicker => !_huePicker ? _huePicker = EResources.Load<Texture2D>("BSX_GM_HuePicker") : _huePicker;
+        internal static Texture2D ValuePicker => !_valuePicker ? _valuePicker = EResources.Load<Texture2D>("BSX_GM_ValuePicker") : _valuePicker;
+        internal static Texture2D SaturationPicker => !_saturationPicker ? _saturationPicker = EResources.Load<Texture2D>("BSX_GM_SaturationPicker") : _saturationPicker;
+        internal static Texture2D CustomColorMain => !_customColorMain ? _customColorMain = EResources.Load<Texture2D>("BSX_GM_CustomColorMain") : _customColorMain;
+        internal static Texture2D CustomColorBorder => !_customColorBorder ? _customColorBorder = EResources.Load<Texture2D>("BSX_GM_CustomColorBorder") : _customColorBorder;
+        internal static Texture2D CustomColorSelected => !_customColorSelected ? _customColorSelected = EResources.Load<Texture2D>("BSX_GM_CustomColorSelected") : _customColorSelected;
         internal static Texture2D IsOnFriendsList => !_isOnFriendsList ? _isOnFriendsList = EResources.Load<Texture2D>("BSX_GM_IsOnFriendsList") : _isOnFriendsList;
+        internal static Texture2D SpawnRemoteUser => !_spawnRemoteUser ? _spawnRemoteUser = EResources.Load<Texture2D>("BSX_GM_SpawnRemoteUser") : _spawnRemoteUser;
         internal static Texture2D IsAnimatorEnabled => !_isAnimatorEnabled ? _isAnimatorEnabled = EResources.Load<Texture2D>("BSX_GM_IsAnimatorEnabled") : _isAnimatorEnabled;
+        internal static Texture2D SpawnRemoteFriend => !_spawnRemoteFriend ? _spawnRemoteFriend = EResources.Load<Texture2D>("BSX_GM_SpawnRemoteFriend") : _spawnRemoteFriend;
 
         public static class Data
         {

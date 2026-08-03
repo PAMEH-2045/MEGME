@@ -17,12 +17,26 @@ namespace BlackStartX.GestureManager.Modules
         public int userIndex;
 
         public float cullingDistance;
-        public bool isOnFriendsList;
+        public bool isOnFriendsList
+        {
+            get => Settings.Get<bool>("IsOnFriendsList");
+            set => Settings.Set("IsOnFriendsList", value);
+        }
+        //public bool isOnFriendsList;
         public bool simulateCulling;
         public bool loadStored;
-        public Setting<float> isRemote = Setting<float>.Create("IsLocal");
+        public bool isRemote
+        {
+            get => Settings.Get<bool>("IsLocal");
+            set => Settings.Set("IsLocal", value);
+        }
         //public bool isRemote;
-        public bool vrMode;
+        public bool vrMode
+        {
+            get => Settings.Get<bool>("VRMode");
+            set => Settings.Set("VRMode", value);
+        }
+        //public bool vrMode;
     }
 
     public enum Pose

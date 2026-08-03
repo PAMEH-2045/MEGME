@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices;
+using MEGME;
 using VRC.SDK3.Avatars.ScriptableObjects;
 
 namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
@@ -33,6 +34,12 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         {
             _radialMenu = radialMenu;
             _settings = settings;
+        }
+
+        internal void ReloadColors()
+        {
+            if (_controls == null) return;
+            foreach (var slice in _controls) slice.ReloadColors();
         }
 
         public void Open()

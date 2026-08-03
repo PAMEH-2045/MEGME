@@ -22,25 +22,19 @@ namespace BlackStartX.GestureManager
         //public ModuleBase Module;
         public ModuleSettings settings;
 
-        //private void OnEnable() => GmgEditorCallbacks.Undo.UndoRedoPerformed += HandleUndoRedo;
+        private void OnDisable()
+        {
+            //if (GmgEditorCallbacks.Undo.IsProcessing) GmgEditorCallbacks.Undo.UndoRedoPerformed += HandleUndoRedo;
+            //else UnlinkModule();
+            UnlinkModule();
+        }
 
-        //private void OnDisable()
-        //{
-        //    if (GmgEditorCallbacks.Undo.IsProcessing) return;
-        //    PerformOnDisable();
-        //}
-
-        //private void PerformOnDisable()
-        //{
-        //    GmgEditorCallbacks.Undo.UndoRedoPerformed -= HandleUndoRedo;
-        //    UnlinkModule();
-        //}
-
-        //private void HandleUndoRedo()
-        //{
-        //    if (isActiveAndEnabled) return;
-        //    PerformOnDisable();
-        //}
+        private void HandleUndoRedo()
+        {
+            //GmgEditorCallbacks.Undo.UndoRedoPerformed -= HandleUndoRedo;
+            if (isActiveAndEnabled) return;
+            UnlinkModule();
+        }
 
         //private void OnDrawGizmos() => Module?.OnDrawGizmos();
 
