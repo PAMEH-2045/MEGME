@@ -56,7 +56,7 @@ namespace MEGME
 
             if (bigScreenWasActive != (bigScreenWasActive = CurrentModel.IsBigScreenActive))
             {
-                Manager.Module.AvatarTools.ContactsClickable.BlockExecution = bigScreenWasActive;
+                Manager.Module.AvatarTools.ContactsClickable.BlockExecution = !bigScreenWasActive;
             }
         }
         void OnDisable()
