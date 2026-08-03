@@ -26,7 +26,13 @@ namespace MEGME
             StartCoroutine(AutoSave());
         }
 
-        private void OnApplicationQuit() => SaveToDisk();
+        private void OnApplicationQuit()
+        {
+            if (isDirty)
+            {
+                SaveToDisk();
+            }
+        }
 
         protected void SaveToDisk()
         {
