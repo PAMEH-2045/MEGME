@@ -77,9 +77,10 @@ namespace MEGME
     [HarmonyPatch]
     class FixGraphConflict
     {
-        /**
+        /*
          * Without removing, runtimeAnimatorController's graph would fight with GM's graph for animtor, resulting in unpredictable behavior
          */
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(AvatarDanceHandler), "EnsureAnimatorReady")]
         static void RemoveControllerIfGMActive(bool __result, Animator ___animator)
@@ -97,9 +98,10 @@ namespace MEGME
     [HarmonyPatch, OptionalPatch]
     class FixRedundantFindAvatarSmartExecution
     {
-        /**
+        /*
          * Since animator.runtimeAnimatorController is always null the condition is always true, so unity-heavy FindAvatarSmart() is called every frame, reducing preformance
          */
+
         static readonly AccessTools.FieldRef<AvatarDanceHandler, Animator> animator = AccessTools.FieldRefAccess<AvatarDanceHandler, Animator>("animator");
         static readonly AccessTools.FieldRef<AvatarDanceHandler, Animator> lastAnimator = AccessTools.FieldRefAccess<AvatarDanceHandler, Animator>("lastAnimator");
         static readonly AccessTools.FieldRef<AvatarDanceHandler, RuntimeAnimatorController> defaultController = AccessTools.FieldRefAccess<AvatarDanceHandler, RuntimeAnimatorController>("defaultController");
@@ -142,9 +144,10 @@ namespace MEGME
     [HarmonyPatch, OptionalPatch]
     class FixNullReferenceOnMissingScript
     {
-        /**
+        /*
          * https://github.com/shinyflvre/Mate-Engine/issues/535
          */
+
         static readonly AccessTools.FieldRef<AvatarBigScreenHandler, bool> isBigScreenActiveField = AccessTools.FieldRefAccess<AvatarBigScreenHandler, bool>("isBigScreenActive");
 
         [HarmonyPrefix]
@@ -236,23 +239,28 @@ namespace MEGME
     [HarmonyPatch, OptionalPatch]
     class FixVRM1Eyetracking
     {
-        /**
+        /*
          * https://github.com/shinyflvre/Mate-Engine/issues/536
          */
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(AvatarMouseTracking), "DoEye")]
         static bool ReplaceWithVRM1Eyetracking(Vrm10Instance ___vrm10, Camera ___mainCam, Animator ___animator,
             Transform ___leftEyeBone, Transform ___rightEyeBone, Transform ___eyeCenter, Transform ___leftEyeDriver, Transform ___rightEyeDriver,
-             float ___eyeYawLimit, float ___eyePitchLimit, float ___eyeSmoothness)
+             float ___eyeYawLimit, float ___eyePitchLimit, float ___eyeSmoothness, float ___eyeBlend)
         {
             var mouse = Input.mousePosition;
             var world = ___mainCam.ScreenToWorldPoint(new Vector3(mouse.x, mouse.y, ___mainCam.nearClipPlane));
+
             if (!___leftEyeBone || !___rightEyeBone || !___eyeCenter) return false;
+
             ___eyeCenter.position = (___leftEyeBone.position + ___rightEyeBone.position) * 0.5f;
             var dir = (world - ___eyeCenter.position).normalized;
             var localDir = ___animator.GetBoneTransform(HumanBodyBones.Head).InverseTransformDirection(dir);
+
             float eyeYaw = Mathf.Clamp(Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg, -___eyeYawLimit, ___eyeYawLimit);
             float eyePitch = Mathf.Clamp(Mathf.Asin(localDir.y) * Mathf.Rad2Deg, -___eyePitchLimit, ___eyePitchLimit);
+
             if (___vrm10)
             {
                 var smoothYaw = Mathf.Lerp(___vrm10.Runtime.LookAt.Yaw, eyeYaw, Time.deltaTime * ___eyeSmoothness);
@@ -261,9 +269,12 @@ namespace MEGME
                 ___vrm10.Runtime.LookAt.SetYawPitchManually(smoothYaw, smoothPitch);
                 return false;
             }
+
             var eyeRot = Quaternion.Euler(-eyePitch, eyeYaw, 0f);
             ___leftEyeDriver.localRotation = Quaternion.Slerp(___leftEyeDriver.localRotation, eyeRot, Time.deltaTime * ___eyeSmoothness);
             ___rightEyeDriver.localRotation = Quaternion.Slerp(___rightEyeDriver.localRotation, eyeRot, Time.deltaTime * ___eyeSmoothness);
+            ___leftEyeBone.localRotation = Quaternion.Slerp(___leftEyeBone.localRotation, ___leftEyeDriver.localRotation, ___eyeBlend);
+            ___rightEyeBone.localRotation = Quaternion.Slerp(___rightEyeBone.localRotation, ___rightEyeDriver.localRotation, ___eyeBlend);
 
             return false;
         }
@@ -272,7 +283,7 @@ namespace MEGME
     [HarmonyPatch, OptionalPatch]
     class FixSpringBoneJittering
     {
-        /**
+        /*
          * https://github.com/shinyflvre/Mate-Engine/issues/526
          */
 
@@ -372,7 +383,7 @@ namespace MEGME
 
         [HarmonyReversePatch]
         [HarmonyPatch(typeof(SaveLoadHandler), nameof(SaveLoadHandler.SaveToDisk))]
-        static void ActualSaveToDisk(SaveLoadHandler instance) => 
+        static void ActualSaveToDisk(SaveLoadHandler instance) =>
             throw new NotImplementedException();
 
         [HarmonyPrefix]
@@ -440,15 +451,15 @@ namespace MEGME
                 }
 
                 foreach (var food in Root.GetComponentsInChildren<AvatarFoodController>(true))
-                //foreach (var food in Resources.FindObjectsOfTypeAll<AvatarFoodController>())
+                    //foreach (var food in Resources.FindObjectsOfTypeAll<AvatarFoodController>())
                     food.SetFeatureEnabled(SaveLoadHandler.Instance.data.enableFeedSystem);
 
                 foreach (var handler in Root.GetComponentsInChildren<AvatarWindowHandler>(true))
-                //foreach (var handler in Resources.FindObjectsOfTypeAll<AvatarWindowHandler>())
+                    //foreach (var handler in Resources.FindObjectsOfTypeAll<AvatarWindowHandler>())
                     handler.windowSitYOffset = data.windowSitYOffset;
 
                 foreach (var loco in Root.GetComponentsInChildren<AvatarLocomotionController>(true))
-                //foreach (var loco in Resources.FindObjectsOfTypeAll<AvatarLocomotionController>())
+                    //foreach (var loco in Resources.FindObjectsOfTypeAll<AvatarLocomotionController>())
                     loco.EnableLocomotion = data.enableLocomotion;
 
             }
@@ -460,20 +471,20 @@ namespace MEGME
     [HarmonyPatch, OptionalPatch]
     class FixAvatarScaleControllerDeferredData
     {
-        /**
-         * If cursor leaves window while scale is being adjusted, controller stores unapplied data and reapplies it the next time app gains focus
+        /*
+         * If cursor leaves window while scale is being adjusted, controller stores unapplied data and reapplies it the next time mouse hovers above app
          */
-        
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(AvatarScaleController), "Update")]
-        static void Update(float ___scrollSensitivity, float ___smoothFactor, float ___minSize, float ___maxSize, float ___targetSize, 
+        static bool ReplaceWithAlwaysApply(float ___scrollSensitivity, float ___smoothFactor, float ___minSize, float ___maxSize, ref float ___targetSize,
             Slider ___avatarSizeSlider, Transform ___modelRoot, GameObject ___currentModel, AvatarAnimatorController ___controller)
         {
             if (___avatarSizeSlider == null)
-                return;
+                return false;
 
             if (MenuActions.IsMovementBlocked())
-                return;
+                return false;
 
             if (!UniWindowController.current.isClickThrough)
             {
@@ -508,7 +519,7 @@ namespace MEGME
             }
 
             if (___controller != null && ___controller.isDragging)
-                return;
+                return false;
 
             float current = ___avatarSizeSlider.value;
             float smoothed = Mathf.Lerp(
@@ -525,7 +536,167 @@ namespace MEGME
                 SaveLoadHandler.Instance.SaveToDisk();
                 SaveLoadHandler.ApplyAllSettingsToAllAvatars();
             }
+
+            return false;
+        }
+    }
+
+    [HarmonyPatch, OptionalPatch]
+    class FixBlendshapeManagerLag
+    {
+        /*
+         * BlendshapeManager creates lag spikes 60fps->30fps every $rescanInterval
+         */
+
+        static readonly Action<BlendshapeManager> RebuildUIBlocks = AccessTools.MethodDelegate<Action<BlendshapeManager>>(
+            AccessTools.Method(typeof(BlendshapeManager), "RebuildUIBlocks"));
+        static readonly Action<BlendshapeManager> LoadFromDisk = AccessTools.MethodDelegate<Action<BlendshapeManager>>(
+            AccessTools.Method(typeof(BlendshapeManager), "LoadFromDisk"));
+        static readonly Action<BlendshapeManager> ApplyAllToAvatar = AccessTools.MethodDelegate<Action<BlendshapeManager>>(
+            AccessTools.Method(typeof(BlendshapeManager), "ApplyAllToAvatar"));
+
+        static readonly Type blendRefType = AccessTools.Inner(typeof(BlendshapeManager), "BlendRef");
+
+        static readonly AccessTools.FieldRef<object, SkinnedMeshRenderer> smrField = AccessTools.FieldRefAccess<SkinnedMeshRenderer>(blendRefType, "smr");
+        static readonly AccessTools.FieldRef<object, int> indexField = AccessTools.FieldRefAccess<int>(blendRefType, "index");
+        static readonly AccessTools.FieldRef<object, string> shapeNameField = AccessTools.FieldRefAccess<string>(blendRefType, "shapeName");
+        static readonly AccessTools.FieldRef<object, string> uniqueKeyField = AccessTools.FieldRefAccess<string>(blendRefType, "uniqueKey");
+
+        static int currentSignature;
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(BlendshapeManager), "BuildRefsIfChanged")]
+        static bool ReplaceWithOptimized(BlendshapeManager __instance, bool ___onlyUnderActiveAvatar, ref string ___currentAvatarName, ref List<object> ___currentRefs)
+        {
+            var root = ResolveActiveAvatarRoot(out string avatarNameGuess);
+            if (string.IsNullOrEmpty(avatarNameGuess))
+                avatarNameGuess = "DefaultAvatar";
+
+            var smrs = (___onlyUnderActiveAvatar && root != null)
+                ? root.GetComponentsInChildren<SkinnedMeshRenderer>()
+                : GameObject.FindObjectsByType<SkinnedMeshRenderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+
+            var newRefs = new List<object>();
+
+            foreach (var smr in smrs)
+            {
+                if (smr == null || !smr.gameObject.activeInHierarchy || !smr.enabled) continue;
+
+                var mesh = smr.sharedMesh;
+                if (mesh == null) continue;
+
+                int count = mesh.blendShapeCount;
+                if (count <= 0) continue;
+
+
+                string path = GetTransformPath(smr.transform, root);
+
+                for (int i = 0; i < count; i++)
+                {
+                    string name = smr.sharedMesh.GetBlendShapeName(i);
+                    if (string.IsNullOrEmpty(name)) continue;
+
+                    string key = path + ":" + name;
+
+                    var blendref = Activator.CreateInstance(blendRefType);
+                    smrField(blendref) = smr;
+                    indexField(blendref) = i;
+                    shapeNameField(blendref) = name;
+                    uniqueKeyField(blendref) = key;
+
+                    newRefs.Add(blendref);
+                }
+            }
+
+            newRefs.Sort(static (a, b) =>
+                StringComparer.OrdinalIgnoreCase.Compare(uniqueKeyField(a), uniqueKeyField(b)));
+
+            int newSignature = ComputeSignature(newRefs);
+            bool avatarChanged = !string.Equals(avatarNameGuess, ___currentAvatarName, StringComparison.Ordinal);
+            bool setChanged = currentSignature != newSignature;
+
+            if (avatarChanged || setChanged)
+            {
+                ___currentAvatarName = avatarNameGuess;
+                currentSignature = newSignature;
+                ___currentRefs = newRefs;
+                RebuildUIBlocks(__instance);
+                LoadFromDisk(__instance);
+                ApplyAllToAvatar(__instance);
+            }
+
+            return false;
         }
 
+        static readonly AccessTools.FieldRef<VRMLoader, GameObject> customModelOutput = AccessTools.FieldRefAccess<VRMLoader, GameObject>("customModelOutput");
+        static readonly AccessTools.FieldRef<VRMLoader, GameObject> mainModel = AccessTools.FieldRefAccess<VRMLoader, GameObject>("mainModel");
+
+        static Transform ResolveActiveAvatarRoot(out string avatarName)
+        {
+            var transform = CurrentModel.transform ?? FallBack() ?? FallBack2();
+
+            avatarName = transform?.name;
+            return transform;
+
+            static Transform FallBack()
+            {
+                var loader = GameObject.FindFirstObjectByType<VRMLoader>();
+
+                var cunstomGO = customModelOutput(loader);
+                if (cunstomGO != null && cunstomGO.activeInHierarchy)
+                    return cunstomGO.transform;
+
+                var mainGO = mainModel(loader);
+                if (mainGO != null && mainGO.activeInHierarchy)
+                    return mainGO.transform;
+
+                return null;
+            }
+
+            static Transform FallBack2()
+            {
+                var modelRootGO = GameObject.Find("Model");
+                if (modelRootGO == null)
+                    return null;
+
+                var root = modelRootGO.transform;
+
+                for (int i = 0; i < root.childCount; i++)
+                {
+                    var child = root.GetChild(i).gameObject;
+                    if (!child.activeInHierarchy) continue;
+
+                    return child.transform;
+                }
+
+                return null;
+            }
+        }
+
+        // MEX3.3.0 BlendshapeManager
+        private static string GetTransformPath(Transform t, Transform stopAt)
+        {
+            var stack = new List<string>();
+            var cur = t;
+            while (cur != null && cur != stopAt)
+            {
+                stack.Add(cur.name);
+                cur = cur.parent;
+            }
+            stack.Reverse();
+            return string.Join("/", stack);
+        }
+
+        static int ComputeSignature(List<object> refs)
+        {
+            HashCode hash = new HashCode();
+
+            foreach (var r in refs)
+            {
+                hash.Add(uniqueKeyField(r));
+            }
+
+            return hash.ToHashCode();
+        }
     }
 }
