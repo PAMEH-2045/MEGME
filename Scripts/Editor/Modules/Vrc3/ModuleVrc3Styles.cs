@@ -64,6 +64,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         private static Texture2D _velocity;
         private static Texture2D _visemes;
         private static Texture2D _vRMode;
+        private static Texture2D _headChops;
         private static Texture2D _afk;
         private static Texture2D _fourPoint;
         private static Texture2D _uninitialized;
@@ -132,6 +133,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         internal static Texture2D Visemes => !_visemes ? _visemes = EResources.Load<Texture2D>("BSX_GM_Visemes") : _visemes;
         internal static Texture2D VRMode => !_vRMode ? _vRMode = EResources.Load<Texture2D>("BSX_GM_VRMode") : _vRMode;
         internal static Texture2D Afk => !_afk ? _afk = EResources.Load<Texture2D>("BSX_GM_AFK") : _afk;
+        internal static Texture2D HeadChops => !_headChops ? _headChops = EResources.Load<Texture2D>("BSX_GM_HeadChop") : _headChops;
         internal static Texture2D FourPoint => !_fourPoint ? _fourPoint = EResources.Load<Texture2D>("BSX_GM_FourPoint") : _fourPoint;
         internal static Texture2D Uninitialized => !_uninitialized ? _uninitialized = EResources.Load<Texture2D>("BSX_GM_Uninitialized") : _uninitialized;
         internal static Texture2D IsLocal => !_isLocal ? _isLocal = EResources.Load<Texture2D>("BSX_GM_IsLocal") : _isLocal;
