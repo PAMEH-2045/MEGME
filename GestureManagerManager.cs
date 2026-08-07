@@ -19,8 +19,6 @@ namespace MEGME
         [SerializeField] private GestureManager Manager;
         [SerializeField] private RadialMenuController radialMenuController;
 
-        [SerializeField] private bool bindMEController = true;
-
         bool? bigScreenWasActive;
 
         void OnEnable()

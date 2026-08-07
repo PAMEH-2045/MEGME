@@ -230,9 +230,9 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         {
             if (PoseMode) SetPose(AvatarAnimator);
             if (_scaleFactors.Count != 0) ResetHeadChops();
-            if (DummyMode == null) Avatar.transform.localScale = _baseScale * _scale;
+            //if (DummyMode == null) Avatar.transform.localScale = _baseScale * _scale;
             if (HeadChop.BoolValue()) ApplyHeadChop(GetParam(Vrc3DefaultParams.VRMode));
-            foreach (var module in _clones) module.NetPose(module.AvatarAnimator, _cloneSyncDelay);
+            //foreach (var module in _clones) module.NetPose(module.AvatarAnimator, _cloneSyncDelay);
             AvatarTools.OnLateUpdate(this);
         }
 
