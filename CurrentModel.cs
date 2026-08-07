@@ -10,7 +10,7 @@ namespace MEGME
         public static event Action OnAvatarSwitch;
         public static GameObject gameObject { get; private set; }
         public static Transform Root { get; private set; }
-        public static Transform transform => gameObject.transform;
+        public static Transform transform => gameObject?.transform;
         public static Animator Animator { get; private set; }
 
         static readonly float avatarScanInterval = 0.25f;
@@ -50,11 +50,12 @@ namespace MEGME
         static void UpdateAvatarComponents()
         {
             CurrentModel.Animator = GetComponent<Animator>();
-            AvatarBigScreenHandlerProxy.Inst = GetComponent<AvatarBigScreenHandler>();
-            AvatarGravityControllerProxy.Inst = GetComponent<AvatarGravityController>();
-            UniversalBlendshapesProxy.Inst = GetComponent<UniversalBlendshapes>();
+            AvatarBigScreenHandler.Inst = GetComponent<global::AvatarBigScreenHandler>();
+            AvatarGravityController.Inst = GetComponent<global::AvatarGravityController>();
+            UniversalBlendshapes.Inst = GetComponent<global::UniversalBlendshapes>();
+            IKFix.Inst = GetComponent<global::IKFix>();
 
-            DynamicBoneAvatarGravityControllerProxy.Inst = AddComponent<DynamicBoneAvatarGravityController>();
+            DynamicBoneAvatarGravityController.Inst = AddComponent<MEGME.DynamicBoneAvatarGravityController>();
         }
         public static T GetComponent<T>() where T : Component
             => gameObject.GetComponent<T>();
@@ -62,35 +63,40 @@ namespace MEGME
             => gameObject.AddComponent<T>();
 
 
-        public static bool IsBigScreenActive => AvatarBigScreenHandlerProxy.isBigScreenActive;
-        public static class AvatarBigScreenHandlerProxy
+        public static bool IsBigScreenActive => AvatarBigScreenHandler.isBigScreenActive;
+        public class AvatarBigScreenHandler
         {
-            public static AvatarBigScreenHandler Inst;
+            public static global::AvatarBigScreenHandler Inst;
 
-            static readonly AccessTools.FieldRef<AvatarBigScreenHandler, bool> _isBigScreenActive = AccessTools.FieldRefAccess<AvatarBigScreenHandler, bool>("isBigScreenActive");
+            static readonly AccessTools.FieldRef<global::AvatarBigScreenHandler, bool> _isBigScreenActive = AccessTools.FieldRefAccess<global::AvatarBigScreenHandler, bool>("isBigScreenActive");
             public static bool isBigScreenActive
             {
                 get => _isBigScreenActive != null ? _isBigScreenActive(Inst) : false;
             }
         }
-        public static class AvatarGravityControllerProxy
+        public static class AvatarGravityController
         {
-            public static AvatarGravityController Inst;
+            public static global::AvatarGravityController Inst;
         }
-        public static class UniversalBlendshapesProxy
+        public static class UniversalBlendshapes
         {
-            public static UniversalBlendshapes Inst;
+            public static global::UniversalBlendshapes Inst;
 
-            static readonly AccessTools.FieldRef<UniversalBlendshapes, VRMBlendShapeProxy> _proxy0 = AccessTools.FieldRefAccess<UniversalBlendshapes, VRMBlendShapeProxy>("proxy0");
+            static readonly AccessTools.FieldRef<global::UniversalBlendshapes, VRMBlendShapeProxy> _proxy0 = AccessTools.FieldRefAccess<global::UniversalBlendshapes, VRMBlendShapeProxy>("proxy0");
             public static VRMBlendShapeProxy proxy0
             {
                 get => _proxy0(Inst);
                 set => _proxy0(Inst) = value;
             }
         }
-        public static class DynamicBoneAvatarGravityControllerProxy
+        public static class DynamicBoneAvatarGravityController
         {
-            public static DynamicBoneAvatarGravityController Inst;
+            public static MEGME.DynamicBoneAvatarGravityController Inst;
+        }
+        public static bool EnableIK { get => IKFix.Inst.enableIK; set => IKFix.Inst.enableIK = value; }
+        public static class IKFix
+        {
+            public static global::IKFix Inst;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace MEGME
 
         [SerializeField] private bool bindMEController = true;
 
-        bool bigScreenWasActive;
+        bool? bigScreenWasActive;
 
         void OnEnable()
         {
@@ -45,7 +45,7 @@ namespace MEGME
 
             if (bigScreenWasActive != (bigScreenWasActive = CurrentModel.IsBigScreenActive))
             {
-                Manager.Module.AvatarTools.ContactsClickable.BlockExecution = !bigScreenWasActive;
+                Manager.Module.AvatarTools.ContactsClickable.BlockExecution = !bigScreenWasActive.Value;
             }
         }
         void OnDisable()
@@ -82,7 +82,7 @@ namespace MEGME
             var visemeMesh = descriptor.VisemeSkinnedMesh;
             var eyelidMesh = descriptor.customEyeLookSettings.eyelidsSkinnedMesh;
 
-            CurrentModel.UniversalBlendshapesProxy.proxy0 = CurrentModel.AddComponent<VRMBlendShapeProxy>();
+            CurrentModel.UniversalBlendshapes.proxy0 = CurrentModel.AddComponent<VRMBlendShapeProxy>();
             var blendShapeAvatar = ScriptableObject.CreateInstance<BlendShapeAvatar>();
 
             foreach (var (preset, entry) in VRC_VRM)
@@ -120,7 +120,7 @@ namespace MEGME
                 }
             }
 
-            CurrentModel.UniversalBlendshapesProxy.proxy0.BlendShapeAvatar = blendShapeAvatar;
+            CurrentModel.UniversalBlendshapes.proxy0.BlendShapeAvatar = blendShapeAvatar;
 
             (SkinnedMeshRenderer targetMesh, int targetIndex) FromViseme(Viseme viseme)
             {
