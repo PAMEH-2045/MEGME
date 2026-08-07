@@ -1423,6 +1423,7 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
             _default[receiver] = receiver.contentTypes;
             receiver.contentTypes = ContactFlagsFor(Settings.isRemote, receiver);
             receiver.paramAccess = new AnimParameterAccessAvatarGmg(this, receiver.parameter);
+            receiver.allowSelf = false; // prevent model self collision in animations
         }
 
         private void SenderBaseSetup(ContactSender sender)
