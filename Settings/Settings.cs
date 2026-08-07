@@ -1,5 +1,4 @@
-﻿using BlackStartX.GestureManager;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace MEGME.Settings
 {
