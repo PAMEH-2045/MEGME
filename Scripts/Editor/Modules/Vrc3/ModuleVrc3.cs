@@ -154,9 +154,11 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
         AnimationLayerMixerPlayable mixer;
         uint meHeadLayer;
         uint meTailLayer;
+        AvatarMask mask = new();
         public override void Update()
         {
-            var mask = new AvatarMask();
+            CurrentModel.EnableIK = SaveLoadHandler.Instance.data.enableIK;
+
             foreach (var control in TrackingControls)
             {
                 var trackingPart = control.Key;
@@ -164,16 +166,19 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                     continue;
 
                 var trackingType = control.Value;
-                bool trackingValue = trackingType switch
+                bool isTracking = trackingType switch
                 {
                     VRC_AnimatorTrackingControl.TrackingType.Tracking => true,
                     VRC_AnimatorTrackingControl.TrackingType.Animation => false,
                     _ => throw new NotImplementedException()
                 };
 
+                if (!isTracking)
+                    CurrentModel.EnableIK = false;
+
                 foreach (var bodyPart in bodyParts)
                 {
-                    mask.SetHumanoidBodyPartActive(bodyPart, trackingValue);
+                    mask.SetHumanoidBodyPartActive(bodyPart, isTracking);
                 }
             }
             List<string> masked = [];
