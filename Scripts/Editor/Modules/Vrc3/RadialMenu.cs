@@ -318,7 +318,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
 
         private void ModMainMenuPrefab()
         {
-
             OpenCustom(new RadialSliceBase[]
             {
                 new RadialSliceButton(OptionMainMenuPrefab, "Options", ModuleVrc3Styles.Option),
@@ -326,7 +325,6 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                 new RadialSliceButton(LooksMenuPrefab, "Looks", ModuleVrc3Styles.Looks),
                 new RadialSliceButton(ToolMenuPrefab, "Tools", ModuleVrc3Styles.Tools)
             });
-
         }
 
         private void ExpressionsMenu()

@@ -83,12 +83,13 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                     Hue.InternalSet(_hSAtV[0]);
                     Sat.InternalSet(_hSAtV[1]);
                     Val.InternalSet(_hSAtV[2]);
-                    Alpha.InternalSet(value.a); //
+                    Alpha.InternalSet(_alpha = value.a); //
                     Colors.Reload();
                     SetPref(value);
                 }
 
                 private readonly float[] _hSAtV = new float[3];
+                private float _alpha; //
                 private readonly string _key;
 
                 public readonly Vrc3Param Hue;
@@ -107,9 +108,9 @@ namespace BlackStartX.GestureManager.Editor.Modules.Vrc3
                     Color = GetPref();
                 }
 
-                private void OnHueChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0] = value, _hSAtV[1], _hSAtV[2]));
-                private void OnSatChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0], _hSAtV[1] = value, _hSAtV[2]));
-                private void OnValChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0], _hSAtV[1], _hSAtV[2] = value));
+                private void OnHueChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0] = value, _hSAtV[1], _hSAtV[2]) with { a = _alpha });
+                private void OnSatChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0], _hSAtV[1] = value, _hSAtV[2]) with { a = _alpha });
+                private void OnValChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0], _hSAtV[1], _hSAtV[2] = value) with { a = _alpha });
                 private void OnAlphaChange(Vrc3Param param, float value) => Reload(_color = Color.HSVToRGB(_hSAtV[0], _hSAtV[1], _hSAtV[2]) with { a = value });
             }
 
