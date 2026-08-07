@@ -3,7 +3,6 @@ using BlackStartX.GestureManager.Editor.Modules.Vrc3;
 using BlackStartX.GestureManager.Editor.Modules.Vrc3.Params;
 using HarmonyLib;
 using MEGME.Settings;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VRC.SDK3.Avatars.Components;
-using VRC.SDK3.Avatars.ScriptableObjects;
+using Xamin;
 using static MEGME.ModSettings;
 using static VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu;
 using RadialSettings = BlackStartX.GestureManager.Editor.Modules.Vrc3.RadialSlices.RadialSliceControl.RadialSettings;
@@ -20,46 +19,65 @@ namespace MEGME
 {
     public class RadialMenuController : MonoBehaviour
     {
+        class MenuId : ScriptableObject { }
+
         [SerializeField] private GestureManager Manager;
 
-        VisualElement _root;
         UIDocument doc;
-        RadialMenu ExpressionsMenu;
-        SettingsMenuPosition settingsMenuPosition;
-        AccessTools.FieldRef<SettingsMenuPosition, bool> lastAtRightEdge = AccessTools.FieldRefAccess<SettingsMenuPosition, bool>("lastAtRightEdge");
+        VisualElement root;
 
-        Vector2 menuPosOrigin = new(1168, 632);
-        Vector2 targetRes = new(1536, 1024);
+        RadialMenu ExpressionsMenu;
+        RadialMenu SettingsMenu;
+
+        MenuId settingsMenuId;
+        MenuId expressionsMenuId;
+
         Rect expressionsMenuRect = new(1017, 493, 300, 300);
         Rect settingsMenuRect = new(1017, 493, 300, 300);
-
-        List<ModSettings> ModSettings = new();
-        RadialMenu SettingsMenu;
 
         bool isExpressionsMenuRendering;
         bool isSettingsMenuRendering;
 
-        public GameObject SettingsMenuUIToggle;
         public GameObject ExpressionsMenuToggle;
+        public GameObject SettingsMenuUIToggle;
+
+        MenuActions actions;
+
+
+        public Xamin.Button selectorButton;
+
+        string targetSelectorButton = "Clothes";
+
+        bool isButtonСonfigured;
+
+        SettingsMenuPosition MEMenuPosition;
+        readonly AccessTools.FieldRef<SettingsMenuPosition, bool> lastAtRightEdge = AccessTools.FieldRefAccess<SettingsMenuPosition, bool>("lastAtRightEdge");
+
+        Vector2 menuPosOrigin = new(1168, 632);
+        Vector2 targetRes = new(1536, 1024);
+
+        CircleSelector selector;
+
+        int actionsEntryIndex;
+        MenuEntry actionsEntryOrigin;
+        int selectorButtonIndex;
+        GameObject selectorButtonOrigin;
+
 
         public GameObject MenuBlur;
 
-        static Queue<List<ModSettings>> registerRequests = new();
-
+        readonly List<ModSettings> modSettings = new();
+        static readonly Queue<List<ModSettings>> registerRequests = new();
         bool layoutChanged;
 
         ModuleVrc3 dummyModule;
         VRCAvatarDescriptor dummyDescriptor;
 
-        AccessTools.FieldRef<MenuActions, Xamin.CircleSelector> radialMenu = AccessTools.FieldRefAccess<MenuActions, Xamin.CircleSelector>("radialMenu");
-        Xamin.CircleSelector radialMenuOrig;
-        MenuActions menuActions;
+        readonly AccessTools.FieldRef<MenuActions, CircleSelector> radialMenu = AccessTools.FieldRefAccess<MenuActions, CircleSelector>("radialMenu");
+        CircleSelector radialMenuOrigin;
 
         RectTransform outerTransform;
         UiTooltip[] tooltips;
-
-        VRCExpressionsMenu settingsMenuId;
-        VRCExpressionsMenu expressionsMenuId;
 
         void Awake()
         {
@@ -67,21 +85,26 @@ namespace MEGME
         }
         void OnEnable()
         {
-            _root = doc.rootVisualElement;
+            root = doc.rootVisualElement;
 
-            _root.pickingMode = PickingMode.Ignore;
-            _root.style.color = Color.white; // text color is inherited from parent
+            root.pickingMode = PickingMode.Ignore;
+            root.style.color = Color.white; // text color is inherited from parent
         }
         void Start()
         {
-            settingsMenuId = ScriptableObject.CreateInstance<VRCExpressionsMenu>();
-            expressionsMenuId = ScriptableObject.CreateInstance<VRCExpressionsMenu>();
+            settingsMenuId = ScriptableObject.CreateInstance<MenuId>();
+            expressionsMenuId = ScriptableObject.CreateInstance<MenuId>();
 
-            settingsMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
+            MEMenuPosition = FindFirstObjectByType<SettingsMenuPosition>();
 
-            menuActions = GameObject.Find("CircleMenu")?.GetComponentInChildren<MenuActions>();
+            var circleMenu = GameObject.Find("CircleMenu");
+            actions = circleMenu?.GetComponentInChildren<MenuActions>();
+            selector = circleMenu?.GetComponentInChildren<CircleSelector>();
 
-            if (settingsMenuPosition && menuActions)
+            if (actions && selector && MEMenuPosition)
+                SetupExpressionsMenu();
+
+            if (actions)
                 SetupSettingsMenu();
         }
         public void OnUpdate()
@@ -100,7 +123,7 @@ namespace MEGME
 
                     SettingsMenu = dummyModule.GetOrCreateRadial(settingsMenuId);
                     SettingsMenu.Controller = this;
-                    SettingsMenu.OpenSettingsMenu(ModSettings);
+                    SettingsMenu.OpenSettingsMenu(modSettings);
 
                     layoutChanged = false;
                 }
@@ -115,7 +138,7 @@ namespace MEGME
                     CalculateExpressionsMenuPosition();
 
                     ExpressionsMenu.Rect = expressionsMenuRect;
-                    ExpressionsMenu.Render(_root, expressionsMenuRect);
+                    ExpressionsMenu.Render(root, expressionsMenuRect);
                 }
                 else
                     ExpressionsMenu.StopRendering();
@@ -128,9 +151,9 @@ namespace MEGME
                     CalculateSettingsMenuPosition();
 
                     SettingsMenu.Rect = settingsMenuRect;
-                    SettingsMenu.Render(_root, settingsMenuRect);
+                    SettingsMenu.Render(root, settingsMenuRect);
 
-                    if (Input.GetKeyDown(menuActions.radialMenuKey))
+                    if (Input.GetKeyDown(actions.radialMenuKey))
                         ToggleSettingsMenu();
                 }
                 else
@@ -140,17 +163,30 @@ namespace MEGME
         internal void OnAvatarSwitch()
         {
             if (Manager.Module == null)
-                return;
+            {
+                ExpressionsMenu?.StopRendering();
+                ExpressionsMenu = null;
 
-            ExpressionsMenu = Manager.Module.GetOrCreateRadial(expressionsMenuId);
+                isExpressionsMenuRendering = false;
+
+                if (isButtonСonfigured)
+                    RestoreOriginalSelectorButton();
+            }
+            else
+            {
+                ExpressionsMenu = Manager.Module.GetOrCreateRadial(expressionsMenuId);
+
+                if (!isButtonСonfigured)
+                    SetupSelectorButton();
+            }
         }
         void CalculateExpressionsMenuPosition()
         {
-            if (!settingsMenuPosition) return;
+            if (!MEMenuPosition) return;
 
-            var screenSize = _root.layout.size;
+            var screenSize = root.layout.size;
 
-            var offsetX = lastAtRightEdge(settingsMenuPosition) ? screenSize.x / 2 - targetRes.x : screenSize.x - targetRes.x;
+            var offsetX = lastAtRightEdge(MEMenuPosition) ? screenSize.x / 2 - targetRes.x : screenSize.x - targetRes.x;
             var offsetY = screenSize.y - targetRes.y;
 
             expressionsMenuRect.center = menuPosOrigin + new Vector2(offsetX, offsetY);
@@ -163,7 +199,7 @@ namespace MEGME
                 world
             );
             var panel = RuntimePanelUtils.ScreenToPanel(
-                _root.panel,
+                root.panel,
                 new Vector2(
                     screen.x,
                     Screen.height - screen.y
@@ -186,7 +222,7 @@ namespace MEGME
             if (isSettingsMenuRendering)
             {
                 MenuBlur.SetActive(true);
-                radialMenu(menuActions) = null;
+                radialMenu(actions) = null;
 
                 foreach (var t in tooltips)
                 {
@@ -204,17 +240,39 @@ namespace MEGME
             yield return null;
 
             MenuBlur.SetActive(false);
-            radialMenu(menuActions) = radialMenuOrig;
+            radialMenu(actions) = radialMenuOrigin;
 
             foreach (var t in tooltips)
             {
                 t.enabled = true;
             }
         }
+        void SetupExpressionsMenu()
+        {
+            var menuEntries = actions.menuEntries;
+            for (int j = 0; j < menuEntries.Count; j++)
+                if (menuEntries[j].menu.name == targetSelectorButton)
+                {
+                    actionsEntryIndex = j;
+                    actionsEntryOrigin = menuEntries[j];
+                    break;
+                }
 
+            var selectorButtons = selector.Buttons;
+            for (int j = 0; j < selectorButtons.Count; j++)
+                if (selectorButtons[j].name == targetSelectorButton)
+                {
+                    selectorButtonIndex = j;
+                    selectorButtonOrigin = selectorButtons[j];
+                    break;
+                }
+
+            if (actionsEntryOrigin == null || selectorButtonOrigin == null)
+                Debug.LogWarning($"[MEGME] ExpressionsMenu setup failed, ActionsEntry:{actionsEntryOrigin} SelectorEntry:{selectorButtonOrigin}");
+        }
         void SetupSettingsMenu()
         {
-            radialMenuOrig = radialMenu(menuActions);
+            radialMenuOrigin = radialMenu(actions);
 
             var settings = GameObject.Find("/Settings");
             var canvas = settings?.transform.Find("SettingsMenuCanvas");
@@ -222,7 +280,7 @@ namespace MEGME
             var mainMenu = settings?.transform.Find("SettingsMenuCanvas/Main Menu/Viewport/Content/MenuPanel/Main Menu");
             if (!settings || !canvas || !outerMenu || !mainMenu)
             {
-                Debug.Log($"[MEGME] SettingsMenu setup failed, Settings:{settings} SettingsMenuCanvas:{canvas} OutherMenu:{outerMenu} MainMenu:{mainMenu}");
+                Debug.LogWarning($"[MEGME] SettingsMenu setup failed, Settings:{settings} SettingsMenuCanvas:{canvas} OutherMenu:{outerMenu} MainMenu:{mainMenu}");
                 return;
             }
 
@@ -232,7 +290,7 @@ namespace MEGME
 
             MenuBlur.transform.SetParent(canvas, false);
 
-            settingsMenuPosition.menus.Add(new SettingsMenuPosition.MenuEntry
+            MEMenuPosition.menus.Add(new SettingsMenuPosition.MenuEntry
             {
                 settingsMenu = blurTransform,
                 originalX = blurTransform.anchoredPosition.x,
@@ -250,7 +308,7 @@ namespace MEGME
 
             SettingsMenu.Controller = this;
 
-            SettingsMenu.OpenSettingsMenu(ModSettings);
+            SettingsMenu.OpenSettingsMenu(modSettings);
 
             tooltips = canvas.GetComponentsInChildren<UiTooltip>();
         }
@@ -271,12 +329,37 @@ namespace MEGME
         {
             id = ScriptableObject.CreateInstance<T>();
         }
+        private void SetupSelectorButton()
+        {
+            if (!actions || !selector) return;
+
+            actions.menuEntries[actionsEntryIndex] = new MenuEntry
+            {
+                menu = ExpressionsMenuToggle,
+                blockMovement = true,
+                blockHandTracking = true,
+                blockReaction = true,
+                blockChibiMode = true
+            };
+            selector.Buttons[selectorButtonIndex] = selectorButton.gameObject;
+
+            isButtonСonfigured = true;
+        }
+
+        private void RestoreOriginalSelectorButton()
+        {
+            if (!actions || !selector) return;
+
+            actions.menuEntries[actionsEntryIndex] = actionsEntryOrigin;
+            selector.Buttons[selectorButtonIndex] = selectorButtonOrigin;
+
+            isButtonСonfigured = false;
+        }
 
         public static void RegisterSettingsMenu(ModSettings setting, params ModSettings[] s) => registerRequests.Enqueue([setting, .. s]);
-
         void RegisterSettingsMenu(List<ModSettings> settings)
         {
-            Integrate(settings, ModSettings);
+            Integrate(settings, modSettings);
 
             void Integrate(List<ModSettings> from, List<ModSettings> to, string menuName = null)
             {

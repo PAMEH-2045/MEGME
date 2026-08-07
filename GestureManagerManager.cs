@@ -9,7 +9,6 @@ using UnityEngine;
 using UniVRM10;
 using VRC.SDK3.Avatars.Components;
 using VRM;
-using Xamin;
 using static VRC.SDKBase.VRC_AvatarDescriptor;
 
 namespace MEGME
@@ -19,19 +18,10 @@ namespace MEGME
     {
         [SerializeField] private GestureManager Manager;
         [SerializeField] private RadialMenuController radialMenuController;
-        [SerializeField] private Button circleSelectorButton;
 
         [SerializeField] private bool bindMEController = true;
 
         bool bigScreenWasActive;
-
-        bool isButtonСonfigured;
-        MenuActions menuActions;
-        int actionsClothesIndex;
-        MenuEntry actionsClothesEntryOrigin;
-        CircleSelector circleSelector;
-        int selectorClothesIndex;
-        GameObject selectorClothesButtonOrigin;
 
         void OnEnable()
         {
@@ -42,7 +32,6 @@ namespace MEGME
         void Start()
         {
             CurrentModel.OnStart();
-            CacheClothesItems();
 
             Manager.settings = new ModuleSettings();
         }
@@ -65,55 +54,18 @@ namespace MEGME
             CurrentModel.OnAvatarSwitch -= OnAvatarSwitch;
             CurrentModel.OnAvatarSwitch -= radialMenuController.OnAvatarSwitch;
         }
-        void CacheClothesItems()
-        {
-            var circleMenu = GameObject.Find("CircleMenu");
-
-            if (circleMenu == null) return;
-
-            menuActions = circleMenu.GetComponentInChildren<MenuActions>();
-            circleSelector = circleMenu.GetComponentInChildren<CircleSelector>();
-
-            var menuEntries = menuActions.menuEntries;
-            for (int j = 0; j < menuEntries.Count; j++)
-                if (menuEntries[j].menu.name == "Clothes")
-                {
-                    actionsClothesIndex = j;
-                    actionsClothesEntryOrigin = menuEntries[j];
-                    break;
-                }
-
-            var selectorButtons = circleSelector.Buttons;
-            for (int j = 0; j < selectorButtons.Count; j++)
-                if (selectorButtons[j].name == "Clothes")
-                {
-                    selectorClothesIndex = j;
-                    selectorClothesButtonOrigin = selectorButtons[j];
-                    break;
-                }
-
-            if (actionsClothesEntryOrigin == null || selectorClothesButtonOrigin == null)
-                Debug.LogWarning("[MEGME] No Clothes buttons entries found");
-        }
         private void OnAvatarSwitch()
         {
             var descriptor = CurrentModel.GetComponent<VRCAvatarDescriptor>();
             if (descriptor == null)
             {
                 Manager.UnlinkModule();
-                if (isButtonСonfigured) RestoreOriginalClothesButton();
                 return;
             }
 
             var module = new ModuleVrc3(descriptor);
 
-            //if (bindMEController)
-            //    BindMEControllerToDescriptor();
-
             Manager.SetModule(module);
-
-            if (!isButtonСonfigured)
-                SetupClothesButton();
 
             var isBlendShapesConfigured = CurrentModel.GetComponent<Vrm10Instance>()?.Runtime.Expression.ExpressionKeys.Count > 0
                 || CurrentModel.GetComponent<VRMBlendShapeProxy>()?.BlendShapeAvatar.Clips.Count > 0;
@@ -121,50 +73,6 @@ namespace MEGME
             {
                 TrySetupBlendshapes();
             }
-        }
-
-        private void SetupClothesButton()
-        {
-            if (!menuActions || !circleSelector) return;
-
-            menuActions.menuEntries[actionsClothesIndex] = new MenuEntry
-            {
-                menu = radialMenuController.ExpressionsMenuToggle,
-                blockMovement = true,
-                blockHandTracking = true,
-                blockReaction = true,
-                blockChibiMode = true
-            };
-            circleSelector.Buttons[selectorClothesIndex] = circleSelectorButton.gameObject;
-
-            isButtonСonfigured = true;
-        }
-
-        private void RestoreOriginalClothesButton()
-        {
-            if (!menuActions || !circleSelector) return;
-
-            menuActions.menuEntries[actionsClothesIndex] = actionsClothesEntryOrigin;
-            circleSelector.Buttons[selectorClothesIndex] = selectorClothesButtonOrigin;
-
-            isButtonСonfigured = false;
-        }
-
-        private void BindMEControllerToDescriptor()
-        {
-            var animator = CurrentModel.GetComponent<Animator>();
-            var controller = animator.runtimeAnimatorController;
-
-            var descriptor = CurrentModel.GetComponent<VRCAvatarDescriptor>();
-            var baseLayers = descriptor.baseAnimationLayers;
-
-            for (int i = 0; i < baseLayers.Length; i++)
-                if (baseLayers[i].type == VRCAvatarDescriptor.AnimLayerType.Base)
-                {
-                    baseLayers[i].animatorController = controller;
-                    baseLayers[i].isDefault = false;
-                    break;
-                }
         }
 
         private void TrySetupBlendshapes()
