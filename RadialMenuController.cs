@@ -39,12 +39,11 @@ namespace MEGME
         bool isSettingsMenuRendering;
 
         public GameObject ExpressionsMenuToggle;
+        public GameObject ExpressionsMenuUIToggle;
         public GameObject SettingsMenuUIToggle;
 
         MenuActions actions;
 
-
-        public Xamin.Button selectorButton;
 
         string targetSelectorButton = "Clothes";
 
@@ -341,7 +340,7 @@ namespace MEGME
                 blockReaction = true,
                 blockChibiMode = true
             };
-            selector.Buttons[selectorButtonIndex] = selectorButton.gameObject;
+            selector.Buttons[selectorButtonIndex] = ExpressionsMenuUIToggle;
 
             isButtonСonfigured = true;
         }
