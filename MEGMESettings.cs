@@ -7,7 +7,8 @@ namespace MEGME
 {
     class MEGMESettings
     {
-        static readonly Func<object> AvatarGravityController = () => CurrentModel.AvatarGravityControllerProxy.Inst;
+        static readonly Func<object> AvatarGravityController = () => CurrentModel.AvatarGravityController.Inst;
+        static readonly Func<object> DynamicBoneAvatarGravityController = () => CurrentModel.DynamicBoneAvatarGravityController.Inst;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void SetupSettingsMenu()
@@ -30,7 +31,7 @@ namespace MEGME
                     ModSettings.Radial(
                         name: "DynamicBone inertia power",
                         setting: Setting<float>.From(
-                            null,
+                            DynamicBoneAvatarGravityController,
                             AccessTools.Field(typeof(DynamicBoneAvatarGravityController), "outputRange")
                         ),
                         min: 0f,
