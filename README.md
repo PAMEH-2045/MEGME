@@ -4,14 +4,14 @@ A port of BlackStartx's [Gesture Manager](https://github.com/BlackStartx/VRC-Ges
 
 | Feature                                                                                    | Ported? | Implementation Details         |
 |:------------------------------------------------------------------------------------------ |:-------:| ------------------------------ |
-| Options - Locomotion, States, Edit Mode, Tracking,  and Extra                              | -       |                                |
+| Options - Locomotion, States, Edit Mode, Tracking<br> and Extra                              | -       |                                |
 | Expressions - Menu                                                                         | +       | Replaces the clothing menu     |
 | Expressions - Quick Actions                                                                | -       |                                |
 | Looks                                                                                      | +       |                                |
 | Clones                                                                                     | -       |                                |
 | Gestures control                                                                           | -       |                                |
 | Tools - Clickable Contacts                                                                 | +       | Active only in Big Screen mode |
-| Tools - Scene Camera, Pose Avatar, Avatar Background, Test Animation, Animator Performance | -       |                                |
+| Tools - Scene Camera, Pose Avatar, Avatar Background,<br> Test Animation and Animator Performance | -       |                                |
 | Debug - Avatar, OSC                                                                        | -       |                                |
 
 ## Installation
@@ -59,11 +59,11 @@ Copy it from ME project to `Editor` directory of VCC avatar project ( If dont ha
 
 ### 3.A In case of Modular Avatar
 
-- Right click the avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar`
+Right click the avatar gameobject in Hierarchy, `Modular Avatar > Manual Bake Avatar`
 
 ### 3.B In case of VRCFury
 
-- Select avatar gameobject, in menubar: `Tools > VRCFury > Build an Editor Test Copy`
+Select avatar gameobject, in menubar: `Tools > VRCFury > Build an Editor Test Copy`
 
 ### 4. Export
 
@@ -73,10 +73,10 @@ Copy it from ME project to `Editor` directory of VCC avatar project ( If dont ha
 
 - Creates two Playables from original ME controller
 
-- Connects them to Descriptor's mixer, resulting in the following order:
+- Connects them to Descriptor's mixer, resulting in the following graph:
   
-  1. First ME Playable
+  ⠀⠀⠀⠀⠀⠀⠀⠀┌─ First ME Playable
   
-  2. Base - FX descriptor layers
+  Output ─ Mixer ─ Base - FX descriptor layers
   
-  3. Second ME Playable
+  ⠀⠀⠀⠀⠀⠀⠀⠀└─ Second ME Playable
